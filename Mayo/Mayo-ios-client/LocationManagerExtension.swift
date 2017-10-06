@@ -18,6 +18,35 @@ extension MainViewController: CLLocationManagerDelegate {
         // check location is working
         //print("current user location \(newLocation)")
         
+      
+            
+            // get current time
+            let currentTime = Date()
+            if (self.lastUpdatedTime != nil) {
+                let timeDifference = currentTime.seconds(from: self.lastUpdatedTime!)
+                print("time difference for task: \(timeDifference)")
+                
+                // if time difference is greater than 1 hour (3600 seconds)
+                // return and don't add this task to tasks
+                if timeDifference > self.LOCATION_UPDATE_IN_SECOND {
+                    //Update Location
+                    lastUpdatedTime = NSDate() as Date
+                    self.UpdateUserLocationServer()
+                    
+                }
+                
+            }
+            else {
+                //Update Location
+                lastUpdatedTime = NSDate() as Date
+                self.UpdateUserLocationServer()
+                
+                
+            }
+        
+        
+        // get the difference between time created and current time
+       
         
         // check if he/she has a task that is currently active
         if self.tasks.count > 0 {

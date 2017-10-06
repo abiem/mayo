@@ -23,10 +23,11 @@ class MainViewController: UIViewController{
 
     @IBOutlet weak var carouselView: iCarousel!
     @IBOutlet weak var mapView: MKMapView!
-    
+    var lastUpdatedTime : Date?
     var pointsLabel: UILabel!
     var thanksAnimImageView: UIImageView!
     var playingThanksAnim = false
+    var completedTask:Task?
     
     //user Task ID
     var userTaskId :String?
@@ -59,6 +60,12 @@ class MainViewController: UIViewController{
     
     // constants for time
     let SECONDS_IN_HOUR = 3600
+    
+    //Contant Time for location update
+    let LOCATION_UPDATE_IN_SECOND = 600
+    
+    //Constant minimum Chat history
+    let CHAT_HISTORY = 5
     
     // flag to check if swiped left to add new item
     var newItemSwiped = false
@@ -718,7 +725,6 @@ class MainViewController: UIViewController{
             
         })
         
-        
     }
     
     // get tasks around current location
@@ -1047,46 +1053,132 @@ class MainViewController: UIViewController{
         if (UserDefaults.standard.object(forKey: Constants.PENDING_TASKS) != nil) {
             print("Yes task Exist");
             //Decode data
-            let currentTaskData = UserDefaults.standard.object(forKey: Constants.PENDING_TASKS) as! Data
-            let dicTask = NSKeyedUnarchiver.unarchiveObject(with: currentTaskData) as! Dictionary<String, Any>
-            
-            let userID = dicTask["userId"] as! String
-            let taskDescription = dicTask["taskDescription"] as! String
-            let latitude = dicTask["latitude"] as! CLLocationDegrees
-            let longitude = dicTask["longitude"] as! CLLocationDegrees
-            let completed = dicTask["completed"] as! Bool
-            let timeCreated = dicTask["timeCreated"] as! Date
-            let timeUpdated = dicTask["timeUpdated"] as! Date
-            let taskID = dicTask["taskID"] as! String
-            
-            let currentTask =  Task(userId: userID , taskDescription: taskDescription , latitude: latitude , longitude: longitude, completed: completed, timeCreated: timeCreated , timeUpdated: timeUpdated, taskID: taskID)
-//
-            let dateformatter = DateStringFormatterHelper()
-
-            // get current time
-            let currentTime = Date()
-
-            // get the difference between time created and current time
-            let timeDifference = currentTime.seconds(from: currentTask.timeCreated)
-            print("time difference for task: \(timeDifference)")
-
-            // if time difference is greater than 1 hour (3600 seconds)
-            // return and don't add this task to tasks
-            if timeDifference > self.SECONDS_IN_HOUR {
-                UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
-                return
+            let currentTaskData = UserDefaults.standard.object(forKey: Constants.PENDING_TASKS)
+                if let task = currentTaskData as? Data {
+                
+                    if  let dicTask = NSKeyedUnarchiver.unarchiveObject(with: task as! Data) as? Dictionary<String, Any> {
+                        let userID = dicTask["userId"] as! String
+                        let taskDescription = dicTask["taskDescription"] as! String
+                        let latitude = dicTask["latitude"] as! CLLocationDegrees
+                        let longitude = dicTask["longitude"] as! CLLocationDegrees
+                        let completed = dicTask["completed"] as! Bool
+                        let timeCreated = dicTask["timeCreated"] as! Date
+                        let timeUpdated = dicTask["timeUpdated"] as! Date
+                        let taskID = dicTask["taskID"] as! String
+                        
+                        let currentTask =  Task(userId: userID , taskDescription: taskDescription , latitude: latitude , longitude: longitude, completed: completed, timeCreated: timeCreated , timeUpdated: timeUpdated, taskID: taskID)
+                        //
+                        let dateformatter = DateStringFormatterHelper()
+                        
+                        // get current time
+                        let currentTime = Date()
+                        
+                        // get the difference between time created and current time
+                        let timeDifference = currentTime.seconds(from: currentTask.timeCreated)
+                        print("time difference for task: \(timeDifference)")
+                        
+                        // if time difference is greater than 1 hour (3600 seconds)
+                        // return and don't add this task to tasks
+                        if timeDifference > self.SECONDS_IN_HOUR {
+                            UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
+                            return
+                        }
+                        else {
+                            self.currentUserTaskSaved = true
+                            self.tasks.append(currentTask)
+                            carouselView.reloadData()
+                        }
+                    
+                    }
+                
+    //
             }
-            else {
-                self.currentUserTaskSaved = true
-                self.tasks.append(currentTask)
-                carouselView.reloadData()
-            }
-//
         }
     }
 
+    //update location at back end
     
-
+    func UpdateUserLocationServer()  {
+        self.usersRef?.child(currentUserId!).child("location").observeSingleEvent(of: .value, with: { (snapshot) in
+            
+           
+            let location = ["lat" : self.locationManager.location?.coordinate.latitude ?? 0,
+                            "lon" : self.locationManager.location?.coordinate.longitude ?? 0]
+            
+            if var lastLocations = snapshot.value as? [Any] {
+                
+                if lastLocations.count > self.CHAT_HISTORY {
+                    lastLocations.removeLast()
+                    lastLocations.append(location)
+                }
+                else {
+                    lastLocations.append(location)
+                    self.setUserinfo(lastLocations, "location",self.currentUserId!)
+                    
+                }
+            }
+            else {
+                self.setUserinfo([location], "location",self.currentUserId!)
+            }
+           
+        })
+    }
+    
+    func setUserinfo(_ Value: [Any], _ child :String , _ user : String)  {
+        self.usersRef?.child(user).child(child).setValue(Value)
+        
+    }
+    
+    //Update points
+    func UpdatePointsServer(_ points:Int, _ user : String)  {
+        let currentUserTask = self.tasks[0];
+        self.usersRef?.child(user).child("points").observeSingleEvent(of: .value, with: { (snapshot) in
+            
+            //Convert date to String
+            let dateformatter = DateStringFormatterHelper()
+            let stringDate = dateformatter.convertDateToString(date: NSDate() as Date)
+            
+            var dicPoints = Dictionary<String, Any>()
+            dicPoints["points"] = points
+            dicPoints["taskID"] = currentUserTask?.taskID
+            dicPoints["createdDate"] = stringDate
+            if var points = snapshot.value as? [Any] {
+               points.append(dicPoints)
+                self.setUserinfo(points, "points", user)
+            }
+            else {
+                self.setUserinfo([dicPoints], "points", user)
+            }
+            var currentUserTask = self.tasks[0] as! Task
+            currentUserTask.completed = true;
+            self.removeTaskAfterComplete(currentUserTask)
+        })
+    }
+ 
+    func removeTaskAfterComplete(_ currentUserTask: Task)  {
+        
+        let currentUserKey = FIRAuth.auth()?.currentUser?.uid
+        let taskMessage = currentUserTask.taskDescription
+        // unsubscribe current user from their own notification channel
+        FIRMessaging.messaging().unsubscribe(fromTopic: "/topics/\(currentUserKey)")
+        
+        print("taskMessage \(currentUserTask.taskDescription) \(taskMessage)")
+        PushNotificationManager.sendNotificationToTopicOnCompletion(channelId: currentUserTask.taskID!, taskMessage: taskMessage)
+        let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
+        self.tasks[0] = Task(userId: currentUserKey!, taskDescription: "", latitude: (self.locationManager.location?.coordinate.latitude)!, longitude: (self.locationManager.location?.coordinate.longitude)!, completed: true, taskID: "\(timeStamp)")
+        
+       self.tasksRef?.child(currentUserTask.taskID!).setValue(currentUserTask)
+        
+        // delete the task
+        //self.deleteTaskForUser(userId: currentUserTask.taskID!)
+        
+        // delete the task location
+        //self.deleteTaskLocationForUser(userId: currentUserTask.taskID!)
+        
+        // delete the task conversation
+       // self.deleteTaskConversationForUser(userId: currentUserTask.taskID!)
+    }
+    
 }
 
 // MARK: carousel view
@@ -1098,7 +1190,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         
         // width 335
         // 1st card if user didn't swipe for new task
-        if index == 0 && !self.newItemSwiped && self.tasks.count > 1 {
+        if index == 0 && !self.newItemSwiped && self.tasks.count > 1 && self.currentUserTaskSaved == false{
     
                 let tempView = UIView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width * 0.9, height:212))
                 tempView.backgroundColor = UIColor.clear
@@ -1435,15 +1527,6 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             // let users know it was completed
             let currentUserTask = self.tasks[0] as! Task
             let currentUserKey = FIRAuth.auth()?.currentUser?.uid
-            let taskMessage = currentUserTask.taskDescription
-            
-            // unsubscribe current user from their own notification channel
-            FIRMessaging.messaging().unsubscribe(fromTopic: "/topics/\(currentUserKey)")
-            
-            print("taskMessage \(currentUserTask.taskDescription) \(taskMessage)")
-            PushNotificationManager.sendNotificationToTopicOnCompletion(channelId: currentUserTask.taskID!, taskMessage: taskMessage)
-            let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
-            self.tasks[0] = Task(userId: currentUserKey!, taskDescription: "", latitude: (self.locationManager.location?.coordinate.latitude)!, longitude: (self.locationManager.location?.coordinate.longitude)!, completed: true, taskID: "\(timeStamp)")
             
             // get the channel's last messages for each user and then delete
             // the task, conversation channel, and location
@@ -1487,14 +1570,6 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                 }
             
                 
-                // delete the task
-                self.deleteTaskForUser(userId: currentUserTask.taskID!)
-                
-                // delete the task location
-                self.deleteTaskLocationForUser(userId: currentUserTask.taskID!)
-                
-                // delete the task conversation
-                self.deleteTaskConversationForUser(userId: currentUserTask.taskID!)
                 
                 //set textView back to editable
                 let currentUserTextView = self.view.viewWithTag(self.CURRENT_USER_TEXTVIEW_TAG) as! UITextView
@@ -1762,7 +1837,8 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                     // increment the score
                     if userScore != nil {
                         let newScore = userScore! + 1
-                        
+                        //update points
+                        self.UpdatePointsServer(1, userId)
                         // send update to the user's score
                         self.usersRef?.child(userId).child("score").setValue(newScore)
                         print("new score set")
@@ -1793,6 +1869,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                 self.carouselView.scrollToItem(at: 1, animated: false)
             }
         }
+        
     }
     
     // action for when users complete task
@@ -1819,7 +1896,9 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                 self.carouselView.scrollToItem(at: 1, animated: false)
             }
         }
-        
+        var currentUserTask = self.tasks[0] as! Task
+        currentUserTask.completed = true;
+        removeTaskAfterComplete(currentUserTask)
     }
     
     
