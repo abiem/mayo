@@ -60,16 +60,16 @@ extension MainViewController: CLLocationManagerDelegate {
                 
                 // if the location is greater than queryDistance(200 m)
                 if distanceToOwnTask! >  self.queryDistance {
-                    
+                    userMovedAway()
                     // then notify user that their task is has deleted
-                    self.createLocalNotification(title: "You’re out of range so the quest ended :(", body: "Post again if you still need help.")
-                    
+                  //  self.createLocalNotification(title: "You’re out of range so the quest ended :(", body: "Post again if you still need help.")
+
                     // delete the task
-                    self.deleteAndResetCurrentUserTask()
-                    
+                    //self.deleteAndResetCurrentUserTask()
+
                     // remove own annotation from mapview
-                    self.removeCurrentUserTaskAnnotation()
-                    
+                   // self.removeCurrentUserTaskAnnotation()
+
                     // invalidate the timer for expiration
                     if self.expirationTimer != nil {
                         self.expirationTimer?.invalidate()
@@ -79,4 +79,28 @@ extension MainViewController: CLLocationManagerDelegate {
             }
         }
     }
+    
+    //Geo Facing for 200 meters
+    func setUpGeofenceForTask(_ lat:CLLocationDegrees, _ long:CLLocationDegrees) {
+        let geofenceRegionCenter = CLLocationCoordinate2DMake(lat, long);
+        let geofenceRegion = CLCircularRegion(center: geofenceRegionCenter, radius: self.queryDistance, identifier: "taskDistanceExpired");
+        geofenceRegion.notifyOnExit = true;
+        self.locationManager.startMonitoring(for: geofenceRegion)
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
+        self.createLocalNotification(title: "You’re out of range so the quest ended :(", body: "Post again if you still need help.")
+        self.locationManager.stopMonitoring(for: region)
+        
+        }
+    
+    
+    
+    func userMovedAway()  {
+        var currentUserTask = self.tasks[0] as! Task
+        currentUserTask.completed = true;
+        currentUserTask.completeType = "Expired due to moving out of area"
+        self.removeTaskAfterComplete(currentUserTask)
+    }
+
 }

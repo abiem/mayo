@@ -23,6 +23,7 @@ class Task: NSObject {
     var timeUpdated: Date
     var ref: FIRDatabaseReference
     var tasksRef: FIRDatabaseReference
+    var userRef: FIRDatabaseReference
     var tasksLocationsRef: FIRDatabaseReference
     var geoFire: GeoFire!
     var timeCreatedString: String
@@ -30,7 +31,8 @@ class Task: NSObject {
     var startColor: String?
     var endColor: String?
     var taskID: String?
-    var createdby: String?
+    var completeType: String?
+    var userThanked : String?
     
 
     
@@ -44,16 +46,20 @@ class Task: NSObject {
         self.timeCreated = timeCreated
         self.timeUpdated = timeUpdated
         self.taskID = taskID
-        
-//        self.startColor = startColor
-//        self.endColor = endColor
+        self.completeType = ""
+        userThanked = ""
+      // self.startColor = startColor
+     //  self.endColor = endColor
         
         // create new task object
         // setup firebase database
         ref = FIRDatabase.database().reference()
         
-        // setup users ref
+        // setup tasks ref
         tasksRef = ref.child("tasks")
+        
+        //set up users ref
+        userRef = ref.child("users")
         
         // setup tasks locaiton ref
         tasksLocationsRef = ref.child("tasks_locations")
@@ -91,9 +97,12 @@ class Task: NSObject {
             "startColor": self.startColor,
             "endColor": self.endColor,
             "createdby": userId,
-            "taskID": self.taskID! ]
+            "taskID": self.taskID!,
+            "completeType" : self.completeType ?? "" ]
         tasksRef.child(self.taskID!).setValue(taskDictionary)
         
+        //Update Task at user Profile
+        updateTasksCreated()
         
         // save task location to database with user id as key
         geoFire?.setLocation(CLLocation(latitude:latitude, longitude: longitude), forKey: "\(self.taskID!)") { (error) in
@@ -103,9 +112,32 @@ class Task: NSObject {
                 print("Saved task location successfully!")
             }
         }
-
         
-        
+    }
+    
+    func updateTasksCreated()  {
+        userRef.child(userId).child("taksCreated").observeSingleEvent(of: .value, with: { (snapshot) in
+            if let arrTasksdetail = snapshot.value as? [String : Any] {
+                if var tasks = arrTasksdetail["tasks"] as? [String] {
+                    if !tasks.contains(self.taskID!) {
+                        tasks.append(self.taskID!)
+                        let tasksParticipateUpdate =  ["tasks" : tasks, "count":tasks.count] as [String : Any];
+                        // update at server
+                        self.userRef.child(self.userId).child("taksCreated").setValue(tasksParticipateUpdate)
+                    }
+                }
+                else {
+                    let tasksParticipateUpdate =  ["tasks" : [self.taskID], "count":1] as [String : Any];
+                    // update at server
+                    self.userRef.child(self.userId).child("taksCreated").setValue(tasksParticipateUpdate)
+                }
+            }
+            else {
+                let tasksParticipateUpdate =  ["tasks" : [self.taskID], "count":1] as [String : Any];
+                // update at server
+                self.userRef.child(self.userId).child("taksCreated").setValue(tasksParticipateUpdate)
+            }
+        })
     }
     
 }

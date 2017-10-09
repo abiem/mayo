@@ -18,6 +18,7 @@ class ChatViewController: JSQMessagesViewController {
     var channelTopic: String?
     var messages = [Message]()
     var currentUserColorIndex: Int? = nil
+    var isParticipated = false;
     
     // array of color hex colors for chat bubbles
     let chatBubbleColors = [
@@ -150,6 +151,9 @@ class ChatViewController: JSQMessagesViewController {
             
         } else {
             self.saveMessageAndUpdate(text: text, senderId: senderId, senderDisplayName: senderDisplayName, date: date)
+        }
+        if !isParticipated {
+            setTaskParticipated()
         }
         
     }
@@ -299,6 +303,41 @@ class ChatViewController: JSQMessagesViewController {
         return messages.count
     }
     
+//    MARK:- Custom Methods
+    
+    //Update task participate
+    
+    func setTaskParticipated()  {
+       
+        let userId = FIRAuth.auth()?.currentUser?.uid;
+        let usersRef =  FIRDatabase.database().reference().child("users")
+            usersRef.child(userId!).child("taskParticipated").observeSingleEvent(of: .value, with: { (snapshot) in
+                if let arrUsersParticipated = snapshot.value as? [String : Any] {
+                        if var tasks = arrUsersParticipated["tasks"] as? [String] {
+                            if !tasks.contains(self.channelId!) {
+                                tasks.append(self.channelId!)
+                            let tasksParticipateUpdate =  ["tasks" : tasks, "count":tasks.count] as [String : Any];
+                                self.updateTaskAtServer(userId!, tasksParticipateUpdate, usersRef)
+                            }
+                    }
+                        else {
+                            let tasksParticipateUpdate =  ["tasks" : [self.channelId], "count":1] as [String : Any];
+                            self.updateTaskAtServer(userId!, tasksParticipateUpdate, usersRef)
+                    }
+                }
+                else {
+                    let tasksParticipateUpdate =  ["tasks" : [self.channelId], "count":1] as [String : Any];
+                    self.updateTaskAtServer(userId!, tasksParticipateUpdate, usersRef)
+                }
+        })
+        isParticipated = true;
+        
+    }
+    
+    
+    func updateTaskAtServer(_ userID:String, _ taskDetail:[String:Any], _ ref: FIRDatabaseReference)  {
+        ref.child(userID).child("taskParticipated").setValue(taskDetail)
+    }
 
     /*
     // MARK: - Navigation

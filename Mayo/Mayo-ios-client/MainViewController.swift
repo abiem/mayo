@@ -139,7 +139,7 @@ class MainViewController: UIViewController{
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-                
+        
         // center map to user's location when map appears
         if let userCoordinate = locationManager.location?.coordinate {
             self.mapView.setCenter(userCoordinate, animated: true)
@@ -168,7 +168,7 @@ class MainViewController: UIViewController{
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        getPreviousTask()
+        
         // check notification id
         if let refreshedToken = FIRInstanceID.instanceID().token() {
             print("InstanceID token: \(refreshedToken)")
@@ -238,7 +238,7 @@ class MainViewController: UIViewController{
         // create points uiview
         let pointsShadowGradientView = createPointsView()
         self.view.addSubview(pointsShadowGradientView)
-
+        getPreviousTask()
         initUserAuth()
     }
     
@@ -778,7 +778,6 @@ class MainViewController: UIViewController{
                                 
                             }
                             
-                            
                         }
                         
                         if annotation is CustomFocusTaskMapAnnotation {
@@ -800,21 +799,15 @@ class MainViewController: UIViewController{
                         
                     }
                     
-                    
-                    
                 }
                 
             }
-            
-            
-            
             
         })
         
         // listen for changes for when new tasks are created
         tasksCircleQueryHandle = tasksCircleQuery?.observe(.keyEntered, with: { (key: String!, location: CLLocation!) in
             print("Key '\(key)' entered the search area and is at location '\(location)'")
-            
             
             let taskRef = self.tasksRef?.child(key)
             self.tasksRefHandle = taskRef?.observe(FIRDataEventType.value, with: { (snapshot) in
@@ -840,21 +833,18 @@ class MainViewController: UIViewController{
                     // if time difference is greater than 1 hour (3600 seconds)
                     // return and don't add this task to tasks
                     if timeDifference > self.SECONDS_IN_HOUR {
+                        for (index, task) in self.tasks.enumerated() {
+                            if task?.taskID == taskDict["taskID"] as? String {
+                                self.tasks.remove(at: index);
+                                self.carouselView.reloadData()
+                            }
+                        }
                         return
                     }
                 }
                 
                 
-                // Check - don't add duplicates
                 
-                // check task exists
-                for task in self.tasks {
-                    // the task is already present in the tasks
-                    if task?.userId == key {
-                        // return so no duplicates are added
-                        return
-                    }
-                }
 
                 
                 // only process taskDict if not completed 
@@ -863,6 +853,29 @@ class MainViewController: UIViewController{
                     //
                     // send the current user local notification
                     // that there is a new task
+                    
+                    // Check - don't add duplicates
+                    
+                    // check task exists
+                    for task in self.tasks {
+                        // the task is already present in the tasks
+                        if task?.taskID == taskDict["createdby"] as? String || task?.taskID == taskDict["taskID"] as? String{
+                            //for creator of Task or already existing Task
+                            if taskDict["completed"] as! Bool == true {
+                                for (index, task) in self.tasks.enumerated() {
+                                    if task?.taskID == taskDict["taskID"] as? String {
+                                        self.tasks.remove(at: index);
+                                        self.carouselView.reloadData()
+                                    }
+                                }
+                            }
+                            
+                            // return so no duplicates are added
+                            return
+                        }
+                       
+                    }
+                    
                     self.sendNewTaskNotification()
                     
                     // adds key for task to chat channels array
@@ -917,9 +930,22 @@ class MainViewController: UIViewController{
                     self.updateMapAnnotationCardIndexes()
                     
                 }
-
-                
-                
+                else if  !taskDict.isEmpty && taskDict["completed"] as! Bool == true {
+                    for (index, task) in self.tasks.enumerated() {
+                        if task?.taskID == taskDict["taskID"] as? String {
+                            self.tasks.remove(at: index);
+                            if self.tasks.count == 0 {
+                                self.currentUserTaskSaved = false
+                                UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
+                                self.initUserAuth()
+                            }
+                            else {
+                                self.carouselView.reloadData()
+                            }
+                            
+                        }
+                    }
+                }
             })
             
         })
@@ -1080,12 +1106,17 @@ class MainViewController: UIViewController{
                         // if time difference is greater than 1 hour (3600 seconds)
                         // return and don't add this task to tasks
                         if timeDifference > self.SECONDS_IN_HOUR {
+                            
+                            currentTask.completed = true;
+                            currentTask.completeType = Constants.STATUS_FOR_TIME_EXPIRED
+                            self.removeTaskAfterComplete(currentTask)
                             UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
                             return
                         }
                         else {
                             self.currentUserTaskSaved = true
                             self.tasks.append(currentTask)
+                            setUpGeofenceForTask(currentTask.latitude, currentTask.longitude)
                             carouselView.reloadData()
                         }
                     
@@ -1101,15 +1132,20 @@ class MainViewController: UIViewController{
     func UpdateUserLocationServer()  {
         self.usersRef?.child(currentUserId!).child("location").observeSingleEvent(of: .value, with: { (snapshot) in
             
-           
+            let dateformatter = DateStringFormatterHelper()
+            let stringDate = dateformatter.convertDateToString(date: NSDate() as Date)
+            
             let location = ["lat" : self.locationManager.location?.coordinate.latitude ?? 0,
-                            "lon" : self.locationManager.location?.coordinate.longitude ?? 0]
+                            "long" : self.locationManager.location?.coordinate.longitude ?? 0,
+                            "updatedAt" : stringDate ] as [String : Any]
+            
             
             if var lastLocations = snapshot.value as? [Any] {
                 
                 if lastLocations.count > self.CHAT_HISTORY {
-                    lastLocations.removeLast()
+                    lastLocations.removeFirst()
                     lastLocations.append(location)
+                    self.setUserinfo(lastLocations, "location",self.currentUserId!)
                 }
                 else {
                     lastLocations.append(location)
@@ -1129,10 +1165,27 @@ class MainViewController: UIViewController{
         
     }
     
+    //Add Friends
+    func addFriend(_ friendID:String)  {
+        self.usersRef?.child(self.currentUserId!).child("friends").observeSingleEvent(of: .value, with: { (snapshot) in
+            if var arrFriends = snapshot.value as? [String] {
+                if !arrFriends.contains(friendID) {
+                    arrFriends.append(friendID)
+                    self.usersRef?.child(self.currentUserId!).child("friends").setValue(arrFriends)
+                }
+            }
+            else {
+              self.usersRef?.child(self.currentUserId!).child("friends").setValue([friendID])
+            }
+            
+        })
+
+    }
+    
     //Update points
     func UpdatePointsServer(_ points:Int, _ user : String)  {
         let currentUserTask = self.tasks[0];
-        self.usersRef?.child(user).child("points").observeSingleEvent(of: .value, with: { (snapshot) in
+        self.usersRef?.child(user).child("scoreDetail").observeSingleEvent(of: .value, with: { (snapshot) in
             
             //Convert date to String
             let dateformatter = DateStringFormatterHelper()
@@ -1144,13 +1197,14 @@ class MainViewController: UIViewController{
             dicPoints["createdDate"] = stringDate
             if var points = snapshot.value as? [Any] {
                points.append(dicPoints)
-                self.setUserinfo(points, "points", user)
+                self.setUserinfo(points, "scoreDetail", user)
             }
             else {
-                self.setUserinfo([dicPoints], "points", user)
+                self.setUserinfo([dicPoints], "scoreDetail", user)
             }
             var currentUserTask = self.tasks[0] as! Task
             currentUserTask.completed = true;
+            currentUserTask.completeType = Constants.STATUS_FOR_THANKED;
             self.removeTaskAfterComplete(currentUserTask)
         })
     }
@@ -1160,23 +1214,35 @@ class MainViewController: UIViewController{
         let currentUserKey = FIRAuth.auth()?.currentUser?.uid
         let taskMessage = currentUserTask.taskDescription
         // unsubscribe current user from their own notification channel
-        FIRMessaging.messaging().unsubscribe(fromTopic: "/topics/\(currentUserKey)")
+      //  FIRMessaging.messaging().unsubscribe(fromTopic: "/topics/\(currentUserKey)")
         
         print("taskMessage \(currentUserTask.taskDescription) \(taskMessage)")
-        PushNotificationManager.sendNotificationToTopicOnCompletion(channelId: currentUserTask.taskID!, taskMessage: taskMessage)
-        let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
-        self.tasks[0] = Task(userId: currentUserKey!, taskDescription: "", latitude: (self.locationManager.location?.coordinate.latitude)!, longitude: (self.locationManager.location?.coordinate.longitude)!, completed: true, taskID: "\(timeStamp)")
         
-       self.tasksRef?.child(currentUserTask.taskID!).setValue(currentUserTask)
+        if currentUserTask.completeType != Constants.STATUS_FOR_TIME_EXPIRED || currentUserTask.completeType != "Expired due to moving out of area" {
+            PushNotificationManager.sendNotificationToTopicOnCompletion(channelId: currentUserTask.taskID!, taskMessage: taskMessage)
+        }
         
-        // delete the task
-        //self.deleteTaskForUser(userId: currentUserTask.taskID!)
         
-        // delete the task location
-        //self.deleteTaskLocationForUser(userId: currentUserTask.taskID!)
+        self.tasks.remove(at: 0)
+        if self.tasks.count == 0 {
+            let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
+            self.tasks.append(Task(userId: currentUserKey!, taskDescription: "", latitude: (self.locationManager.location?.coordinate.latitude)!, longitude: (self.locationManager.location?.coordinate.longitude)!, completed: true, taskID: "\(timeStamp)"))
+        }
+        carouselView.reloadData()
         
-        // delete the task conversation
-       // self.deleteTaskConversationForUser(userId: currentUserTask.taskID!)
+        let taskUpdate = ["completed": currentUserTask.completed ,
+                          "createdby": currentUserTask.userId ,
+                          "endColor": currentUserTask.endColor ?? "",
+                          "startColor": currentUserTask.startColor ?? "",
+                          "taskDescription": currentUserTask.taskDescription ,
+                          "taskID": currentUserTask.taskID ?? "",
+                          "timeCreated": currentUserTask.timeCreatedString ,
+                          "timeUpdated": currentUserTask.timeUpdatedString,
+                          "completeType": currentUserTask.completeType
+            ] as [String : Any];
+       self.tasksRef?.child(currentUserTask.taskID!).setValue(taskUpdate)
+        currentUserTaskSaved = false
+        UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
     }
     
 }
@@ -1837,6 +1903,8 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                     // increment the score
                     if userScore != nil {
                         let newScore = userScore! + 1
+                        //add friend
+                        self.addFriend(userId)
                         //update points
                         self.UpdatePointsServer(1, userId)
                         // send update to the user's score
@@ -1898,6 +1966,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         }
         var currentUserTask = self.tasks[0] as! Task
         currentUserTask.completed = true;
+        currentUserTask.completeType = Constants.STATUS_FOR_NOT_HELPED
         removeTaskAfterComplete(currentUserTask)
     }
     
@@ -1969,7 +2038,8 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             
             // save the user's current task
             currentUserTask.save()
-            
+            //Start monitoring Distance
+            self.setUpGeofenceForTask(currentUserTask.latitude, currentUserTask.longitude)
             //Saving of Task
             var dicTask = Dictionary<String, Any>()
             dicTask["userId"] = currentUserTask.userId
@@ -2031,13 +2101,15 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                     
                     // create notification that the task is out of time
                     self.createLocalNotification(title: "Your help quest expired. Still need help?", body: "Click to make a new help task")
-                    
+                    currentUserTask?.completed = true;
+                    currentUserTask?.completeType = Constants.STATUS_FOR_TIME_EXPIRED
+                    self.removeTaskAfterComplete(currentUserTask!)
                     // reset the current user's task
                     // delete the task if it has expired
-                    self.deleteAndResetCurrentUserTask()
+                   // self.deleteAndResetCurrentUserTask()
                     
                     // remove own annotation on the map
-                    self.removeCurrentUserTaskAnnotation()
+                  //  self.removeCurrentUserTaskAnnotation()
                     
                 }
                 
