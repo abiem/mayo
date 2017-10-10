@@ -33,6 +33,7 @@ class Task: NSObject {
     var taskID: String?
     var completeType: String?
     var userThanked : String?
+    var helpedBy: [String]?
     
 
     
@@ -48,6 +49,7 @@ class Task: NSObject {
         self.taskID = taskID
         self.completeType = ""
         userThanked = ""
+        
       // self.startColor = startColor
      //  self.endColor = endColor
         
@@ -98,7 +100,8 @@ class Task: NSObject {
             "endColor": self.endColor,
             "createdby": userId,
             "taskID": self.taskID!,
-            "completeType" : self.completeType ?? "" ]
+            "completeType" : self.completeType ?? "" ,
+            "helpedBy" : "" ]
         tasksRef.child(self.taskID!).setValue(taskDictionary)
         
         //Update Task at user Profile

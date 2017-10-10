@@ -26,7 +26,7 @@ extension MainViewController: CLLocationManagerDelegate {
                 let timeDifference = currentTime.seconds(from: self.lastUpdatedTime!)
                 print("time difference for task: \(timeDifference)")
                 
-                // if time difference is greater than 1 hour (3600 seconds)
+                // if time difference is greater than 10 mins (600 seconds)
                 // return and don't add this task to tasks
                 if timeDifference > self.LOCATION_UPDATE_IN_SECOND {
                     //Update Location
@@ -90,6 +90,7 @@ extension MainViewController: CLLocationManagerDelegate {
     
     func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
         self.createLocalNotification(title: "You’re out of range so the quest ended :(", body: "Post again if you still need help.")
+        userMovedAway()
         self.locationManager.stopMonitoring(for: region)
         
         }
@@ -99,7 +100,7 @@ extension MainViewController: CLLocationManagerDelegate {
     func userMovedAway()  {
         var currentUserTask = self.tasks[0] as! Task
         currentUserTask.completed = true;
-        currentUserTask.completeType = "Expired due to moving out of area"
+        currentUserTask.completeType = Constants.STATUS_FOR_MOVING_OUT
         self.removeTaskAfterComplete(currentUserTask)
     }
 

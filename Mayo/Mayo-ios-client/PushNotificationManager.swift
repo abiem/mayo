@@ -44,6 +44,7 @@ class PushNotificationManager {
                 print(response.request as Any)  // original URL request
                 print(response.response as Any) // URL response
                 print(response.result.value as Any)   // result of response serialization
+                
         }
         
         print("notification posted")
@@ -128,6 +129,40 @@ class PushNotificationManager {
         // add application/json and add authorization key
         let parameters: Parameters = [
             "to": "/topics/\(channelId)",
+            "priority": "high",
+            "notification": [
+                "body": "'\(taskMessage)' was completed",
+                "title": "Nearby Task Completed",
+                "content_available": true,
+                "sound": "default"
+            ],
+            "data": [
+                "channelId": "\(channelId)",
+                "notification_type": "\(Constants.NOTIFICATION_TOPIC_COMPLETED)"
+            ]
+        ]
+        let headers: HTTPHeaders = [
+            "Content-Type": "application/json",
+            "Authorization": "key=\(Constants.FIREBASE_CLOUD_SERVER_KEY)"
+        ]
+        
+        Alamofire.request(fcmURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: headers)
+            .responseJSON { response in
+                print("Completed Notification")
+                print(response.request as Any)  // original URL request
+                print(response.response as Any) // URL response
+                print(response.result.value as Any)   // result of response serialization
+        }    }
+    
+    
+    static func sendNotificationToDevice(deviceToken: String, channelId: String, taskMessage: String) {
+        
+        // setup alamofire url
+        let fcmURL = "https://fcm.googleapis.com/fcm/send"
+        
+        // add application/json and add authorization key
+        let parameters: Parameters = [
+            "to": "\(deviceToken)",
             "priority": "high",
             "notification": [
                 "body": "'\(taskMessage)' was completed",

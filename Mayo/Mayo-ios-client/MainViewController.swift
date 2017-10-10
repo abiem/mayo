@@ -192,6 +192,7 @@ class MainViewController: UIViewController{
         // turn off compass on mapview
         mapView.showsCompass = false
         
+        
         // setup mapview delegate
         mapView.delegate = self
         
@@ -818,7 +819,7 @@ class MainViewController: UIViewController{
                 let dateformatter = DateStringFormatterHelper()
                 
                 // Check - don't add tasks that are older than 1 hour
-                if !taskDict.isEmpty {
+                if !taskDict.isEmpty && taskDict["completed"] as! Bool == false {
                     
                     // get the time created for the current task
                     let taskTimeCreated = dateformatter.convertStringToDate(datestring: taskDict["timeCreated"] as! String)
@@ -833,6 +834,8 @@ class MainViewController: UIViewController{
                     // if time difference is greater than 1 hour (3600 seconds)
                     // return and don't add this task to tasks
                     if timeDifference > self.SECONDS_IN_HOUR {
+                        self.tasksRef?.child(snapshot.key).child("completed").setValue(true);
+                        self.tasksRef?.child(snapshot.key).child("completeType").setValue(Constants.STATUS_FOR_TIME_EXPIRED);
                         for (index, task) in self.tasks.enumerated() {
                             if task?.taskID == taskDict["taskID"] as? String {
                                 self.tasks.remove(at: index);
@@ -934,18 +937,18 @@ class MainViewController: UIViewController{
                     for (index, task) in self.tasks.enumerated() {
                         if task?.taskID == taskDict["taskID"] as? String {
                             self.tasks.remove(at: index);
-                            if self.tasks.count == 0 {
-                                self.currentUserTaskSaved = false
-                                UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
-                                self.initUserAuth()
-                            }
-                            else {
-                                self.carouselView.reloadData()
-                            }
+                                if self.tasks.count == 0 {
+                                    self.currentUserTaskSaved = false
+                                    UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
+                                    self.initUserAuth()
+                                }
+                                else {
+                                    self.carouselView.reloadData()
+                                }
                             
+                            }
                         }
                     }
-                }
             })
             
         })
@@ -1075,6 +1078,45 @@ class MainViewController: UIViewController{
 
 //MARK:- Custome Methods
     
+    func startTimer(_ interval :Int)  {
+        // save current user task description to check if its
+        // the same when timer is done
+       
+        // start timer to check if it has expired
+        self.expirationTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(interval), repeats: false) { (Timer) in
+            
+            // finish deleting task
+            print("timer is up and user's task will be deleted")
+            
+            // get the current user's task
+            let currentUserTask = self.tasks[0]
+            
+            // if the current user's task has not been completed
+            // and it is the same task (don't notify expiration if its a different task)
+            if currentUserTask?.completed != true && currentUserTask?.userId == self.currentUserId {
+                
+                // create notification that the task is out of time
+                currentUserTask?.completed = true;
+                currentUserTask?.completeType = Constants.STATUS_FOR_TIME_EXPIRED
+                self.removeTaskAfterComplete(currentUserTask!)
+                // reset the current user's task
+                // delete the task if it has expired
+                // self.deleteAndResetCurrentUserTask()
+                
+                // remove own annotation on the map
+                //  self.removeCurrentUserTaskAnnotation()
+                
+            }
+            
+            // reset expiration timer
+            self.expirationTimer = nil
+            
+            // invalidate the current timer
+            Timer.invalidate()
+        }
+    }
+    
+    
     func getPreviousTask()  {
         if (UserDefaults.standard.object(forKey: Constants.PENDING_TASKS) != nil) {
             print("Yes task Exist");
@@ -1114,6 +1156,7 @@ class MainViewController: UIViewController{
                             return
                         }
                         else {
+                            startTimer(timeDifference)
                             self.currentUserTaskSaved = true
                             self.tasks.append(currentTask)
                             setUpGeofenceForTask(currentTask.latitude, currentTask.longitude)
@@ -1202,15 +1245,12 @@ class MainViewController: UIViewController{
             else {
                 self.setUserinfo([dicPoints], "scoreDetail", user)
             }
-            var currentUserTask = self.tasks[0] as! Task
-            currentUserTask.completed = true;
-            currentUserTask.completeType = Constants.STATUS_FOR_THANKED;
-            self.removeTaskAfterComplete(currentUserTask)
+            
         })
     }
  
     func removeTaskAfterComplete(_ currentUserTask: Task)  {
-        
+    UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["taskExpirationNotification"])
         let currentUserKey = FIRAuth.auth()?.currentUser?.uid
         let taskMessage = currentUserTask.taskDescription
         // unsubscribe current user from their own notification channel
@@ -1218,17 +1258,32 @@ class MainViewController: UIViewController{
         
         print("taskMessage \(currentUserTask.taskDescription) \(taskMessage)")
         
-        if currentUserTask.completeType != Constants.STATUS_FOR_TIME_EXPIRED || currentUserTask.completeType != "Expired due to moving out of area" {
-            PushNotificationManager.sendNotificationToTopicOnCompletion(channelId: currentUserTask.taskID!, taskMessage: taskMessage)
+        //Send Push notification If task is Completed
+        //filter Admin and thank users users
+        if currentUserTask.completeType != Constants.STATUS_FOR_TIME_EXPIRED || currentUserTask.completeType != Constants.STATUS_FOR_MOVING_OUT {
+            self.channelsRef?.child(currentUserTask.taskID!).child("users").observeSingleEvent(of: .value, with: { (snapshot) in
+                let users = snapshot.value as! Dictionary<String , Any>
+                for user in Array(users.keys) {
+                    if !Array(self.usersToThank.keys).contains(user) && self.currentUserId != user {
+                        self.usersRef?.child(user).child("deviceToken").observeSingleEvent(of: .value, with: { (snapshot) in
+                          if  let token = snapshot.value as? String {
+                            PushNotificationManager.sendNotificationToDevice(deviceToken: token, channelId: currentUserTask.taskID!, taskMessage: taskMessage)
+                            }
+                        })
+                    }
+                }
+                // reset the dictionary
+                self.usersToThank = [:]
+            })
+            //PushNotificationManager.sendNotificationToTopicOnCompletion(channelId: currentUserTask.taskID!, taskMessage: taskMessage)
+        }
+        else {
+            // reset the dictionary
+            self.usersToThank = [:]
         }
         
+        // Update task as Completed
         
-        self.tasks.remove(at: 0)
-        if self.tasks.count == 0 {
-            let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
-            self.tasks.append(Task(userId: currentUserKey!, taskDescription: "", latitude: (self.locationManager.location?.coordinate.latitude)!, longitude: (self.locationManager.location?.coordinate.longitude)!, completed: true, taskID: "\(timeStamp)"))
-        }
-        carouselView.reloadData()
         
         let taskUpdate = ["completed": currentUserTask.completed ,
                           "createdby": currentUserTask.userId ,
@@ -1238,11 +1293,26 @@ class MainViewController: UIViewController{
                           "taskID": currentUserTask.taskID ?? "",
                           "timeCreated": currentUserTask.timeCreatedString ,
                           "timeUpdated": currentUserTask.timeUpdatedString,
-                          "completeType": currentUserTask.completeType
+                          "completeType": currentUserTask.completeType ?? "",
+                          "helpedBy": currentUserTask.helpedBy ?? ""
             ] as [String : Any];
-       self.tasksRef?.child(currentUserTask.taskID!).setValue(taskUpdate)
+        self.tasksRef?.child(currentUserTask.taskID!).setValue(taskUpdate)
+        
         currentUserTaskSaved = false
         UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
+        
+        
+        //reload Carousel
+        if self.tasks.count > 0 {
+            self.tasks.remove(at: 0)
+        }
+        if self.tasks.count == 0 {
+            let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
+            self.tasks.append(Task(userId: currentUserKey!, taskDescription: "", latitude: (self.locationManager.location?.coordinate.latitude)!, longitude: (self.locationManager.location?.coordinate.longitude)!, completed: true, taskID: "\(timeStamp)"))
+        }
+        carouselView.reloadData()
+        
+       
     }
     
 }
@@ -1885,7 +1955,15 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         }) { _ in
             
             let usersToThankCopy = self.usersToThank
-
+            
+            //update Complete task Status
+            var currentUserTask = self.tasks[0] as! Task
+            currentUserTask.completed = true;
+            currentUserTask.completeType = Constants.STATUS_FOR_THANKED;
+           currentUserTask.helpedBy = Array(usersToThankCopy.keys)
+           
+            self.removeTaskAfterComplete(currentUserTask)
+            
             // thank the users that are in the thank users dictionary
             for userId in usersToThankCopy.keys {
                 
@@ -1924,8 +2002,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                 
             }
             
-            // reset the dictionary
-            self.usersToThank = [:]
+           
             
             completionView?.removeFromSuperview()
             // toggle carouselView to visible if hidden
@@ -2038,6 +2115,9 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             
             // save the user's current task
             currentUserTask.save()
+            //Local Notification Implemented
+             self.createLocalNotification(title: "Your help quest expired. Still need help?", body: "Click to make a new help task")
+            
             //Start monitoring Distance
             self.setUpGeofenceForTask(currentUserTask.latitude, currentUserTask.longitude)
             //Saving of Task
@@ -2084,41 +2164,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             
             // save current user task description to check if its
             // the same when timer is done
-            let currentUserTaskDescription = currentUserTask.taskDescription
-            
-            // start timer to check if it has expired
-            self.expirationTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(SECONDS_IN_HOUR), repeats: false) { (Timer) in
-                
-                // finish deleting task
-                print("timer is up and user's task will be deleted")
-                
-                // get the current user's task
-                let currentUserTask = self.tasks[0]
-                
-                // if the current user's task has not been completed
-                // and it is the same task (don't notify expiration if its a different task)
-                if currentUserTask?.completed != true && currentUserTask?.taskDescription == currentUserTaskDescription {
-                    
-                    // create notification that the task is out of time
-                    self.createLocalNotification(title: "Your help quest expired. Still need help?", body: "Click to make a new help task")
-                    currentUserTask?.completed = true;
-                    currentUserTask?.completeType = Constants.STATUS_FOR_TIME_EXPIRED
-                    self.removeTaskAfterComplete(currentUserTask!)
-                    // reset the current user's task
-                    // delete the task if it has expired
-                   // self.deleteAndResetCurrentUserTask()
-                    
-                    // remove own annotation on the map
-                  //  self.removeCurrentUserTaskAnnotation()
-                    
-                }
-                
-                // reset expiration timer
-                self.expirationTimer = nil
-                
-                // invalidate the current timer
-                Timer.invalidate()
-            }
+          startTimer(SECONDS_IN_HOUR)
             
             
         }
@@ -2170,10 +2216,14 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         if let contentBody = body {
             content.body = contentBody
         }
+        var Interval = 0.5
+        if title == "Your help quest expired. Still need help?" {
+            Interval = Double(self.SECONDS_IN_HOUR)-1
+        }
         content.sound = UNNotificationSound.default()
         
         // create trigger
-        let trigger = UNTimeIntervalNotificationTrigger.init(timeInterval: 0.5, repeats: false)
+        let trigger = UNTimeIntervalNotificationTrigger.init(timeInterval: Interval, repeats: false)
         let request = UNNotificationRequest.init(identifier: "taskExpirationNotification", content: content, trigger: trigger)
         
         // schedule the notification
