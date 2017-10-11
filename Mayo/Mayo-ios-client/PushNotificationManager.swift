@@ -50,6 +50,44 @@ class PushNotificationManager {
         print("notification posted")
     }
     
+    static func sendNotificationToDeviceForMessage(device:String ,channelId: String, topic: String, currentUserId: String) {
+        
+        // setup alamofire url
+        let fcmURL = "https://fcm.googleapis.com/fcm/send"
+        let parameters: Parameters = [
+            "to": "\(device)",
+            "priority": "high",
+            "notification": [
+                "body": "Someone posted in \(topic)",
+                "title": "New Message Posted",
+                "content_available": true,
+                "sound": "default"
+            ],
+            "data": [
+                "sender_id": "\(currentUserId)",
+                "channelId": "\(channelId)",
+                "task_description": "\(topic)",
+                "notification_type": "\(Constants.NOTIFICATION_MESSAGE)"
+            ]
+        ]
+        
+        let headers: HTTPHeaders = [
+            "Content-Type": "application/json",
+            "Authorization": "key=\(Constants.FIREBASE_CLOUD_SERVER_KEY)"
+        ]
+        
+        Alamofire.request(fcmURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: headers)
+            .responseJSON { response in
+                print("Message Notification")
+                print(response.request as Any)  // original URL request
+                print(response.response as Any) // URL response
+                print(response.result.value as Any)   // result of response serialization
+                
+        }
+        
+        print("notification posted")
+    }
+    
     static func sendYouWereThankedNotification(deviceToken: String) {
         
         if deviceToken.isEmpty || deviceToken.characters.count == 0 {

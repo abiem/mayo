@@ -11,6 +11,8 @@ import Firebase
 import CoreLocation
 import UserNotifications
 import IQKeyboardManagerSwift
+import Fabric
+import Crashlytics
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -22,7 +24,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         IQKeyboardManager.sharedManager().enable = true
-
+       
+        //Set Up Fabric Crashlystics
+//         Fabric.with([Crashlytics.self])
+        
         // setup firebase
         FIRApp.configure()
 
@@ -112,10 +117,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationDidBecomeActive(_ application: UIApplication) {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+        
+            
+        
     }
 
     func applicationWillTerminate(_ application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+        if self.mainVC != nil {
+            self.mainVC.startReceivingSignificantLocationChanges()
+        }
     }
     
     // [START receive_message]
@@ -409,12 +420,30 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
         if let messageID = userInfo[gcmMessageIDKey] {
             print("Message ID: \(messageID)")
         }
-        
         // Print full message.
         print(userInfo)
-        
+        if let notification_type = userInfo["notification_type"] {
+            
+            print("notification_type = \(notification_type)")
+            
+            switch Int(notification_type as! String)! {
+                
+            // Process Thanks push notification.
+            case Constants.NOTIFICATION_WERE_THANKS:
+                
+                print("Thanks Push Notification Clicked")
+                
+                if self.mainVC != nil {
+                    self.mainVC.showUserThankedAnimation()
+                }
+                break
+                
+            default:
+                break
+            }
+        }
         // Change this to your preferred presentation option
-        completionHandler([])
+        completionHandler([.alert, .sound])
     }
 }
 

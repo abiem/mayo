@@ -32,6 +32,7 @@ extension MainViewController: CLLocationManagerDelegate {
                     //Update Location
                     lastUpdatedTime = NSDate() as Date
                     self.UpdateUserLocationServer()
+                    self.addCurrentUserLocationToFirebase()
                     
                 }
                 
@@ -40,6 +41,8 @@ extension MainViewController: CLLocationManagerDelegate {
                 //Update Location
                 lastUpdatedTime = NSDate() as Date
                 self.UpdateUserLocationServer()
+                self.addCurrentUserLocationToFirebase()
+                
                 
                 
             }

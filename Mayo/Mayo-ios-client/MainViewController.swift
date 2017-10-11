@@ -180,6 +180,7 @@ class MainViewController: UIViewController{
         locationManager.startUpdatingHeading()
         // allows location manager to update location in the background
         locationManager.allowsBackgroundLocationUpdates = true
+        locationManager .stopMonitoringSignificantLocationChanges()
         
         // reset users to thank dictionary
         self.usersToThank = [:]
@@ -239,7 +240,7 @@ class MainViewController: UIViewController{
         // create points uiview
         let pointsShadowGradientView = createPointsView()
         self.view.addSubview(pointsShadowGradientView)
-        getPreviousTask()
+       // getPreviousTask()
         initUserAuth()
     }
     
@@ -1185,7 +1186,7 @@ class MainViewController: UIViewController{
             
             if var lastLocations = snapshot.value as? [Any] {
                 
-                if lastLocations.count > self.CHAT_HISTORY {
+                if lastLocations.count >= self.CHAT_HISTORY {
                     lastLocations.removeFirst()
                     lastLocations.append(location)
                     self.setUserinfo(lastLocations, "location",self.currentUserId!)
@@ -1248,7 +1249,7 @@ class MainViewController: UIViewController{
             
         })
     }
- 
+ // remove task form firebase
     func removeTaskAfterComplete(_ currentUserTask: Task)  {
     UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["taskExpirationNotification"])
         let currentUserKey = FIRAuth.auth()?.currentUser?.uid
@@ -1281,9 +1282,14 @@ class MainViewController: UIViewController{
             // reset the dictionary
             self.usersToThank = [:]
         }
+        // create new date formatter
+        let dateformatter = DateStringFormatterHelper()
         
-        // Update task as Completed
+        // convert timeCreated and timeUpdated to string
+        let updateDate = dateformatter.convertDateToString(date: Date())
         
+        
+        // Update task as Complete
         
         let taskUpdate = ["completed": currentUserTask.completed ,
                           "createdby": currentUserTask.userId ,
@@ -1292,7 +1298,7 @@ class MainViewController: UIViewController{
                           "taskDescription": currentUserTask.taskDescription ,
                           "taskID": currentUserTask.taskID ?? "",
                           "timeCreated": currentUserTask.timeCreatedString ,
-                          "timeUpdated": currentUserTask.timeUpdatedString,
+                          "timeUpdated": updateDate,
                           "completeType": currentUserTask.completeType ?? "",
                           "helpedBy": currentUserTask.helpedBy ?? ""
             ] as [String : Any];
@@ -1314,6 +1320,22 @@ class MainViewController: UIViewController{
         
        
     }
+    
+    func startReceivingSignificantLocationChanges() {
+        let authorizationStatus = CLLocationManager.authorizationStatus()
+        if authorizationStatus != .authorizedAlways {
+            // User has not authorized access to location information.
+            return
+        }
+        
+        if !CLLocationManager.significantLocationChangeMonitoringAvailable() {
+            // The service is not available.
+            return
+        }
+        locationManager.delegate = self
+        locationManager.startMonitoringSignificantLocationChanges()
+    }
+
     
 }
 
