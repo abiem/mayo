@@ -69,8 +69,17 @@ class ChatViewController: JSQMessagesViewController {
         self.senderId = FIRAuth.auth()?.currentUser?.uid
         self.senderDisplayName = ""
         
+        
+        
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
         // listen for new messages
         observeMessages()
+    }
+    override func viewWillDisappear(_ animated: Bool) {
+        //
+        messageRef.removeObserver(withHandle: newMessageRefHandle!)
     }
     
     private func checkColorIndexForCurrentUserIfOwner() {
@@ -326,6 +335,7 @@ class ChatViewController: JSQMessagesViewController {
         let userId = FIRAuth.auth()?.currentUser?.uid;
         let usersRef =  FIRDatabase.database().reference().child("users")
             usersRef.child(userId!).child("taskParticipated").observeSingleEvent(of: .value, with: { (snapshot) in
+                
                 if let arrUsersParticipated = snapshot.value as? [String : Any] {
                         if var tasks = arrUsersParticipated["tasks"] as? [String] {
                             if !tasks.contains(self.channelId!) {
@@ -348,6 +358,9 @@ class ChatViewController: JSQMessagesViewController {
         
     }
     
+    func taskViews()  {
+        
+    }
     
     func updateTaskAtServer(_ userID:String, _ taskDetail:[String:Any], _ ref: FIRDatabaseReference)  {
         ref.child(userID).child("taskParticipated").setValue(taskDetail)

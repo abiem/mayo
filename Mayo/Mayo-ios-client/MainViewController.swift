@@ -240,7 +240,7 @@ class MainViewController: UIViewController{
         // create points uiview
         let pointsShadowGradientView = createPointsView()
         self.view.addSubview(pointsShadowGradientView)
-       // getPreviousTask()
+        getPreviousTask()
         initUserAuth()
     }
     
@@ -941,7 +941,18 @@ class MainViewController: UIViewController{
                                 if self.tasks.count == 0 {
                                     self.currentUserTaskSaved = false
                                     UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
-                                    self.initUserAuth()
+                                    if (self.tasks.count == 0) {
+                                        print("current user task created")
+                                        
+                                        if (self.userLatitude != nil && self.userLongitude != nil) {
+                                            // TODO fix
+                                            let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
+                                            self.tasks.append(
+                                                Task(userId: self.currentUserId!, taskDescription: "", latitude: self.userLatitude!, longitude: self.userLongitude!, completed: true, timeCreated: Date(), timeUpdated: Date(), taskID: "\(timeStamp)")
+                                            )
+                                            self.carouselView.reloadData()
+                                        }
+                                    }
                                 }
                                 else {
                                     self.carouselView.reloadData()
@@ -1158,6 +1169,7 @@ class MainViewController: UIViewController{
                         }
                         else {
                             startTimer(timeDifference)
+                            self.newItemSwiped = true
                             self.currentUserTaskSaved = true
                             self.tasks.append(currentTask)
                             setUpGeofenceForTask(currentTask.latitude, currentTask.longitude)
@@ -1312,9 +1324,9 @@ class MainViewController: UIViewController{
         if self.tasks.count > 0 {
             self.tasks.remove(at: 0)
         }
-        if self.tasks.count == 0 {
+        if self.tasks.count <= 1 {
             let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
-            self.tasks.append(Task(userId: currentUserKey!, taskDescription: "", latitude: (self.locationManager.location?.coordinate.latitude)!, longitude: (self.locationManager.location?.coordinate.longitude)!, completed: true, taskID: "\(timeStamp)"))
+            self.tasks.insert(Task(userId: currentUserKey!, taskDescription: "", latitude: (self.locationManager.location?.coordinate.latitude)!, longitude: (self.locationManager.location?.coordinate.longitude)!, completed: true, taskID: "\(timeStamp)"), at: 0)
         }
         carouselView.reloadData()
         
@@ -1581,7 +1593,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             }
             
             // setup label for gradient view
-            let label = UILabel(frame: CGRect(x: 0, y: 0, width: 300, height: (carousel.frame.size.height-15)*3/4))
+            let label = UILabel(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width * 0.9, height: (carousel.frame.size.height-15)*3/4))
             label.lineBreakMode = NSLineBreakMode.byWordWrapping
             label.numberOfLines = 4
             label.text = task.taskDescription
@@ -1595,9 +1607,9 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             // create constraints
             let horizontalConstraint = NSLayoutConstraint(item: label, attribute: .leading, relatedBy: NSLayoutRelation.equal, toItem: tempView, attribute: .leading, multiplier: 1, constant: 20)
             let verticalConstraint = NSLayoutConstraint(item: label, attribute: .top, relatedBy: NSLayoutRelation.equal, toItem: tempView, attribute: .top, multiplier: 1, constant: 20)
-            let widthConstraint = NSLayoutConstraint(item: label, attribute: NSLayoutAttribute.width, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.notAnAttribute, multiplier: 1, constant: 300)
+            let widthConstraint = NSLayoutConstraint(item: label, attribute: NSLayoutAttribute.width, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.notAnAttribute, multiplier: 1, constant: UIScreen.main.bounds.width * 0.9)
             
-            label.font = UIFont.systemFont(ofSize: 24)
+            label.font = UIFont.systemFont(ofSize: 20)
             label.textColor = UIColor.white
             tempView.addSubview(label)
             // add edge constraints to the label
@@ -1744,6 +1756,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                 
                 // complete the current task
                 self.newItemSwiped = false
+                
                 self.carouselView.reloadItem(at: 0, animated: false)
                 
                 // remove task annotation on mapview
@@ -2127,7 +2140,11 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         // get textview
         let currentUserTextView = self.view.viewWithTag(CURRENT_USER_TEXTVIEW_TAG) as! UITextView
         
-        
+        if self.tasks[0]?.taskDescription != "" {
+            let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
+            let task = Task(userId: self.currentUserId!, taskDescription: "", latitude: self.userLatitude!, longitude: self.userLongitude!, completed: true, timeCreated: Date(), timeUpdated: Date(), taskID: "\(timeStamp)")
+            self.tasks.insert(task, at: 0)
+        }
         if let currentUserTask = self.tasks[0] {
             // taskdescription to be textView
             currentUserTask.latitude = (locationManager.location?.coordinate.latitude)!
@@ -2296,7 +2313,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         
         
         if(carousel.scrollOffset < 0.15 && self.newItemSwiped == false) {
-            
+
             self.newItemSwiped = true
             UIView.animate(withDuration: 1, animations: {
                 carousel.reloadItem(at: 0, animated: true)

@@ -86,13 +86,13 @@ extension MainViewController: CLLocationManagerDelegate {
     //Geo Facing for 200 meters
     func setUpGeofenceForTask(_ lat:CLLocationDegrees, _ long:CLLocationDegrees) {
         let geofenceRegionCenter = CLLocationCoordinate2DMake(lat, long);
-        let geofenceRegion = CLCircularRegion(center: geofenceRegionCenter, radius: self.queryDistance, identifier: "taskDistanceExpired");
+        let geofenceRegion = CLCircularRegion(center: geofenceRegionCenter, radius: 200, identifier: "taskDistanceExpired");
         geofenceRegion.notifyOnExit = true;
         self.locationManager.startMonitoring(for: geofenceRegion)
     }
     
     func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
-        self.createLocalNotification(title: "You’re out of range so the quest ended :(", body: "Post again if you still need help.")
+        
         userMovedAway()
         self.locationManager.stopMonitoring(for: region)
         
@@ -101,10 +101,25 @@ extension MainViewController: CLLocationManagerDelegate {
     
     
     func userMovedAway()  {
+        
         var currentUserTask = self.tasks[0] as! Task
-        currentUserTask.completed = true;
-        currentUserTask.completeType = Constants.STATUS_FOR_MOVING_OUT
-        self.removeTaskAfterComplete(currentUserTask)
+        if currentUserTask.taskDescription != "" {
+            currentUserTask.completed = true;
+            currentUserTask.completeType = Constants.STATUS_FOR_MOVING_OUT
+            self.createLocalNotification(title: "You’re out of range so the quest ended :(", body: "Post again if you still need help.")
+            self.removeTaskAfterComplete(currentUserTask)
+        }
+        
     }
+    
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        if let error = error as? CLError, error.code == .denied {
+            // Location updates are not authorized.
+            manager.stopMonitoringSignificantLocationChanges()
+            return
+        }
+        // Notify the user of any errors.
+    }
+
 
 }

@@ -26,7 +26,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         IQKeyboardManager.sharedManager().enable = true
        
         //Set Up Fabric Crashlystics
-//         Fabric.with([Crashlytics.self])
+         Fabric.with([Crashlytics.self])
         
         // setup firebase
         FIRApp.configure()
@@ -70,9 +70,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             })
             
             // check if MainViewController user init.
-            if self.mainVC != nil {
-                self.mainVC.initUserAuth()
-            }
+//            if self.mainVC != nil {
+//                self.mainVC.initUserAuth()
+//            }
         }
         
         // check if user has gone through the onboarding
@@ -258,6 +258,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 
                 chatVC.channelTopic = task_description as? String
                 chatVC.channelId = channelId as? String
+                
                 ref = FIRDatabase.database().reference()
                 let channelsRef = ref?.child("channels")
                 
@@ -267,7 +268,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                         self.getNavigationController()?.pushViewController(chatVC, animated: true)
                     }
                     else {
-                        chatVC.reloadChat()
+                       // chatVC.reloadChat()
                     }
                     
                 } else {
@@ -285,7 +286,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                                 self.getNavigationController()?.pushViewController(chatVC, animated: true)
                             }
                             else {
-                                chatVC.reloadChat()
+                               // chatVC.reloadChat()
                             }
                         }
                     }
