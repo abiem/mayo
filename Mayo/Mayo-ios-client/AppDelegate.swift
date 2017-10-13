@@ -13,9 +13,10 @@ import UserNotifications
 import IQKeyboardManagerSwift
 import Fabric
 import Crashlytics
+import GeoFire
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate {
 
     var window: UIWindow?
     var ref: FIRDatabaseReference!
@@ -23,6 +24,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     let gcmMessageIDKey = "gcm.message_id"
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+
+        if launchOptions?[UIApplicationLaunchOptionsKey.location] != nil {
+            let locationManager:CLLocationManager = CLLocationManager()
+            locationManager.delegate = self
+            locationManager.allowsBackgroundLocationUpdates = true
+            locationManager.pausesLocationUpdatesAutomatically = false
+            locationManager.startMonitoringSignificantLocationChanges()
+        }
+    
         IQKeyboardManager.sharedManager().enable = true
        
         //Set Up Fabric Crashlystics
@@ -70,9 +80,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             })
             
             // check if MainViewController user init.
-//            if self.mainVC != nil {
-//                self.mainVC.initUserAuth()
-//            }
+            if self.mainVC != nil {
+                self.mainVC.initUserAuth()
+            }
         }
         
         // check if user has gone through the onboarding
@@ -445,6 +455,16 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
         }
         // Change this to your preferred presentation option
         completionHandler([.alert, .sound])
+    }
+    
+//    MARK:- location delegates
+    //Application is in terminated
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        let usersGeoFire = GeoFire(firebaseRef: FIRDatabase.database().reference().child("users_locations"))
+        if  locations.count > 0 {
+                usersGeoFire?.setLocation( locations.last, forKey: "\(String(describing: FIRAuth.auth()?.currentUser?.uid))")
+        }
+        
     }
 }
 

@@ -104,12 +104,11 @@ class Task: NSObject {
             "createdby": userId,
             "taskID": self.taskID!,
             "completeType" : self.completeType ?? "" ,
-            "helpedBy" : "" ,
-            "taskView" : "" ]
+            "helpedBy" : "" ]
         tasksRef.child(self.taskID!).setValue(taskDictionary)
         
         //Update Task at user Profile
-        updateTasksCreated()
+        updateTasksCreated(userId)
         
         // save task location to database with user id as key
         geoFire?.setLocation(CLLocation(latitude:latitude, longitude: longitude), forKey: "\(self.taskID!)") { (error) in
@@ -122,27 +121,27 @@ class Task: NSObject {
         
     }
     
-    func updateTasksCreated()  {
-        userRef.child(userId).child("taksCreated").observeSingleEvent(of: .value, with: { (snapshot) in
+    func updateTasksCreated(_ userID : String)  {
+        userRef.child(userID).child("taksCreated").observeSingleEvent(of: .value, with: { (snapshot) in
             if let arrTasksdetail = snapshot.value as? [String : Any] {
                 if var tasks = arrTasksdetail["tasks"] as? [String] {
                     if !tasks.contains(self.taskID!) {
                         tasks.append(self.taskID!)
                         let tasksParticipateUpdate =  ["tasks" : tasks, "count":tasks.count] as [String : Any];
                         // update at server
-                        self.userRef.child(self.userId).child("taksCreated").setValue(tasksParticipateUpdate)
+                        self.userRef.child(userID).child("taksCreated").setValue(tasksParticipateUpdate)
                     }
                 }
                 else {
                     let tasksParticipateUpdate =  ["tasks" : [self.taskID], "count":1] as [String : Any];
                     // update at server
-                    self.userRef.child(self.userId).child("taksCreated").setValue(tasksParticipateUpdate)
+                    self.userRef.child(userID).child("taksCreated").setValue(tasksParticipateUpdate)
                 }
             }
             else {
                 let tasksParticipateUpdate =  ["tasks" : [self.taskID], "count":1] as [String : Any];
                 // update at server
-                self.userRef.child(self.userId).child("taksCreated").setValue(tasksParticipateUpdate)
+                self.userRef.child(userID).child("taksCreated").setValue(tasksParticipateUpdate)
             }
         })
     }

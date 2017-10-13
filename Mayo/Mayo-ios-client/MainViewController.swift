@@ -28,7 +28,7 @@ class MainViewController: UIViewController{
     var thanksAnimImageView: UIImageView!
     var playingThanksAnim = false
     var completedTask:Task?
-    
+    var heightShadow = 0
     //user Task ID
     var userTaskId :String?
     // tags and constants for subviews
@@ -176,10 +176,12 @@ class MainViewController: UIViewController{
         
         locationManager = CLLocationManager()
         locationManager.delegate = self
-        locationManager.startUpdatingLocation()
-        locationManager.startUpdatingHeading()
         // allows location manager to update location in the background
         locationManager.allowsBackgroundLocationUpdates = true
+        locationManager.pausesLocationUpdatesAutomatically = false
+        locationManager.startUpdatingLocation()
+        locationManager.startUpdatingHeading()
+        
         locationManager .stopMonitoringSignificantLocationChanges()
         
         // reset users to thank dictionary
@@ -240,7 +242,7 @@ class MainViewController: UIViewController{
         // create points uiview
         let pointsShadowGradientView = createPointsView()
         self.view.addSubview(pointsShadowGradientView)
-        getPreviousTask()
+       // getPreviousTask()
         initUserAuth()
     }
     
@@ -629,6 +631,7 @@ class MainViewController: UIViewController{
     
 
     override func viewWillAppear(_ animated: Bool) {
+        
         // hides navigation bar for home viewcontroller
         self.navigationController?.isNavigationBarHidden = true
         //subscribeToKeyboardNotifications()
@@ -839,7 +842,10 @@ class MainViewController: UIViewController{
                         self.tasksRef?.child(snapshot.key).child("completeType").setValue(Constants.STATUS_FOR_TIME_EXPIRED);
                         for (index, task) in self.tasks.enumerated() {
                             if task?.taskID == taskDict["taskID"] as? String {
+                                
+                                
                                 self.tasks.remove(at: index);
+                                self.updateMapAnnotationCardIndexes()
                                 self.carouselView.reloadData()
                             }
                         }
@@ -868,8 +874,10 @@ class MainViewController: UIViewController{
                             if taskDict["completed"] as! Bool == true {
                                 for (index, task) in self.tasks.enumerated() {
                                     if task?.taskID == taskDict["taskID"] as? String {
+                                        
                                         self.tasks.remove(at: index);
                                         self.carouselView.reloadData()
+                                        self.updateMapAnnotationCardIndexes();
                                     }
                                 }
                             }
@@ -912,7 +920,7 @@ class MainViewController: UIViewController{
                         newTask.setGradientColors(startColor: nil, endColor: nil)
                     }
                     
-                
+                    
                     self.tasks.append(newTask)
                     print("tasks: \(self.tasks)")
                     print("tasks count: \(self.tasks.count)")
@@ -950,7 +958,9 @@ class MainViewController: UIViewController{
                                             self.tasks.append(
                                                 Task(userId: self.currentUserId!, taskDescription: "", latitude: self.userLatitude!, longitude: self.userLongitude!, completed: true, timeCreated: Date(), timeUpdated: Date(), taskID: "\(timeStamp)")
                                             )
+                                            
                                             self.carouselView.reloadData()
+                                            self.updateMapAnnotationCardIndexes()
                                         }
                                     }
                                 }
@@ -1172,7 +1182,7 @@ class MainViewController: UIViewController{
                             self.newItemSwiped = true
                             self.currentUserTaskSaved = true
                             self.tasks.append(currentTask)
-                            setUpGeofenceForTask(currentTask.latitude, currentTask.longitude)
+                          //  setUpGeofenceForTask(currentTask.latitude, currentTask.longitude)
                             carouselView.reloadData()
                         }
                     
@@ -1274,21 +1284,22 @@ class MainViewController: UIViewController{
         //Send Push notification If task is Completed
         //filter Admin and thank users users
         if currentUserTask.completeType != Constants.STATUS_FOR_TIME_EXPIRED || currentUserTask.completeType != Constants.STATUS_FOR_MOVING_OUT {
-            self.channelsRef?.child(currentUserTask.taskID!).child("users").observeSingleEvent(of: .value, with: { (snapshot) in
-                let users = snapshot.value as! Dictionary<String , Any>
-                for user in Array(users.keys) {
-                    if !Array(self.usersToThank.keys).contains(user) && self.currentUserId != user {
-                        self.usersRef?.child(user).child("deviceToken").observeSingleEvent(of: .value, with: { (snapshot) in
-                          if  let token = snapshot.value as? String {
-                            PushNotificationManager.sendNotificationToDevice(deviceToken: token, channelId: currentUserTask.taskID!, taskMessage: taskMessage)
-                            }
-                        })
-                    }
-                }
-                // reset the dictionary
-                self.usersToThank = [:]
-            })
-            //PushNotificationManager.sendNotificationToTopicOnCompletion(channelId: currentUserTask.taskID!, taskMessage: taskMessage)
+//            self.channelsRef?.child(currentUserTask.taskID!).child("users").observeSingleEvent(of: .value, with: { (snapshot) in
+//                let users = snapshot.value as! Dictionary<String , Any>
+//                for user in Array(users.keys) {
+//                    if !Array(self.usersToThank.keys).contains(user) && self.currentUserId != user {
+//                        self.usersRef?.child(user).child("deviceToken").observeSingleEvent(of: .value, with: { (snapshot) in
+//                          if  let token = snapshot.value as? String {
+//                            PushNotificationManager.sendNotificationToDevice(deviceToken: token, channelId: currentUserTask.taskID!, taskMessage: taskMessage)
+//                            }
+//                        })
+//                    }
+//                }
+//                // reset the dictionary
+//                self.usersToThank = [:]
+//            })
+            PushNotificationManager.sendNotificationToTopicOnCompletion(channelId: currentUserTask.taskID!, taskMessage: taskMessage)
+            self.usersToThank = [:]
         }
         else {
             // reset the dictionary
@@ -1333,6 +1344,8 @@ class MainViewController: UIViewController{
        
     }
     
+
+    
     func startReceivingSignificantLocationChanges() {
         let authorizationStatus = CLLocationManager.authorizationStatus()
         if authorizationStatus != .authorizedAlways {
@@ -1362,7 +1375,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         // 1st card if user didn't swipe for new task
         if index == 0 && !self.newItemSwiped && self.tasks.count > 1 && self.currentUserTaskSaved == false{
     
-                let tempView = UIView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width * 0.9, height:212))
+                let tempView = UIView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width * 0.9, height:(UIScreen.main.bounds.height * 0.3)+20))
                 tempView.backgroundColor = UIColor.clear
                 
                 let plusView = UIImageView(frame: CGRect(x: 300, y: 91, width: 30, height: 30))
@@ -1389,7 +1402,8 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         if (index == 0 && self.newItemSwiped) || self.tasks.count <= 1 {
             // setup temporary view as gradient view
             
-            let tempView = GradientView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width * 0.9, height:carousel.frame.size.height-15))
+            //carousel.frame.size.height-15
+            let tempView = GradientView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width * 0.9, height:UIScreen.main.bounds.height * 0.3))
             
             
             // get the first task
@@ -1424,7 +1438,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             
             // width 8.5/10
             //setup textView for gradient viwe
-            let textView = UITextView(frame: CGRect(x: 0, y: 0, width: (tempView.bounds.width*0.9), height: (carousel.frame.size.height-15)*3/4))
+            let textView = UITextView(frame: CGRect(x: 0, y: 0, width: (tempView.bounds.width*0.9), height: (UIScreen.main.bounds.height*0.3)*3/4))
             textView.textColor = UIColor.white
             textView.contentInset = UIEdgeInsets(top: 15, left: 0, bottom: 0, right: 0)
             // turn off auto correction
@@ -1453,7 +1467,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             textView.center.x = tempView.center.x
             textView.backgroundColor = UIColor.clear
             textView.textAlignment = .left
-            textView.font = UIFont.systemFont(ofSize: 24)
+            textView.font = UIFont.systemFont(ofSize: 20)
             textView.delegate = self
             textView.tag = CURRENT_USER_TEXTVIEW_TAG
             tempView.addSubview(textView)
@@ -1529,7 +1543,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             
             
             // add temp view to shadow view
-            let shadowView = UIView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width * 0.9, height: carousel.frame.size.height-15))
+            let shadowView = UIView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width * 0.9, height: (UIScreen.main.bounds.height * 0.3)+20))
             shadowView.backgroundColor = UIColor.clear
             shadowView.layer.shadowColor = UIColor.black.cgColor
             shadowView.layer.shadowOffset = CGSize(width: 0, height: 10)
@@ -1539,13 +1553,13 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             shadowView.addSubview(tempView)
             
             // add instructions for "Automatically expires in 1hr or if you leave the area" at bottom label
-            let bottomNoticeLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 350, height: 50))
+            let bottomNoticeLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 350, height: 20))
             bottomNoticeLabel.textColor = UIColor.white
             bottomNoticeLabel.text = "Automatically expires in 1hr or if you leave the area"
             bottomNoticeLabel.textAlignment = .center
             bottomNoticeLabel.font = UIFont.systemFont(ofSize: 11)
             bottomNoticeLabel.center.x = tempView.center.x
-            bottomNoticeLabel.center.y = tempView.bounds.maxY + 15
+            bottomNoticeLabel.center.y = tempView.bounds.maxY + 8
             shadowView.addSubview(bottomNoticeLabel)
             
             return shadowView
@@ -1555,7 +1569,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         if (index >= (self.tasks.count)) {
             // create invisible card
             print("clear card created")
-            let tempView = UIView(frame: CGRect(x: 0, y: 0, width: 335, height:carousel.frame.size.height-15))
+            let tempView = UIView(frame: CGRect(x: 0, y: 0, width: 335, height:UIScreen.main.bounds.height * 0.3))
             tempView.backgroundColor = UIColor.clear
             tempView.layer.masksToBounds = false
             return tempView
@@ -1567,7 +1581,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             let task = self.tasks[index] as! Task
             
             // setup temporary view as gradient view
-            let tempView = GradientView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width * 0.9, height:carousel.frame.size.height-15))
+            let tempView = GradientView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width * 0.9, height:UIScreen.main.bounds.height * 0.3))
             let cardColor = CardColor()
             
             // if task doesn't have a  start color and end color
@@ -1593,7 +1607,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             }
             
             // setup label for gradient view
-            let label = UILabel(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width * 0.9, height: (carousel.frame.size.height-15)*3/4))
+            let label = UILabel(frame: CGRect(x: 0, y: 0, width: (tempView.bounds.width*0.9), height: (UIScreen.main.bounds.height * 0.3)*3/4))
             label.lineBreakMode = NSLineBreakMode.byWordWrapping
             label.numberOfLines = 4
             label.text = task.taskDescription
@@ -1607,7 +1621,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             // create constraints
             let horizontalConstraint = NSLayoutConstraint(item: label, attribute: .leading, relatedBy: NSLayoutRelation.equal, toItem: tempView, attribute: .leading, multiplier: 1, constant: 20)
             let verticalConstraint = NSLayoutConstraint(item: label, attribute: .top, relatedBy: NSLayoutRelation.equal, toItem: tempView, attribute: .top, multiplier: 1, constant: 20)
-            let widthConstraint = NSLayoutConstraint(item: label, attribute: NSLayoutAttribute.width, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.notAnAttribute, multiplier: 1, constant: UIScreen.main.bounds.width * 0.9)
+            let widthConstraint = NSLayoutConstraint(item: label, attribute: NSLayoutAttribute.width, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.notAnAttribute, multiplier: 1, constant: (tempView.bounds.width*0.9))
             
             label.font = UIFont.systemFont(ofSize: 20)
             label.textColor = UIColor.white
@@ -1617,7 +1631,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             
         
             // setup clickable button for gradient view
-            let messageButton = UIButton(frame: CGRect(x: 0, y: (carousel.frame.size.height-15)*3/4, width: 150, height: 20))
+            let messageButton = UIButton(frame: CGRect(x: 0, y: (UIScreen.main.bounds.height * 0.3)*3/4, width: 150, height: 20))
             messageButton.center.x = tempView.center.x
             messageButton.setTitle("I can help", for: .normal)
             let messageImage = UIImage(named: "messageImage") as UIImage?
@@ -1630,7 +1644,9 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             tempView.addSubview(messageButton)
             
             // add temp view to shadow view
-            let shadowView = UIView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width * 0.9, height: carousel.frame.size.height-15))
+            
+            
+            let shadowView = UIView(frame: CGRect(x: 0, y: 0, width: Int(UIScreen.main.bounds.width * 0.9), height: Int((UIScreen.main.bounds.height * 0.3)+20)))
             shadowView.backgroundColor = UIColor.clear
             shadowView.layer.shadowColor = UIColor.black.cgColor
             shadowView.layer.shadowOffset = CGSize(width: 0, height: 10)
@@ -1640,7 +1656,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             shadowView.addSubview(tempView)
             
             // create label to show how long ago it was created
-            let bottomLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 100, height: 50))
+            let bottomLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 100, height: 30))
             // use Moment to get the time ago for task at current index
             let taskTimeCreated = moment((self.tasks[index]?.timeCreated)!)
             print("time ago created \(taskTimeCreated.fromNow())")
@@ -1651,7 +1667,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             bottomLabel.font = UIFont.systemFont(ofSize: 11)
             bottomLabel.center.x = tempView.center.x
             let tempViewBottom = tempView.bounds.maxY
-            bottomLabel.center.y = tempViewBottom + 15
+            bottomLabel.center.y = tempViewBottom + 8
             bottomLabel.textColor = UIColor.white
             bottomLabel.text = "\(taskTimeCreated.fromNow())"
             
@@ -2257,7 +2273,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         }
         var Interval = 0.5
         if title == "Your help quest expired. Still need help?" {
-            Interval = Double(self.SECONDS_IN_HOUR)-1
+            Interval = 50 //Double(self.SECONDS_IN_HOUR)-1
         }
         content.sound = UNNotificationSound.default()
         
