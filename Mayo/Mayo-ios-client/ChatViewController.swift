@@ -78,7 +78,7 @@ class ChatViewController: JSQMessagesViewController {
         observeMessages()
     }
     override func viewWillDisappear(_ animated: Bool) {
-        //
+        // remove observer for messages
         messageRef.removeObserver(withHandle: newMessageRefHandle!)
     }
     
@@ -143,15 +143,12 @@ class ChatViewController: JSQMessagesViewController {
                     
                     // update the current task with emoji star U+2B50
                     
-                    
                 } else {
                     
                     // user is already in the conversation and is found
                     // rest of update
                     self.saveMessageAndUpdate(text: text, senderId: senderId, senderDisplayName: senderDisplayName, date: date)
                 }
-                
-                
             
             }, withCancel: { (error) in
                 print(error)
@@ -228,7 +225,7 @@ class ChatViewController: JSQMessagesViewController {
             channelTopicMessage = channelTopic
         }
         let currentUserId = FIRAuth.auth()?.currentUser?.uid
-       let ref  = FIRDatabase.database().reference()
+//       let ref  = FIRDatabase.database().reference()
 //        ref.child("channels").child(channelId).child("users").observeSingleEvent(of: .value, with: { (snapshot) in
 //            let users  = snapshot.value as! [String:Any]
 //            for user in Array(users.keys) {
@@ -328,8 +325,7 @@ class ChatViewController: JSQMessagesViewController {
     
 //    MARK:- Custom Methods
     
-    //Update task participate
-    
+    //Update task participate count at user node
     func setTaskParticipated()  {
        
         let userId = FIRAuth.auth()?.currentUser?.uid;
@@ -358,22 +354,9 @@ class ChatViewController: JSQMessagesViewController {
         
     }
     
-    func taskViews()  {
-        
-    }
-    
+    //Update task Participate at Server
     func updateTaskAtServer(_ userID:String, _ taskDetail:[String:Any], _ ref: FIRDatabaseReference)  {
         ref.child(userID).child("taskParticipated").setValue(taskDetail)
     }
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-    }
-    */
 
 }

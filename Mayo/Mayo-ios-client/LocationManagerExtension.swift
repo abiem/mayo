@@ -42,9 +42,6 @@ extension MainViewController: CLLocationManagerDelegate {
                 lastUpdatedTime = NSDate() as Date
                 self.UpdateUserLocationServer()
                 self.addCurrentUserLocationToFirebase()
-                
-                
-                
             }
         
         
@@ -52,7 +49,7 @@ extension MainViewController: CLLocationManagerDelegate {
        
         
         // check if he/she has a task that is currently active
-        if self.tasks.count > 0 {
+        if self.tasks.count > 0 && self.currentUserTaskSaved == true {
             let currentUserTask = self.tasks[0]
             
             if currentUserTask?.completed == false {
@@ -63,6 +60,7 @@ extension MainViewController: CLLocationManagerDelegate {
                 
                 // if the location is greater than queryDistance(200 m)
                 if distanceToOwnTask! >  self.queryDistance {
+                    self.currentUserTaskSaved = false
                     userMovedAway()
                     // then notify user that their task is has deleted
                   //  self.createLocalNotification(title: "You’re out of range so the quest ended :(", body: "Post again if you still need help.")

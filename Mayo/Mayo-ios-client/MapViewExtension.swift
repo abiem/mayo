@@ -42,6 +42,7 @@ extension MainViewController: MKMapViewDelegate {
             let annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: "customUser")
             annotationView.image = UIImage(named: "greenDot")
             
+            
             return annotationView
         }
         

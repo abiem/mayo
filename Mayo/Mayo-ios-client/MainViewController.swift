@@ -101,6 +101,8 @@ class MainViewController: UIViewController{
     var usersRef: FIRDatabaseReference?
     var currentUserHandle: FIRDatabaseHandle?
     
+    var taskViewRef: FIRDatabaseReference?
+    
     var tasksRef:FIRDatabaseReference?
     var channelsRef: FIRDatabaseReference?
     
@@ -207,6 +209,7 @@ class MainViewController: UIViewController{
         usersRef = ref?.child("users")
         tasksLocationsRef = ref?.child("tasks_locations")
         usersLocationsRef = ref?.child("users_locations")
+        taskViewRef = ref?.child("task_views")
         tasksGeoFire = GeoFire(firebaseRef: tasksLocationsRef)
         usersGeoFire = GeoFire(firebaseRef: usersLocationsRef)
         
@@ -404,7 +407,7 @@ class MainViewController: UIViewController{
         pointsProfileView.tag = self.POINTS_PROFILE_VIEW_TAG
         
         // create horizontal gradient card for showing points
-        let horizontalGradientView = HorizontalGradientView(frame: CGRect(x: 0, y: 0, width: pointsProfileView.frame.size.width, height: 170))
+        let horizontalGradientView = HorizontalGradientView(frame: CGRect(x: 0, y: 0, width: pointsProfileView.frame.size.width-30, height: 170))
         horizontalGradientView.center.y = pointsProfileView.bounds.height/4
         horizontalGradientView.center.x = pointsProfileView.center.x
         horizontalGradientView.layer.cornerRadius = 4
@@ -418,7 +421,8 @@ class MainViewController: UIViewController{
         textLabel.font = UIFont.systemFont(ofSize: 14)
         textLabel.lineBreakMode = .byWordWrapping
         textLabel.numberOfLines = 2
-        textLabel.center.x = pointsProfileView.bounds.width/2 - 10
+        textLabel.adjustsFontSizeToFitWidth = true
+        textLabel.center.x = horizontalGradientView.bounds.width/2 - 10
         textLabel.center.y = 30
         textLabel.textColor = UIColor.white
         
@@ -511,8 +515,6 @@ class MainViewController: UIViewController{
             let task3 = Task(userId: "fakeuserid3", taskDescription: self.ONBOARDING_TASK_3_DESCRIPTION, latitude: self.userLatitude! + 0.0003, longitude: self.userLongitude! - 0.0003, completed: false, taskID: "\(timeStamp)")
             task3.save()
         }
-        
-        
         
     }
     
@@ -1100,6 +1102,7 @@ class MainViewController: UIViewController{
 
 //MARK:- Custome Methods
     
+    // Start timer for one hour (Task Expiration)
     func startTimer(_ interval :Int)  {
         // save current user task description to check if its
         // the same when timer is done
@@ -1138,7 +1141,23 @@ class MainViewController: UIViewController{
         }
     }
     
+    //Start updating location at Significant Changes
+    func startReceivingSignificantLocationChanges() {
+        let authorizationStatus = CLLocationManager.authorizationStatus()
+        if authorizationStatus != .authorizedAlways {
+            // User has not authorized access to location information.
+            return
+        }
+        
+        if !CLLocationManager.significantLocationChangeMonitoringAvailable() {
+            // The service is not available.
+            return
+        }
+        locationManager.delegate = self
+        locationManager.startMonitoringSignificantLocationChanges()
+    }
     
+    //get Previous Task saved in user Defaults
     func getPreviousTask()  {
         if (UserDefaults.standard.object(forKey: Constants.PENDING_TASKS) != nil) {
             print("Yes task Exist");
@@ -1188,13 +1207,13 @@ class MainViewController: UIViewController{
                     
                     }
                 
-    //
             }
         }
     }
-
-    //update location at back end
     
+//    MARK:- Firebase Updation - Lakshmi
+    
+    //update last 5 locations at backend
     func UpdateUserLocationServer()  {
         self.usersRef?.child(currentUserId!).child("location").observeSingleEvent(of: .value, with: { (snapshot) in
             
@@ -1207,7 +1226,7 @@ class MainViewController: UIViewController{
             
             
             if var lastLocations = snapshot.value as? [Any] {
-                
+                // append location if any
                 if lastLocations.count >= self.CHAT_HISTORY {
                     lastLocations.removeFirst()
                     lastLocations.append(location)
@@ -1226,12 +1245,13 @@ class MainViewController: UIViewController{
         })
     }
     
+    //Update information At Firebase
     func setUserinfo(_ Value: [Any], _ child :String , _ user : String)  {
         self.usersRef?.child(user).child(child).setValue(Value)
         
     }
     
-    //Add Friends
+    //update Friends at user Nodes
     func addFriend(_ friendID:String)  {
         self.usersRef?.child(self.currentUserId!).child("friends").observeSingleEvent(of: .value, with: { (snapshot) in
             if var arrFriends = snapshot.value as? [String] {
@@ -1248,7 +1268,7 @@ class MainViewController: UIViewController{
 
     }
     
-    //Update points
+    //Update points at Firebase Server
     func UpdatePointsServer(_ points:Int, _ user : String)  {
         let currentUserTask = self.tasks[0];
         self.usersRef?.child(user).child("scoreDetail").observeSingleEvent(of: .value, with: { (snapshot) in
@@ -1271,14 +1291,14 @@ class MainViewController: UIViewController{
             
         })
     }
- // remove task form firebase
+    
+ // Remove task and Update completeion details at Firebase
     func removeTaskAfterComplete(_ currentUserTask: Task)  {
     UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["taskExpirationNotification"])
         let currentUserKey = FIRAuth.auth()?.currentUser?.uid
         let taskMessage = currentUserTask.taskDescription
         // unsubscribe current user from their own notification channel
       //  FIRMessaging.messaging().unsubscribe(fromTopic: "/topics/\(currentUserKey)")
-        
         print("taskMessage \(currentUserTask.taskDescription) \(taskMessage)")
         
         //Send Push notification If task is Completed
@@ -1310,8 +1330,6 @@ class MainViewController: UIViewController{
         
         // convert timeCreated and timeUpdated to string
         let updateDate = dateformatter.convertDateToString(date: Date())
-        
-        
         // Update task as Complete
         
         let taskUpdate = ["completed": currentUserTask.completed ,
@@ -1329,8 +1347,7 @@ class MainViewController: UIViewController{
         
         currentUserTaskSaved = false
         UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
-        
-        
+
         //reload Carousel
         if self.tasks.count > 0 {
             self.tasks.remove(at: 0)
@@ -1339,28 +1356,36 @@ class MainViewController: UIViewController{
             let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
             self.tasks.insert(Task(userId: currentUserKey!, taskDescription: "", latitude: (self.locationManager.location?.coordinate.latitude)!, longitude: (self.locationManager.location?.coordinate.longitude)!, completed: true, taskID: "\(timeStamp)"), at: 0)
         }
-        carouselView.reloadData()
+        self.carouselView.reloadItem(at: 0, animated: false)
         
        
     }
-    
 
-    
-    func startReceivingSignificantLocationChanges() {
-        let authorizationStatus = CLLocationManager.authorizationStatus()
-        if authorizationStatus != .authorizedAlways {
-            // User has not authorized access to location information.
-            return
-        }
-        
-        if !CLLocationManager.significantLocationChangeMonitoringAvailable() {
-            // The service is not available.
-            return
-        }
-        locationManager.delegate = self
-        locationManager.startMonitoringSignificantLocationChanges()
+    //update Task views count at firebase
+    func updateViewsCount(_ taskID : String)  {
+        taskViewRef?.child(taskID).observeSingleEvent(of: .value, with: { (snapshot) in
+            if let arrTasksdetail = snapshot.value as? [String : Any] {
+                if var taskViews = arrTasksdetail["users"] as? [String] {
+                    if !taskViews.contains( self.currentUserId!) {
+                        taskViews.append(self.currentUserId!)
+                        let tasksViewUpdate =  ["users" : taskViews, "count":taskViews.count] as [String : Any];
+                        // update at server
+                        self.taskViewRef?.child(taskID).setValue(tasksViewUpdate)
+                    }
+                }
+                else {
+                    let tasksViewUpdate =  ["users" : [self.currentUserId], "count":1] as [String : Any];
+                    // update at server
+                    self.taskViewRef?.child(taskID).setValue(tasksViewUpdate)
+                }
+            }
+            else {
+                let tasksViewUpdate =  ["users" : [self.currentUserId], "count":1] as [String : Any];
+                // update at server
+                self.taskViewRef?.child(taskID).setValue(tasksViewUpdate)
+            }
+        })
     }
-
     
 }
 
@@ -1673,9 +1698,6 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             
             // add bottom label to shadow view
             shadowView.addSubview(bottomLabel)
-            
-            
-            
             return shadowView
         }
         
@@ -1910,7 +1932,6 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             messageButtonText += " ..."
         }
         
-        
         let chatUserMessageButton = UIButton(frame: CGRect(x: 0, y: 0, width: (completionView.bounds.width * 8/10), height: 52))
         chatUserMessageButton.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         chatUserMessageButton.tag = tagNumber
@@ -1933,8 +1954,6 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         chatUserMessageButton.addTarget(self, action: #selector(self.handleCompletionViewChatUserMessageButtonPressed(sender:)), for: .touchUpInside)
         return chatUserMessageButton
     }
-
-    
 
     // delete the task conversation
     func deleteTaskConversationForUser(userId: String) {
@@ -2050,10 +2069,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                     print(error.localizedDescription)
                 })
                 
-                
             }
-            
-           
             
             completionView?.removeFromSuperview()
             // toggle carouselView to visible if hidden
@@ -2289,8 +2305,6 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
 
     }
     
-   
-    
     // action for close button item
     func discardCurrentUserTask(sender: UIButton) {
         
@@ -2326,7 +2340,6 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
     
     // function called when carousel view scrolls
     func carouselDidScroll(_ carousel: iCarousel) {
-        
         
         if(carousel.scrollOffset < 0.15 && self.newItemSwiped == false) {
 
@@ -2560,9 +2573,11 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         
         let taskIndex = carouselView.currentItemIndex
         
-        if taskIndex >= 0 {
+        if taskIndex >= 0 && taskIndex < tasks.count {
             if let task = tasks[taskIndex] {
-                
+                if task.taskDescription != "" {
+                    updateViewsCount(task.taskID!)
+                }
                 let taskLat = task.latitude
                 let taskLong = task.longitude
                 let taskCoordinate = CLLocationCoordinate2D(latitude: taskLat, longitude: taskLong)
@@ -2573,19 +2588,6 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         
         // update the last carousel card index
         //self.lastCardIndex = carousel.currentItemIndex
-        
-        
-        
-        
-//        if taskIndex >= 1 {
-//            if self.keyboardOnScreen == true {
-//                self.keyboardOnScreen = false
-//                UIApplication.shared.sendAction(#selector(UIApplication.resignFirstResponder), to: nil, from: nil, for: nil)
-//            }
-//            
-//        }
-        
-        
         
     }
     func carousel(_ carousel: iCarousel, valueFor option: iCarouselOption, withDefault value: CGFloat) -> CGFloat {
@@ -2601,10 +2603,8 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
 }
 
 
-
-
 // MARK: - MainViewController (Notifications)
-
+/*
 extension MainViewController {
     
     func subscribeToKeyboardNotifications() {
@@ -2622,5 +2622,4 @@ extension MainViewController {
         NotificationCenter.default.removeObserver(self)
     }
 }
-
-
+ */

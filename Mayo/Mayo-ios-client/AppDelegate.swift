@@ -433,28 +433,28 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
         }
         // Print full message.
         print(userInfo)
-        if let notification_type = userInfo["notification_type"] {
-            
-            print("notification_type = \(notification_type)")
-            
-            switch Int(notification_type as! String)! {
-                
-            // Process Thanks push notification.
-            case Constants.NOTIFICATION_WERE_THANKS:
-                
-                print("Thanks Push Notification Clicked")
-                
-                if self.mainVC != nil {
-                    self.mainVC.showUserThankedAnimation()
-                }
-                break
-                
-            default:
-                break
-            }
-        }
+//        if let notification_type = userInfo["notification_type"] {
+//
+//            print("notification_type = \(notification_type)")
+//
+//            switch Int(notification_type as! String)! {
+//
+//            // Process Thanks push notification.
+//            case Constants.NOTIFICATION_WERE_THANKS:
+//
+//                print("Thanks Push Notification Clicked")
+//
+//                if self.mainVC != nil {
+//                    self.mainVC.showUserThankedAnimation()
+//                }
+//                break
+//
+//            default:
+//                break
+//            }
+//        }
         // Change this to your preferred presentation option
-        completionHandler([.alert, .sound])
+        completionHandler([ ])
     }
     
 //    MARK:- location delegates
