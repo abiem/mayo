@@ -225,22 +225,22 @@ class ChatViewController: JSQMessagesViewController {
             channelTopicMessage = channelTopic
         }
         let currentUserId = FIRAuth.auth()?.currentUser?.uid
-//       let ref  = FIRDatabase.database().reference()
-//        ref.child("channels").child(channelId).child("users").observeSingleEvent(of: .value, with: { (snapshot) in
-//            let users  = snapshot.value as! [String:Any]
-//            for user in Array(users.keys) {
-//                if user != currentUserId {
-//                    ref.child("users").child(user).child("deviceToken").observeSingleEvent(of: .value, with: { (snapshot) in
-//                        if let token = snapshot.value as? String {
-//                            PushNotificationManager.sendNotificationToDeviceForMessage(device: token , channelId: channelId, topic: channelTopicMessage, currentUserId: currentUserId!)
-//                        }
-//                    })
-//                }
-//            }
-//
-//
-//        })
-        PushNotificationManager.sendNotificationToTopic(channelId: channelId, topic: channelTopicMessage, currentUserId: currentUserId!)
+       let ref  = FIRDatabase.database().reference()
+        ref.child("channels").child(channelId).child("users").observeSingleEvent(of: .value, with: { (snapshot) in
+            let users  = snapshot.value as! [String:Any]
+            for user in Array(users.keys) {
+                if user != currentUserId {
+                    ref.child("users").child(user).child("deviceToken").observeSingleEvent(of: .value, with: { (snapshot) in
+                        if let token = snapshot.value as? String {
+                            PushNotificationManager.sendNotificationToDeviceForMessage(device: token , channelId: channelId, topic: channelTopicMessage, currentUserId: currentUserId!)
+                        }
+                    })
+                }
+            }
+
+
+        })
+//        PushNotificationManager.sendNotificationToTopic(channelId: channelId, topic: channelTopicMessage, currentUserId: currentUserId!)
     }
     
     //reload messages.

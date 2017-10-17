@@ -14,6 +14,7 @@ import IQKeyboardManagerSwift
 import Fabric
 import Crashlytics
 import GeoFire
+import SCLAlertView
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate {
@@ -36,7 +37,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         IQKeyboardManager.sharedManager().enable = true
        
         //Set Up Fabric Crashlystics
-         Fabric.with([Crashlytics.self])
+         //Fabric.with([Crashlytics.self])
         
         // setup firebase
         FIRApp.configure()
@@ -160,6 +161,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         
         FIRMessaging.messaging().appDidReceiveMessage(userInfo)
+        self.ref = FIRDatabase.database().reference()
         if let aps = userInfo["aps"] as? NSDictionary {
             if let _ = aps["alert"] as? NSDictionary {
                 if let notification_type = userInfo["notification_type"] {
@@ -173,23 +175,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
                         
                         print("Message Push Notification Clicked")
                         
-                        if let senderId = userInfo["sender_id"] as? String {
-                            if let currentUserId = FIRAuth.auth()?.currentUser?.uid {
-                                if senderId == currentUserId {
-                                    return
-                                }
-                                else {
-                                    processMessageNotification(userInfo: userInfo)
-                                }
-                            }
-                            else {
-                                FIRAuth.auth()?.signInAnonymously() { (user, error) in
-                                    if error != nil {
-                                        print("an error occured during auth")
-                                        return
-                                    }
-                                    
-                                    let currentUserId = FIRAuth.auth()?.currentUser?.uid
+                            if let senderId = userInfo["sender_id"] as? String {
+                                if let currentUserId = FIRAuth.auth()?.currentUser?.uid {
                                     if senderId == currentUserId {
                                         return
                                     }
@@ -197,8 +184,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
                                         self.processMessageNotification(userInfo: userInfo)
                                     }
                                 }
+                                else {
+                                    FIRAuth.auth()?.signInAnonymously() { (user, error) in
+                                        if error != nil {
+                                            print("an error occured during auth")
+                                            return
+                                        }
+                                        
+                                        let currentUserId = FIRAuth.auth()?.currentUser?.uid
+                                        if senderId == currentUserId {
+                                            return
+                                        }
+                                        else {
+                                            self.processMessageNotification(userInfo: userInfo)
+                                        }
+                                    }
+                                }
                             }
-                        }
+                        
+                        
                         
                         break
                         
@@ -223,6 +227,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
                         }
                         break
                     
+                    case Constants.NOTIFICATION_NEARBY_TASK:
+                        if let channelId = userInfo["taskID"] {
+                            //Check task Detail
+                            self.ref.child("tasks").child(channelId as! String).observeSingleEvent(of: .value, with: { (snapshot) in
+                                if let dicTask = snapshot.value as? [String: Any]{
+                                    //Check Task Status
+                                    if dicTask["completed"] as! Bool == true {
+                                     //Show Alert Task Expired
+                                        SCLAlertView().showInfo("Mayo", subTitle: "Task Expired")
+                                    }
+                                }
+                            })
+                        }
+                        break
+                        
                     default:
                         break
                     }
@@ -247,61 +266,76 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         //Get Current ViewController.
         let currentViewController = getCurrentViewController()
         if let channelId = userInfo["channelId"] {
-            if let task_description = userInfo["task_description"] {
-                
-                var chatVC: ChatViewController!
-                var needToPush = false
-                if (currentViewController is MainViewController) {
-                    
-                    //Move to ChatViewController.
-                    chatVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "chatViewController") as! ChatViewController
-                    needToPush = true
-                }
-                else if (currentViewController is ChatViewController) {
-                    chatVC = currentViewController as? ChatViewController
-                }
-                
-                if chatVC == nil {
-                    chatVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "chatViewController") as! ChatViewController
-                    needToPush = true
-                }
-                
-                chatVC.channelTopic = task_description as? String
-                chatVC.channelId = channelId as? String
-                
-                ref = FIRDatabase.database().reference()
-                let channelsRef = ref?.child("channels")
-                
-                if let chatChannelRef = channelsRef?.child(channelId as! String) {
-                    chatVC.channelRef = chatChannelRef
-                    if needToPush == true {
-                        self.getNavigationController()?.pushViewController(chatVC, animated: true)
-                    }
-                    else {
-                       // chatVC.reloadChat()
-                    }
-                    
-                } else {
-                    FIRAuth.auth()?.signInAnonymously() { (user, error) in
-                        if error != nil {
-                            print("an error occured during auth")
-                            return
-                        }
-                        
-                        self.ref = FIRDatabase.database().reference()
-                        let channelsRef = self.ref?.child("channels")
-                        if let chatChannelRef = channelsRef?.child(channelId as! String) {
-                            chatVC.channelRef = chatChannelRef
-                            if needToPush == true {
-                                self.getNavigationController()?.pushViewController(chatVC, animated: true)
+                //Check task Detail
+                self.ref.child("tasks").child(channelId as! String).observeSingleEvent(of: .value, with: { (snapshot) in
+                    if let dicTask = snapshot.value as? [String: Any]{
+                        //Check Task Status
+                        if dicTask["completed"] as! Bool == false {
+                            if let task_description = userInfo["task_description"] {
+                                
+                                var chatVC: ChatViewController!
+                                var needToPush = false
+                                if (currentViewController is MainViewController) {
+                                    
+                                    //Move to ChatViewController.
+                                    chatVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "chatViewController") as! ChatViewController
+                                    needToPush = true
+                                }
+                                else if (currentViewController is ChatViewController) {
+                                    chatVC = currentViewController as? ChatViewController
+                                }
+                                
+                                if chatVC == nil {
+                                    chatVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "chatViewController") as! ChatViewController
+                                    needToPush = true
+                                }
+                                
+                                chatVC.channelTopic = task_description as? String
+                                chatVC.channelId = channelId as? String
+                                
+                                self.ref = FIRDatabase.database().reference()
+                                let channelsRef = self.ref?.child("channels")
+                                
+                                if let chatChannelRef = channelsRef?.child(channelId as! String) {
+                                    chatVC.channelRef = chatChannelRef
+                                    if needToPush == true {
+                                        self.getNavigationController()?.pushViewController(chatVC, animated: true)
+                                    }
+                                    else {
+                                        // chatVC.reloadChat()
+                                    }
+                                    
+                                } else {
+                                    FIRAuth.auth()?.signInAnonymously() { (user, error) in
+                                        if error != nil {
+                                            print("an error occured during auth")
+                                            return
+                                        }
+                                        
+                                        self.ref = FIRDatabase.database().reference()
+                                        let channelsRef = self.ref?.child("channels")
+                                        if let chatChannelRef = channelsRef?.child(channelId as! String) {
+                                            chatVC.channelRef = chatChannelRef
+                                            if needToPush == true {
+                                                self.getNavigationController()?.pushViewController(chatVC, animated: true)
+                                            }
+                                            else {
+                                                // chatVC.reloadChat()
+                                            }
+                                        }
+                                    }
+                                }
                             }
-                            else {
-                               // chatVC.reloadChat()
-                            }
+                        }
+                        else {
+                            //Show Alert Task Expired
+                            SCLAlertView().showInfo("Mayo", subTitle: "Task Expired")
                         }
                     }
-                }
-            }
+                    
+                })
+            
+            
         }
     }
     
@@ -335,7 +369,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
             print("InstanceID token: \(refreshedToken)")
             
             // get references to save user token
-            
             if let userId = FIRAuth.auth()?.currentUser?.uid {
                 
                 // save device token for push notifications

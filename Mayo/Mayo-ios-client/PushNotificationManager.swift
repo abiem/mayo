@@ -102,7 +102,7 @@ class PushNotificationManager {
             "to": "\(deviceToken)",
             "priority": "high",
             "notification": [
-                "body": "You were thanked by a nearby user",
+                "body": "the task was completed and you were thanked",
                 "title": "You were thanked!",
                 "sound": "default"
             ],
@@ -124,7 +124,7 @@ class PushNotificationManager {
     }
     
     
-    static func sendNearbyTaskNotification(deviceToken: String) {
+    static func sendNearbyTaskNotification(deviceToken: String, taskID : String) {
         
         if deviceToken.isEmpty || deviceToken.characters.count == 0 {
             return
@@ -143,7 +143,8 @@ class PushNotificationManager {
                 "sound": "default"
             ],
             "data": [
-                "notification_type": "\(Constants.NOTIFICATION_NEARBY_TASK)"
+                "notification_type": "\(Constants.NOTIFICATION_NEARBY_TASK)",
+                "taskID" : taskID
             ]
         ]
         let headers: HTTPHeaders = [
@@ -190,7 +191,9 @@ class PushNotificationManager {
                 print(response.request as Any)  // original URL request
                 print(response.response as Any) // URL response
                 print(response.result.value as Any)   // result of response serialization
-        }    }
+        }
+        
+    }
     
     
     static func sendNotificationToDevice(deviceToken: String, channelId: String, taskMessage: String) {

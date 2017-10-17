@@ -47,7 +47,7 @@ extension MainViewController: CLLocationManagerDelegate {
         
         // get the difference between time created and current time
        
-        
+        /*
         // check if he/she has a task that is currently active
         if self.tasks.count > 0 && self.currentUserTaskSaved == true {
             let currentUserTask = self.tasks[0]
@@ -79,33 +79,44 @@ extension MainViewController: CLLocationManagerDelegate {
                 }
             }
         }
+ */
     }
     
     //Geo Facing for 200 meters
     func setUpGeofenceForTask(_ lat:CLLocationDegrees, _ long:CLLocationDegrees) {
-        let geofenceRegionCenter = CLLocationCoordinate2DMake(lat, long);
-        let geofenceRegion = CLCircularRegion(center: geofenceRegionCenter, radius: 200, identifier: "taskDistanceExpired");
-        geofenceRegion.notifyOnExit = true;
-        self.locationManager.startMonitoring(for: geofenceRegion)
+        if calculateDistance(lat, long) > 200 {
+            userMovedAway()
+        }
+        else {
+            let geofenceRegionCenter = CLLocationCoordinate2DMake(lat, long);
+            let geofenceRegion = CLCircularRegion(center: geofenceRegionCenter, radius: 200, identifier: "taskDistanceExpired");
+            geofenceRegion.notifyOnExit = true;
+            self.locationManager.startMonitoring(for: geofenceRegion)
+        }
+        
     }
     
     func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
-        
         userMovedAway()
         self.locationManager.stopMonitoring(for: region)
         
         }
     
-    
+    func calculateDistance(_ lat:CLLocationDegrees, _ long:CLLocationDegrees) -> Double {
+        return (locationManager.location?.distance(from: CLLocation(latitude: lat, longitude: long)))!
+    }
     
     func userMovedAway()  {
-        
         var currentUserTask = self.tasks[0] as! Task
         if currentUserTask.taskDescription != "" {
             currentUserTask.completed = true;
             currentUserTask.completeType = Constants.STATUS_FOR_MOVING_OUT
             self.createLocalNotification(title: "You’re out of range so the quest ended :(", body: "Post again if you still need help.")
             self.removeTaskAfterComplete(currentUserTask)
+            if self.expirationTimer != nil {
+                self.expirationTimer?.invalidate()
+                self.expirationTimer = nil
+            }
         }
         
     }

@@ -820,6 +820,7 @@
 				"${BUILT_PRODUCTS_DIR}/JSQMessagesViewController/JSQMessagesViewController.framework",
 				"${BUILT_PRODUCTS_DIR}/JSQSystemSoundPlayer/JSQSystemSoundPlayer.framework",
 				"${BUILT_PRODUCTS_DIR}/Protobuf/Protobuf.framework",
+				"${BUILT_PRODUCTS_DIR}/SCLAlertView/SCLAlertView.framework",
 				"${BUILT_PRODUCTS_DIR}/SwiftMoment/SwiftMoment.framework",
 				"${BUILT_PRODUCTS_DIR}/iCarousel/iCarousel.framework",
 			);
@@ -834,6 +835,7 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/JSQMessagesViewController.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/JSQSystemSoundPlayer.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Protobuf.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SCLAlertView.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwiftMoment.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/iCarousel.framework",
 			);
@@ -1016,7 +1018,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "Mayo-ios-client/Mayo-ios-client.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer: Sahil Kumar (763HBFKRE7)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = GLEGE67FN8;
@@ -1025,8 +1027,8 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.abiem.mayo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "c27e3333-c4ce-48e6-aea0-b05615e2fb5d";
-				PROVISIONING_PROFILE_SPECIFIER = "Mayo Distribution Profile";
+				PROVISIONING_PROFILE = "865cba4e-9a2b-4c3a-bc13-c3e2447abe4e";
+				PROVISIONING_PROFILE_SPECIFIER = "Mayo Development Profile";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
@@ -1038,7 +1040,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "Mayo-ios-client/Mayo-ios-client.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer: Sahil Kumar (763HBFKRE7)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = GLEGE67FN8;
 				INFOPLIST_FILE = "Mayo-ios-client/Info.plist";
@@ -1046,8 +1048,8 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.abiem.mayo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "c27e3333-c4ce-48e6-aea0-b05615e2fb5d";
-				PROVISIONING_PROFILE_SPECIFIER = "Mayo Distribution Profile";
+				PROVISIONING_PROFILE = "865cba4e-9a2b-4c3a-bc13-c3e2447abe4e";
+				PROVISIONING_PROFILE_SPECIFIER = "Mayo Development Profile";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Release;

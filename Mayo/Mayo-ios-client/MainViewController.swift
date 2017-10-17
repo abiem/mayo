@@ -245,7 +245,7 @@ class MainViewController: UIViewController{
         // create points uiview
         let pointsShadowGradientView = createPointsView()
         self.view.addSubview(pointsShadowGradientView)
-       // getPreviousTask()
+        getPreviousTask()
         initUserAuth()
     }
     
@@ -1154,6 +1154,8 @@ class MainViewController: UIViewController{
             return
         }
         locationManager.delegate = self
+        locationManager.stopUpdatingHeading()
+        locationManager.stopUpdatingLocation()
         locationManager.startMonitoringSignificantLocationChanges()
     }
     
@@ -1201,7 +1203,7 @@ class MainViewController: UIViewController{
                             self.newItemSwiped = true
                             self.currentUserTaskSaved = true
                             self.tasks.append(currentTask)
-                          //  setUpGeofenceForTask(currentTask.latitude, currentTask.longitude)
+                            setUpGeofenceForTask(currentTask.latitude, currentTask.longitude)
                             carouselView.reloadData()
                         }
                     
@@ -1304,22 +1306,22 @@ class MainViewController: UIViewController{
         //Send Push notification If task is Completed
         //filter Admin and thank users users
         if currentUserTask.completeType != Constants.STATUS_FOR_TIME_EXPIRED || currentUserTask.completeType != Constants.STATUS_FOR_MOVING_OUT {
-//            self.channelsRef?.child(currentUserTask.taskID!).child("users").observeSingleEvent(of: .value, with: { (snapshot) in
-//                let users = snapshot.value as! Dictionary<String , Any>
-//                for user in Array(users.keys) {
-//                    if !Array(self.usersToThank.keys).contains(user) && self.currentUserId != user {
-//                        self.usersRef?.child(user).child("deviceToken").observeSingleEvent(of: .value, with: { (snapshot) in
-//                          if  let token = snapshot.value as? String {
-//                            PushNotificationManager.sendNotificationToDevice(deviceToken: token, channelId: currentUserTask.taskID!, taskMessage: taskMessage)
-//                            }
-//                        })
-//                    }
-//                }
-//                // reset the dictionary
-//                self.usersToThank = [:]
-//            })
-            PushNotificationManager.sendNotificationToTopicOnCompletion(channelId: currentUserTask.taskID!, taskMessage: taskMessage)
-            self.usersToThank = [:]
+            self.channelsRef?.child(currentUserTask.taskID!).child("users").observeSingleEvent(of: .value, with: { (snapshot) in
+                let users = snapshot.value as! Dictionary<String , Any>
+                for user in Array(users.keys) {
+                    if !Array(self.usersToThank.keys).contains(user) && self.currentUserId != user {
+                        self.usersRef?.child(user).child("deviceToken").observeSingleEvent(of: .value, with: { (snapshot) in
+                          if  let token = snapshot.value as? String {
+                            PushNotificationManager.sendNotificationToDevice(deviceToken: token, channelId: currentUserTask.taskID!, taskMessage: taskMessage)
+                            }
+                        })
+                    }
+                }
+                // reset the dictionary
+                self.usersToThank = [:]
+            })
+//            PushNotificationManager.sendNotificationToTopicOnCompletion(channelId: currentUserTask.taskID!, taskMessage: taskMessage)
+//            self.usersToThank = [:]
         }
         else {
             // reset the dictionary
@@ -2244,26 +2246,28 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
     }
     
     func sendPushNotificationToNearbyUsers() {
-        
-        for userId in self.nearbyUsers {
-            self.usersRef?.child(userId).observeSingleEvent(of: .value, with: { (snapshot) in
-                
-                // get the user dictionary
-                let value = snapshot.value as? NSDictionary
-                
-                // get the user's current deviceToken
-                let deviceToken = value?["deviceToken"] as? String
-                
-                
-                // send the user a notification to nearby users.
-                if deviceToken != nil && userId != self.currentUserId {
-                    PushNotificationManager.sendNearbyTaskNotification(deviceToken: deviceToken!)
-                }
-                
-            }, withCancel: { (error) in
-                print(error.localizedDescription)
-            })
+        if let currentUserTask = self.tasks[0] {
+            for userId in self.nearbyUsers {
+                self.usersRef?.child(userId).observeSingleEvent(of: .value, with: { (snapshot) in
+                    
+                    // get the user dictionary
+                    let value = snapshot.value as? NSDictionary
+                    
+                    // get the user's current deviceToken
+                    let deviceToken = value?["deviceToken"] as? String
+                    
+                    
+                    // send the user a notification to nearby users.
+                    if deviceToken != nil && userId != self.currentUserId {
+                        PushNotificationManager.sendNearbyTaskNotification(deviceToken: deviceToken!, taskID: currentUserTask.taskID!)
+                    }
+                    
+                }, withCancel: { (error) in
+                    print(error.localizedDescription)
+                })
+            }
         }
+        
     }
     
     // get rid of annotation when user deletes annotation
@@ -2273,7 +2277,13 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             // if one of them is a customCurrentUserTaskAnnotation
             if annotation is CustomCurrentUserTaskAnnotation {
                 // get rid of it
-                self.mapView.removeAnnotation(annotation)
+                let annotationView = self.mapView.view(for: annotation)
+                UIView.animate(withDuration: 0.5, animations: {
+                    annotationView?.alpha = 0.0
+                }, completion: { (isCompleted) in
+                    self.mapView.removeAnnotation(annotation)
+                })
+                
             }
         }
     }
@@ -2289,7 +2299,10 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         }
         var Interval = 0.5
         if title == "Your help quest expired. Still need help?" {
-            Interval = 50 //Double(self.SECONDS_IN_HOUR)-1
+            Interval = Double(self.SECONDS_IN_HOUR)-1
+        }
+        else {
+            removeCurrentUserTaskAnnotation()
         }
         content.sound = UNNotificationSound.default()
         

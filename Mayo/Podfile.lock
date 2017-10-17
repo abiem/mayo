@@ -64,6 +64,7 @@ PODS:
     - JSQSystemSoundPlayer (~> 2.0.1)
   - JSQSystemSoundPlayer (2.0.1)
   - Protobuf (3.3.0)
+  - SCLAlertView (0.7.0)
   - SwiftMoment (0.7)
 
 DEPENDENCIES:
@@ -81,6 +82,7 @@ DEPENDENCIES:
   - iCarousel
   - IQKeyboardManagerSwift
   - JSQMessagesViewController
+  - SCLAlertView
   - SwiftMoment
 
 EXTERNAL SOURCES:
@@ -113,8 +115,9 @@ SPEC CHECKSUMS:
   JSQMessagesViewController: 39fed975e3c9f8eba7292071e29eeb541d105e66
   JSQSystemSoundPlayer: c5850e77a4363ffd374cd851154b9af93264ed8d
   Protobuf: d582fecf68201eac3d79ed61369ef45734394b9c
+  SCLAlertView: 8a14ffc40590c619e183eed2298b854385f30be1
   SwiftMoment: dc6dd27012e267819104cbb03f74ff9192dd0b42
 
-PODFILE CHECKSUM: b7d65a5ff1296ecb0cd15af6a272f8d8c10c91a4
+PODFILE CHECKSUM: 4b47745931f7c2bc95cd81e6acde6453a9dcb16e
 
 COCOAPODS: 1.3.1
