@@ -37,7 +37,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         IQKeyboardManager.sharedManager().enable = true
        
         //Set Up Fabric Crashlystics
-         //Fabric.with([Crashlytics.self])
+         Fabric.with([Crashlytics.self])
         
         // setup firebase
         FIRApp.configure()
@@ -202,8 +202,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
                                 }
                             }
                         
-                        
-                        
                         break
                         
                     // Process topic complete push notification.
@@ -235,7 +233,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
                                     //Check Task Status
                                     if dicTask["completed"] as! Bool == true {
                                      //Show Alert Task Expired
-                                        SCLAlertView().showInfo("Mayo", subTitle: "Task Expired")
+                                        self.taskExpireAlert()
+
                                     }
                                 }
                             })
@@ -329,7 +328,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
                         }
                         else {
                             //Show Alert Task Expired
-                            SCLAlertView().showInfo("Mayo", subTitle: "Task Expired")
+                            self.taskExpireAlert()
                         }
                     }
                     
@@ -499,6 +498,19 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
         }
         
     }
+    //Task Expire Alert
+    func taskExpireAlert()  {
+        SCLAlertView().showTitle(
+            "Sorry", // Title of view
+            subTitle: "Task Expired.", // String of view
+            duration: 0.0, // Duration to show before closing automatically, default: 0.0
+            completeText: "Okay", // Optional button value, default: ""
+            style: .notice, // Styles - see below.
+            colorStyle: 0x508FBC,
+            colorTextButton: 0xFFFFFF
+        )
+    }
+    
 }
 
 

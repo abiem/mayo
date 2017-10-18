@@ -38,8 +38,11 @@ extension MainViewController: MKMapViewDelegate {
         
         if annotation is CustomUserMapAnnotation {
             
-            
+            let customAnnotation = annotation as! CustomUserMapAnnotation
             let annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: "customUser")
+//            self.usersRef?.child(customAnnotation.userId!).child("location").observeSingleEvent(of: .value, with: { (snapshot) in
+//                annotationView.image = UIImage(named: "currentUserMapTaskIcon")
+//            })
             annotationView.image = UIImage(named: "greenDot")
             
             

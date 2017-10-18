@@ -1185,7 +1185,7 @@ class MainViewController: UIViewController{
                         let currentTime = Date()
                         
                         // get the difference between time created and current time
-                        let timeDifference = currentTime.seconds(from: currentTask.timeCreated)
+                        var timeDifference = currentTime.seconds(from: currentTask.timeCreated)
                         print("time difference for task: \(timeDifference)")
                         
                         // if time difference is greater than 1 hour (3600 seconds)
@@ -1199,6 +1199,7 @@ class MainViewController: UIViewController{
                             return
                         }
                         else {
+                            timeDifference = self.SECONDS_IN_HOUR - timeDifference
                             startTimer(timeDifference)
                             self.newItemSwiped = true
                             self.currentUserTaskSaved = true
@@ -2215,9 +2216,6 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             // and update the current user to the users list
             self.channelsRef?.child(currentUserTask.taskID!).child("users").child(currentUserChannelId!).setValue(0)
             //self.channelsRef?.child(currentUserChannelId!).child("users_count").setValue(1)
-            
-            // TODO subscribe the current user to their own channel
-            
             
             //add new annotation to the map for the current user's task
             let currentUserMapTaskAnnotation = CustomCurrentUserTaskAnnotation(currentCarouselIndex: 0)

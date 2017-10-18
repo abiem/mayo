@@ -8,6 +8,7 @@
 
 import UIKit
 import CoreLocation
+import SCLAlertView
 
 extension MainViewController: CLLocationManagerDelegate {
     
@@ -18,7 +19,9 @@ extension MainViewController: CLLocationManagerDelegate {
         // check location is working
         //print("current user location \(newLocation)")
         
-      
+        if self.tasks.count == 0 {
+            self.initUserAuth()
+        }
             
             // get current time
             let currentTime = Date()
@@ -124,10 +127,27 @@ extension MainViewController: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         if let error = error as? CLError, error.code == .denied {
             // Location updates are not authorized.
+            
+            //Show Alert For Location permission Denied
+//            let alertView = SCLAlertView()
+//            alertView.addButton("Settings") {
+//                UIApplication.shared.open(URL(string:UIApplicationOpenSettingsURLString)!, options: [:], completionHandler: nil)
+//            }
+//
+//            alertView.showTitle(
+//                "Mayo", // Title of view
+//                subTitle: "Unable to get location, Please check settings.", // String of view
+//                duration: 0.0, // Duration to show before closing automatically, default: 0.0
+//                completeText: "Cancel", // Optional button value, default: ""
+//                style: .error, // Styles - see below.
+//                colorStyle: 0x508FBC,
+//                colorTextButton: 0xFFFFFF
+//            )
             manager.stopMonitoringSignificantLocationChanges()
             return
         }
         // Notify the user of any errors.
+        
     }
 
 
