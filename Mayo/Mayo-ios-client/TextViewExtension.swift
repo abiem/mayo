@@ -72,25 +72,25 @@ extension MainViewController: UITextViewDelegate {
     // MARK: Show/Hide Keyboard
     
     func keyboardWillShow(_ notification: Notification) {
-        if !keyboardOnScreen {
+        if self.view.frame.origin.y == 0 {
             self.view.frame.origin.y -= self.keyboardHeight(notification)
         }
     }
-    
+
     func keyboardWillHide(_ notification: Notification) {
-        if keyboardOnScreen {
+        if self.view.frame.origin.y != 0 {
             self.view.frame.origin.y += self.keyboardHeight(notification)
         }
     }
-    
+
     func keyboardDidShow(_ notification: Notification) {
         keyboardOnScreen = true
     }
-    
+
     func keyboardDidHide(_ notification: Notification) {
         keyboardOnScreen = false
     }
-    
+
     func keyboardHeight(_ notification: Notification) -> CGFloat {
         return ((notification as NSNotification).userInfo![UIKeyboardFrameBeginUserInfoKey] as! NSValue).cgRectValue.height
     }

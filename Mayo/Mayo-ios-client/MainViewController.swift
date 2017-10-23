@@ -112,9 +112,11 @@ class MainViewController: UIViewController{
     var tasksDeletedCircleQueryHandle: FirebaseHandle?
     var usersCircleQueryHandle: FirebaseHandle?
     
+    
     var usersDeletedCircleQueryHandle: FirebaseHandle?
     var usersMovedCircleQueryHandle: FirebaseHandle?
     var usersExitCircleQueryHandle: FirebaseHandle?
+    var usersEnterCircleQueryHandle: FirebaseHandle?
     
     // create location manager variable
     var locationManager:CLLocationManager!
@@ -466,8 +468,6 @@ class MainViewController: UIViewController{
         pointsProfileView.addSubview(horizontalGradientView)
         
         self.view.addSubview(pointsProfileView)
-        
-        
     }
     
     // remove points profile view
@@ -636,13 +636,13 @@ class MainViewController: UIViewController{
         
         // hides navigation bar for home viewcontroller
         self.navigationController?.isNavigationBarHidden = true
-        //subscribeToKeyboardNotifications()
+        subscribeToKeyboardNotifications()
 
     }
     override func viewWillDisappear(_ animated: Bool) {
         // show navigation bar on chat view controller
         self.navigationController?.isNavigationBarHidden = false
-        //unsubscribeFromAllNotifications()
+        unsubscribeFromAllNotifications()
 
     }
     
@@ -654,7 +654,8 @@ class MainViewController: UIViewController{
         let center = CLLocation(latitude: latitude, longitude: longitude)
         let usersCircleQuery = usersGeoFire?.query(at: center, withRadius: queryDistance/1000)
         
-        usersCircleQuery?.observe(.keyEntered, with: { (key: String?, location: CLLocation?) in
+        
+       usersEnterCircleQueryHandle = usersCircleQuery?.observe(.keyEntered, with: { (key: String?, location: CLLocation?) in
             print("Key '\(key!)' entered the search are and is at location '\(location!)'")
             
             if !self.nearbyUsers.contains(key!) && key! != FIRAuth.auth()!.currentUser!.uid {
@@ -666,8 +667,11 @@ class MainViewController: UIViewController{
                     self.nearbyUsers.append(userId!)
                     self.addUserPin(latitude: (location?.coordinate.latitude)!, longitude: (location?.coordinate.longitude)!, userId: userId!)
                 }
+                
 
             }
+            
+            
             
             /*
             // check that the user is not current user
@@ -690,7 +694,10 @@ class MainViewController: UIViewController{
         // remove users circle when it leaves
         usersExitCircleQueryHandle = usersCircleQuery?.observe(.keyExited, with: { (key: String!, location: CLLocation!) in
             print("user \(key) left the area")
-            
+            // Remove observer
+            print("user observer removed")
+            let key1 = key?.replacingOccurrences(of: "Optional(\"", with: "")
+            let userId = key1?.replacingOccurrences(of: "\")", with: "")
             // remove user in the nearby userlist.
             var index = 0
             for userKey in self.nearbyUsers {
@@ -701,6 +708,7 @@ class MainViewController: UIViewController{
                 
                 index = index + 1
             }
+       
             
             // loop through the user annotations and remove it
             for annotation in self.mapView.annotations {
@@ -717,7 +725,9 @@ class MainViewController: UIViewController{
         // update user location when it moves
         usersMovedCircleQueryHandle = usersCircleQuery?.observe(.keyMoved, with: { (key: String!, location: CLLocation!) in
             print("user \(key) moved ")
-            
+            let key1 = key?.replacingOccurrences(of: "Optional(\"", with: "")
+            let userId = key1?.replacingOccurrences(of: "\")", with: "")
+
             // loop through the user annotations and remove it
             for annotation in self.mapView.annotations {
                 if annotation is CustomUserMapAnnotation {
@@ -844,9 +854,9 @@ class MainViewController: UIViewController{
                         self.tasksRef?.child(snapshot.key).child("completeType").setValue(Constants.STATUS_FOR_TIME_EXPIRED);
                         for (index, task) in self.tasks.enumerated() {
                             if task?.taskID == taskDict["taskID"] as? String {
-                                
-                                
+
                                 self.tasks.remove(at: index);
+                                self.removeAnnotationForTask((task?.taskID)!)
                                 self.updateMapAnnotationCardIndexes()
                                 self.carouselView.reloadData()
                             }
@@ -878,8 +888,9 @@ class MainViewController: UIViewController{
                                     if task?.taskID == taskDict["taskID"] as? String {
                                         
                                         self.tasks.remove(at: index);
+                                        self.removeAnnotationForTask((task?.taskID)!)
+                                        self.updateMapAnnotationCardIndexes()
                                         self.carouselView.reloadData()
-                                        self.updateMapAnnotationCardIndexes();
                                     }
                                 }
                             }
@@ -947,7 +958,11 @@ class MainViewController: UIViewController{
                 else if  !taskDict.isEmpty && taskDict["completed"] as! Bool == true {
                     for (index, task) in self.tasks.enumerated() {
                         if task?.taskID == taskDict["taskID"] as? String {
+                            
                             self.tasks.remove(at: index);
+                            self.removeAnnotationForTask((task?.taskID)!)
+                            self.updateMapAnnotationCardIndexes()
+                            
                                 if self.tasks.count == 0 {
                                     self.currentUserTaskSaved = false
                                     UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
@@ -1102,6 +1117,40 @@ class MainViewController: UIViewController{
 
 //MARK:- Custome Methods
     
+    // Remove marker for tasks
+    func removeAnnotationForTask(_ taskID:String) {
+        for annotation in self.mapView.annotations {
+            
+            if annotation is CustomTaskMapAnnotation {
+                
+                // loops through the tasks array and find the corresponding task
+                let customAnnotation = annotation as! CustomTaskMapAnnotation
+                
+                    // check if the task has the same id as the annotation
+                    if  taskID == customAnnotation.taskUserId {
+                        self.mapView.removeAnnotation(annotation)
+                        break
+                    
+                }
+                
+                
+            } else if annotation is CustomFocusTaskMapAnnotation {
+                
+                // loops through the tasks array and find the corresponding task
+                let customAnnotation = annotation as! CustomFocusTaskMapAnnotation
+
+                    // check if the task has the same id as the annotation
+                    if  taskID == customAnnotation.taskUserId {
+                        self.mapView.removeAnnotation(annotation)
+                        break
+                }
+  
+            }
+            
+        }
+        
+    }
+    
     // Start timer for one hour (Task Expiration)
     func startTimer(_ interval :Int)  {
         // save current user task description to check if its
@@ -1204,6 +1253,13 @@ class MainViewController: UIViewController{
                             self.newItemSwiped = true
                             self.currentUserTaskSaved = true
                             self.tasks.append(currentTask)
+                            
+                            //add new annotation to the map for the current user's task
+                            let currentUserMapTaskAnnotation = CustomCurrentUserTaskAnnotation(currentCarouselIndex: 0)
+                            // set location for the annotation
+                            currentUserMapTaskAnnotation.coordinate = CLLocationCoordinate2DMake(currentTask.latitude, currentTask.longitude)
+                            self.mapView.addAnnotation(currentUserMapTaskAnnotation)
+                            
                             setUpGeofenceForTask(currentTask.latitude, currentTask.longitude)
                             carouselView.reloadData()
                         }
@@ -1308,18 +1364,20 @@ class MainViewController: UIViewController{
         //filter Admin and thank users users
         if currentUserTask.completeType != Constants.STATUS_FOR_TIME_EXPIRED || currentUserTask.completeType != Constants.STATUS_FOR_MOVING_OUT {
             self.channelsRef?.child(currentUserTask.taskID!).child("users").observeSingleEvent(of: .value, with: { (snapshot) in
-                let users = snapshot.value as! Dictionary<String , Any>
-                for user in Array(users.keys) {
-                    if !Array(self.usersToThank.keys).contains(user) && self.currentUserId != user {
-                        self.usersRef?.child(user).child("deviceToken").observeSingleEvent(of: .value, with: { (snapshot) in
-                          if  let token = snapshot.value as? String {
-                            PushNotificationManager.sendNotificationToDevice(deviceToken: token, channelId: currentUserTask.taskID!, taskMessage: taskMessage)
-                            }
-                        })
+                if  let users = snapshot.value as? Dictionary<String , Any> {
+                    
+                    for user in Array(users.keys) {
+                        if !Array(self.usersToThank.keys).contains(user) && self.currentUserId != user {
+                            self.usersRef?.child(user).child("deviceToken").observeSingleEvent(of: .value, with: { (snapshot) in
+                              if  let token = snapshot.value as? String {
+                                PushNotificationManager.sendNotificationToDevice(deviceToken: token, channelId: currentUserTask.taskID!, taskMessage: taskMessage)
+                                }
+                            })
+                        }
                     }
+                    // reset the dictionary
+                    self.usersToThank = [:]
                 }
-                // reset the dictionary
-                self.usersToThank = [:]
             })
 //            PushNotificationManager.sendNotificationToTopicOnCompletion(channelId: currentUserTask.taskID!, taskMessage: taskMessage)
 //            self.usersToThank = [:]
@@ -1406,11 +1464,11 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                 let tempView = UIView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width * 0.9, height:(UIScreen.main.bounds.height * 0.3)+20))
                 tempView.backgroundColor = UIColor.clear
                 
-                let plusView = UIImageView(frame: CGRect(x: 300, y: 91, width: 30, height: 30))
-                plusView.image = #imageLiteral(resourceName: "plusIcon")
-                tempView.addSubview(plusView)
-                tempView.layer.cornerRadius = 4
-                
+//                let plusView = UIImageView(frame: CGRect(x: 300, y: 91, width: 30, height: 30))
+//                plusView.image = #imageLiteral(resourceName: "plusIcon")
+//                tempView.addSubview(plusView)
+//                tempView.layer.cornerRadius = 4
+            
             
                 //tempView.layer.cornerRadius = 4
                 tempView.layer.shadowColor = UIColor.black.cgColor
@@ -2166,10 +2224,10 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         
         // TODO keyboard bug when user hits home button
         // create/update new task item for current user
-        if self.keyboardOnScreen == true {
+        if self.view.frame.origin.y != 0 {
             UIApplication.shared.sendAction(#selector(UIApplication.resignFirstResponder), to: nil, from: nil, for: nil)
             //set keyboard to off screen
-            self.keyboardOnScreen = false
+//            self.keyboardOnScreen = false
         }
         
         // get textview
@@ -2336,7 +2394,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
     func goToChat(sender: UIButton) {
         // if the keyboard is out
         // remove it
-        if self.keyboardOnScreen {
+        if self.view.frame.origin.y != 0 {
             UIApplication.shared.sendAction(#selector(UIApplication.resignFirstResponder), to: nil, from: nil, for: nil)
         }
         
@@ -2351,6 +2409,10 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
     
     // function called when carousel view scrolls
     func carouselDidScroll(_ carousel: iCarousel) {
+        
+        if self.view.frame.origin.y != 0 {
+            UIApplication.shared.sendAction(#selector(UIApplication.resignFirstResponder), to: nil, from: nil, for: nil)
+        }
         
         if(carousel.scrollOffset < 0.15 && self.newItemSwiped == false) {
 
@@ -2585,6 +2647,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         let taskIndex = carouselView.currentItemIndex
         
         if taskIndex >= 0 && taskIndex < tasks.count {
+            
             if let task = tasks[taskIndex] {
                 if task.taskDescription != "" {
                     updateViewsCount(task.taskID!)
@@ -2615,22 +2678,29 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
 
 
 // MARK: - MainViewController (Notifications)
-/*
+
 extension MainViewController {
-    
+
     func subscribeToKeyboardNotifications() {
         subscribeToNotification(.UIKeyboardWillShow, selector: #selector(keyboardWillShow))
         subscribeToNotification(.UIKeyboardWillHide, selector: #selector(keyboardWillHide))
         subscribeToNotification(.UIKeyboardDidShow, selector: #selector(keyboardDidShow))
         subscribeToNotification(.UIKeyboardDidHide, selector: #selector(keyboardDidHide))
     }
-    
+
     func subscribeToNotification(_ name: NSNotification.Name, selector: Selector) {
         NotificationCenter.default.addObserver(self, selector: selector, name: name, object: nil)
     }
-    
+
     func unsubscribeFromAllNotifications() {
         NotificationCenter.default.removeObserver(self)
     }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        
+        if self.view.frame.origin.y != 0 {
+            UIApplication.shared.sendAction(#selector(UIApplication.resignFirstResponder), to: nil, from: nil, for: nil)
+        }
+    }
 }
- */
+

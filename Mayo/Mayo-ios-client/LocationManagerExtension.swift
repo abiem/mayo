@@ -20,6 +20,7 @@ extension MainViewController: CLLocationManagerDelegate {
         //print("current user location \(newLocation)")
         
         if self.tasks.count == 0 {
+            self.setupLocationRegion()
             self.initUserAuth()
         }
             
