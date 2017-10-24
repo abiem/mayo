@@ -84,11 +84,15 @@ extension MainViewController: UITextViewDelegate {
     }
 
     func keyboardDidShow(_ notification: Notification) {
-        keyboardOnScreen = true
+        if self.view.frame.origin.y == 0 {
+            self.view.frame.origin.y -= self.keyboardHeight(notification)
+        }
     }
 
     func keyboardDidHide(_ notification: Notification) {
-        keyboardOnScreen = false
+        if self.view.frame.origin.y != 0 {
+            self.view.frame.origin.y += self.keyboardHeight(notification)
+        }
     }
 
     func keyboardHeight(_ notification: Notification) -> CGFloat {

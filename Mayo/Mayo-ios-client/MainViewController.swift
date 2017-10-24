@@ -106,7 +106,9 @@ class MainViewController: UIViewController{
     var tasksRef:FIRDatabaseReference?
     var channelsRef: FIRDatabaseReference?
     
+    var tasksExpireObserver: FIRDatabaseHandle?
     var tasksRefHandle: FIRDatabaseHandle?
+    var tasksCircleQuery : GFCircleQuery?
     var tasksCircleQueryHandle: FirebaseHandle?
     
     var tasksDeletedCircleQueryHandle: FirebaseHandle?
@@ -180,9 +182,11 @@ class MainViewController: UIViewController{
         
         locationManager = CLLocationManager()
         locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.distanceFilter = 30
         // allows location manager to update location in the background
         locationManager.allowsBackgroundLocationUpdates = true
-        locationManager.pausesLocationUpdatesAutomatically = false
+        
         locationManager.startUpdatingLocation()
         locationManager.startUpdatingHeading()
         
@@ -296,8 +300,15 @@ class MainViewController: UIViewController{
     
     func addCurrentUserLocationToFirebase() {
         // add current user's location to firebase/geofire
+        
         self.getCurrentUserLocation()
         self.usersGeoFire?.setLocation( self.locationManager.location, forKey: "\(String(describing: FIRAuth.auth()?.currentUser?.uid))")
+        
+        //Updated Time
+        let dateformatter = DateStringFormatterHelper()
+        let stringDate = dateformatter.convertDateToString(date: NSDate() as Date)
+        usersRef?.child((FIRAuth.auth()?.currentUser?.uid)!).child("UpdatedAt").setValue(stringDate)
+        
     }
     
     func showUserThankedAnimation() {
@@ -636,13 +647,13 @@ class MainViewController: UIViewController{
         
         // hides navigation bar for home viewcontroller
         self.navigationController?.isNavigationBarHidden = true
-        subscribeToKeyboardNotifications()
+       // subscribeToKeyboardNotifications()
 
     }
     override func viewWillDisappear(_ animated: Bool) {
         // show navigation bar on chat view controller
         self.navigationController?.isNavigationBarHidden = false
-        unsubscribeFromAllNotifications()
+       // unsubscribeFromAllNotifications()
 
     }
     
@@ -698,6 +709,23 @@ class MainViewController: UIViewController{
             print("user observer removed")
             let key1 = key?.replacingOccurrences(of: "Optional(\"", with: "")
             let userId = key1?.replacingOccurrences(of: "\")", with: "")
+            
+//            if userId == self.currentUserId {
+//                // user Moved to another place
+//                self.nearbyUsers.removeAll()
+//                usersCircleQuery?.removeObserver(withFirebaseHandle: self.usersExitCircleQueryHandle!)
+//                usersCircleQuery?.removeObserver(withFirebaseHandle: self.usersEnterCircleQueryHandle!)
+//                usersCircleQuery?.removeObserver(withFirebaseHandle: self.usersMovedCircleQueryHandle!)
+//                self.queryUsersAroundCurrentLocation(latitude: (self.locationManager.location?.coordinate.latitude)!, longitude: (self.locationManager.location?.coordinate.longitude)!)
+//
+//                //task Moved to new Location
+//                self.tasksCircleQuery?.removeObserver(withFirebaseHandle: self.tasksDeletedCircleQueryHandle!)
+//                self.tasksCircleQuery?.removeObserver(withFirebaseHandle: self.tasksCircleQueryHandle!)
+//                self.queryTasksAroundCurrentLocation(latitude: (self.locationManager.location?.coordinate.latitude)!, longitude: (self.locationManager.location?.coordinate.longitude)!)
+//
+//
+//            }
+            
             // remove user in the nearby userlist.
             var index = 0
             for userKey in self.nearbyUsers {
@@ -708,6 +736,8 @@ class MainViewController: UIViewController{
                 
                 index = index + 1
             }
+            
+            
        
             
             // loop through the user annotations and remove it
@@ -752,7 +782,7 @@ class MainViewController: UIViewController{
         
         // Query locations at latitude, longitutde with a radius of queryDistance
         // 200 meters = .2 for geofire units
-        let tasksCircleQuery = tasksGeoFire?.query(at: center, withRadius: queryDistance/1000)
+        tasksCircleQuery = tasksGeoFire?.query(at: center, withRadius: queryDistance/1000)
         
         tasksDeletedCircleQueryHandle = tasksCircleQuery?.observe(.keyExited, with: { (key: String!, location: CLLocation!) in
             
@@ -838,7 +868,7 @@ class MainViewController: UIViewController{
                 if !taskDict.isEmpty && taskDict["completed"] as! Bool == false {
                     
                     // get the time created for the current task
-                    let taskTimeCreated = dateformatter.convertStringToDate(datestring: taskDict["timeCreated"] as! String)
+                    let taskTimeCreated = dateformatter.convertStringToDate(datestring: taskDict["timeUpdated"] as! String)
                     
                     // get current time
                     let currentTime = Date()
@@ -1151,6 +1181,49 @@ class MainViewController: UIViewController{
         
     }
     
+    func checkTaskTimeLeft () {
+        let currentUserTask = self.tasks[0]
+       tasksExpireObserver = self.tasksRef?.child((currentUserTask?.taskID)!).child("timeUpdated").observe(.value, with: { (snapshot) in
+            UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["taskExpirationNotification"])
+            // reset expiration timer
+            self.expirationTimer = nil
+            
+            // invalidate the current timer
+            self.expirationTimer?.invalidate()
+            
+            if let timeUpdated = snapshot.value as? String {
+                
+                let dateformatter = DateStringFormatterHelper()
+                
+                // get current time
+                let currentTime = Date()
+                
+                // get the difference between time created and current time
+                var timeDifference = currentTime.seconds(from: dateformatter.convertStringToDate(datestring: timeUpdated))
+                
+                // if time difference is greater than 1 hour (3600 seconds)
+                // return and don't add this task to tasks
+
+                if timeDifference > self.SECONDS_IN_HOUR {
+                    self.createLocalNotification(title: "Your help quest expired. Still need help?", body: "Click to make a new help task", time: Int(0.5))
+                    currentUserTask?.completed = true;
+                    currentUserTask?.completeType = Constants.STATUS_FOR_TIME_EXPIRED
+                    UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
+                    self.removeTaskAfterComplete(currentUserTask!)
+                    
+                }
+                else {
+                    timeDifference = self.SECONDS_IN_HOUR - timeDifference
+                    self.startTimer(timeDifference)
+                    self.createLocalNotification(title: "Hey! No activity is there from long time", body: "Click to chat with nearby people", time: timeDifference)
+                   
+                }
+            }
+        })
+        
+    }
+    
+    
     // Start timer for one hour (Task Expiration)
     func startTimer(_ interval :Int)  {
         // save current user task description to check if its
@@ -1161,7 +1234,9 @@ class MainViewController: UIViewController{
             
             // finish deleting task
             print("timer is up and user's task will be deleted")
-            
+            if self.tasks.count == 0 {
+                return
+            }
             // get the current user's task
             let currentUserTask = self.tasks[0]
             
@@ -1239,17 +1314,18 @@ class MainViewController: UIViewController{
                         
                         // if time difference is greater than 1 hour (3600 seconds)
                         // return and don't add this task to tasks
-                        if timeDifference > self.SECONDS_IN_HOUR {
-                            
-                            currentTask.completed = true;
-                            currentTask.completeType = Constants.STATUS_FOR_TIME_EXPIRED
-                            self.removeTaskAfterComplete(currentTask)
-                            UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
-                            return
-                        }
-                        else {
-                            timeDifference = self.SECONDS_IN_HOUR - timeDifference
-                            startTimer(timeDifference)
+                        
+//                        if timeDifference > self.SECONDS_IN_HOUR {
+//
+//                            currentTask.completed = true;
+//                            currentTask.completeType = Constants.STATUS_FOR_TIME_EXPIRED
+//                            self.removeTaskAfterComplete(currentTask)
+//                            UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
+//                            return
+//                        }
+//                        else {
+//                            timeDifference = self.SECONDS_IN_HOUR - timeDifference
+//                            startTimer(timeDifference)
                             self.newItemSwiped = true
                             self.currentUserTaskSaved = true
                             self.tasks.append(currentTask)
@@ -1262,7 +1338,8 @@ class MainViewController: UIViewController{
                             
                             setUpGeofenceForTask(currentTask.latitude, currentTask.longitude)
                             carouselView.reloadData()
-                        }
+                        checkTaskTimeLeft()
+                        //}
                     
                     }
                 
@@ -1362,7 +1439,7 @@ class MainViewController: UIViewController{
         
         //Send Push notification If task is Completed
         //filter Admin and thank users users
-        if currentUserTask.completeType != Constants.STATUS_FOR_TIME_EXPIRED || currentUserTask.completeType != Constants.STATUS_FOR_MOVING_OUT {
+        if currentUserTask.completeType == Constants.STATUS_FOR_THANKED || currentUserTask.completeType == Constants.STATUS_FOR_NOT_HELPED {
             self.channelsRef?.child(currentUserTask.taskID!).child("users").observeSingleEvent(of: .value, with: { (snapshot) in
                 if  let users = snapshot.value as? Dictionary<String , Any> {
                     
@@ -1391,8 +1468,9 @@ class MainViewController: UIViewController{
         
         // convert timeCreated and timeUpdated to string
         let updateDate = dateformatter.convertDateToString(date: Date())
+        //remove observer for time
+        self.tasksRef?.child(currentUserTask.taskID!).child("timeUpdated").removeObserver(withHandle: tasksExpireObserver!)
         // Update task as Complete
-        
         let taskUpdate = ["completed": currentUserTask.completed ,
                           "createdby": currentUserTask.userId ,
                           "endColor": currentUserTask.endColor ?? "",
@@ -1404,6 +1482,7 @@ class MainViewController: UIViewController{
                           "completeType": currentUserTask.completeType ?? "",
                           "helpedBy": currentUserTask.helpedBy ?? ""
             ] as [String : Any];
+        
         self.tasksRef?.child(currentUserTask.taskID!).setValue(taskUpdate)
         
         currentUserTaskSaved = false
@@ -2226,6 +2305,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         // create/update new task item for current user
         if self.view.frame.origin.y != 0 {
             UIApplication.shared.sendAction(#selector(UIApplication.resignFirstResponder), to: nil, from: nil, for: nil)
+            
             //set keyboard to off screen
 //            self.keyboardOnScreen = false
         }
@@ -2248,7 +2328,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             // save the user's current task
             currentUserTask.save()
             //Local Notification Implemented
-             self.createLocalNotification(title: "Your help quest expired. Still need help?", body: "Click to make a new help task")
+            
             
             //Start monitoring Distance
             self.setUpGeofenceForTask(currentUserTask.latitude, currentUserTask.longitude)
@@ -2272,7 +2352,10 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             let currentUserChannelId = FIRAuth.auth()?.currentUser?.uid
             // update the number of users in the channel
             // and update the current user to the users list
-            self.channelsRef?.child(currentUserTask.taskID!).child("users").child(currentUserChannelId!).setValue(0)
+        self.channelsRef?.child(currentUserTask.taskID!).child("users").child(currentUserChannelId!).setValue(0)
+            //Update Time
+            let dateFormatter = DateStringFormatterHelper()
+            let dateCreated = dateFormatter.convertDateToString(date: Date())
             //self.channelsRef?.child(currentUserChannelId!).child("users_count").setValue(1)
             
             //add new annotation to the map for the current user's task
@@ -2293,7 +2376,8 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             
             // save current user task description to check if its
             // the same when timer is done
-          startTimer(SECONDS_IN_HOUR)
+//          startTimer(SECONDS_IN_HOUR)
+            checkTaskTimeLeft()
             
             
         }
@@ -2345,7 +2429,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
     }
     
     // create custom notification
-    func createLocalNotification(title: String, body: String?){
+    func createLocalNotification(title: String, body: String?, time :Int){
         
         // create content
         let content = UNMutableNotificationContent()
@@ -2354,8 +2438,8 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             content.body = contentBody
         }
         var Interval = 0.5
-        if title == "Your help quest expired. Still need help?" {
-            Interval = Double(self.SECONDS_IN_HOUR)-1
+        if title == "Hey! No activity is there from long time" {
+            Interval = Double(time)
         }
         else {
             removeCurrentUserTaskAnnotation()
@@ -2412,6 +2496,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         
         if self.view.frame.origin.y != 0 {
             UIApplication.shared.sendAction(#selector(UIApplication.resignFirstResponder), to: nil, from: nil, for: nil)
+            self.view.frame.origin.y = 0
         }
         
         if(carousel.scrollOffset < 0.15 && self.newItemSwiped == false) {
@@ -2681,20 +2766,20 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
 
 extension MainViewController {
 
-    func subscribeToKeyboardNotifications() {
-        subscribeToNotification(.UIKeyboardWillShow, selector: #selector(keyboardWillShow))
-        subscribeToNotification(.UIKeyboardWillHide, selector: #selector(keyboardWillHide))
-        subscribeToNotification(.UIKeyboardDidShow, selector: #selector(keyboardDidShow))
-        subscribeToNotification(.UIKeyboardDidHide, selector: #selector(keyboardDidHide))
-    }
-
-    func subscribeToNotification(_ name: NSNotification.Name, selector: Selector) {
-        NotificationCenter.default.addObserver(self, selector: selector, name: name, object: nil)
-    }
-
-    func unsubscribeFromAllNotifications() {
-        NotificationCenter.default.removeObserver(self)
-    }
+//    func subscribeToKeyboardNotifications() {
+//        subscribeToNotification(.UIKeyboardWillShow, selector: #selector(keyboardWillShow))
+//        subscribeToNotification(.UIKeyboardWillHide, selector: #selector(keyboardWillHide))
+//        subscribeToNotification(.UIKeyboardDidShow, selector: #selector(keyboardDidShow))
+//        subscribeToNotification(.UIKeyboardDidHide, selector: #selector(keyboardDidHide))
+//    }
+//
+//    func subscribeToNotification(_ name: NSNotification.Name, selector: Selector) {
+//        NotificationCenter.default.addObserver(self, selector: selector, name: name, object: nil)
+//    }
+//
+//    func unsubscribeFromAllNotifications() {
+//        NotificationCenter.default.removeObserver(self)
+//    }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         

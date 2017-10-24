@@ -192,7 +192,8 @@ class ChatViewController: JSQMessagesViewController {
         // it is determined by the current user's position in the current chat channel
         let dateFormatter = DateStringFormatterHelper()
         let dateCreated = dateFormatter.convertDateToString(date: Date())
-        
+        //self.channelRef?.child("updatedAt").setValue(dateCreated)
+    FIRDatabase.database().reference().child("tasks").child(channelId!).child("timeUpdated").setValue(dateCreated)
         
         let itemRef = messageRef.childByAutoId()
         let messageItem = [

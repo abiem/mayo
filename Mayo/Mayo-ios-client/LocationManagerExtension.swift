@@ -15,7 +15,7 @@ extension MainViewController: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         // if the user moves
         let newLocation = locations.last
-        
+        self.addCurrentUserLocationToFirebase()
         // check location is working
         //print("current user location \(newLocation)")
         
@@ -36,8 +36,6 @@ extension MainViewController: CLLocationManagerDelegate {
                     //Update Location
                     lastUpdatedTime = NSDate() as Date
                     self.UpdateUserLocationServer()
-                    self.addCurrentUserLocationToFirebase()
-                    
                 }
                 
             }
@@ -45,7 +43,7 @@ extension MainViewController: CLLocationManagerDelegate {
                 //Update Location
                 lastUpdatedTime = NSDate() as Date
                 self.UpdateUserLocationServer()
-                self.addCurrentUserLocationToFirebase()
+                
             }
         
         
@@ -115,7 +113,7 @@ extension MainViewController: CLLocationManagerDelegate {
         if currentUserTask.taskDescription != "" {
             currentUserTask.completed = true;
             currentUserTask.completeType = Constants.STATUS_FOR_MOVING_OUT
-            self.createLocalNotification(title: "You’re out of range so the quest ended :(", body: "Post again if you still need help.")
+            self.createLocalNotification(title: "You’re out of range so the quest ended :(", body: "Post again if you still need help." , time: Int(0.5))
             self.removeTaskAfterComplete(currentUserTask)
             if self.expirationTimer != nil {
                 self.expirationTimer?.invalidate()
