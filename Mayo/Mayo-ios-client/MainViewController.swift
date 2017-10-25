@@ -27,6 +27,7 @@ class MainViewController: UIViewController{
     var pointsLabel: UILabel!
     var thanksAnimImageView: UIImageView!
     var playingThanksAnim = false
+    var canCreateNewtask = false
     var completedTask:Task?
     var heightShadow = 0
     //user Task ID
@@ -142,6 +143,7 @@ class MainViewController: UIViewController{
     deinit {
         // get rid of observers when denit
     }
+ 
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -251,8 +253,28 @@ class MainViewController: UIViewController{
         // create points uiview
         let pointsShadowGradientView = createPointsView()
         self.view.addSubview(pointsShadowGradientView)
-        getPreviousTask()
-        initUserAuth()
+        if checkFakeTakViewed() == true {
+            getPreviousTask()
+            initUserAuth()
+            canCreateNewtask = true
+        }
+        else {
+            canCreateNewtask = false
+            createFakeTasks()
+        }
+        
+    }
+    
+    func checkFakeTakViewed() -> Bool {
+        let defaults = UserDefaults.standard
+        let boolForTask1 = defaults.bool(forKey: self.ONBOARDING_TASK1_VIEWED_KEY)
+        let boolForTask2 = defaults.bool(forKey: self.ONBOARDING_TASK2_VIEWED_KEY)
+        let boolForTask3 = defaults.bool(forKey: self.ONBOARDING_TASK3_VIEWED_KEY)
+        if boolForTask1 != true || boolForTask2 != true || boolForTask3 != true {
+            return false
+        }
+        return true
+        
     }
     
     func initUserAuth() {
@@ -492,7 +514,7 @@ class MainViewController: UIViewController{
         
         // update user location
         self.getCurrentUserLocation()
-        
+        let cardColor = CardColor()
         // get standard defaults to check if the current user has done the onboarding tasks
         let defaults = UserDefaults.standard
         
@@ -503,7 +525,11 @@ class MainViewController: UIViewController{
         if boolForTask1 != true {
             let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
             let task1 = Task(userId: "fakeuserid1", taskDescription: self.ONBOARDING_TASK_1_DESCRIPTION, latitude: self.userLatitude! + 0.0003, longitude: self.userLongitude! + 0.0003, completed: false, taskID: "\(timeStamp)")
-            task1.save()
+            let randomColorGradient = cardColor.generateRandomColor()
+            // save the colors to the task
+            task1.setGradientColors(startColor: randomColorGradient[0], endColor: randomColorGradient[1])
+            self.tasks.append(task1)
+            addMapPin(task: task1, carouselIndex: self.tasks.count-1)
         }
         
             
@@ -514,7 +540,12 @@ class MainViewController: UIViewController{
         if boolForTask2 != true {
             let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
             let task2 = Task(userId: "fakeuserid2", taskDescription: self.ONBOARDING_TASK_2_DESCRIPTION, latitude: self.userLatitude! + 0.0001, longitude: self.userLongitude! + 0.0001, completed: false, taskID: "\(timeStamp)")
-            task2.save()
+            let randomColorGradient = cardColor.generateRandomColor()
+            
+            // save the colors to the task
+            task2.setGradientColors(startColor: randomColorGradient[0], endColor: randomColorGradient[1])
+            self.tasks.append(task2)
+            addMapPin(task: task2, carouselIndex: self.tasks.count-1)
         }
         
         // get the third bool for the onboarding task
@@ -524,9 +555,14 @@ class MainViewController: UIViewController{
         if boolForTask3 != true {
             let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
             let task3 = Task(userId: "fakeuserid3", taskDescription: self.ONBOARDING_TASK_3_DESCRIPTION, latitude: self.userLatitude! + 0.0003, longitude: self.userLongitude! - 0.0003, completed: false, taskID: "\(timeStamp)")
-            task3.save()
+            let randomColorGradient = cardColor.generateRandomColor()
+            
+            // save the colors to the task
+            task3.setGradientColors(startColor: randomColorGradient[0], endColor: randomColorGradient[1])
+            self.tasks.append(task3)
+            addMapPin(task: task3, carouselIndex: self.tasks.count-1)
         }
-        
+        carouselView.reloadData()
     }
     
     // creates fake users nearby
@@ -647,6 +683,30 @@ class MainViewController: UIViewController{
         
         // hides navigation bar for home viewcontroller
         self.navigationController?.isNavigationBarHidden = true
+        //Check Fake tasks are available
+        if checkFakeTakViewed() != true {
+            let defaults = UserDefaults.standard
+            let boolForTask2 = defaults.bool(forKey: self.ONBOARDING_TASK2_VIEWED_KEY)
+            if boolForTask2 == true {
+                for (index, element) in tasks.enumerated() {
+                    if element?.taskDescription == ONBOARDING_TASK_2_DESCRIPTION {
+//                        self.tasks.remove(at: index)
+                        removeOnboardingFakeTask(carousel: carouselView, cardIndex: index)
+                        
+                    }
+                }
+                canCreateNewtask = true
+                let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
+                self.tasks.insert(Task(userId: self.currentUserId!, taskDescription: "", latitude: self.userLatitude!, longitude: self.userLongitude!, completed: true, timeCreated: Date(), timeUpdated: Date(), taskID: "\(timeStamp)"), at: 0)
+                carouselView.reloadData()
+                if tasks.count > 0 {
+                    carouselView.scrollToItem(at: 1, animated: false)
+                }
+                
+            }
+        }
+        
+        
        // subscribeToKeyboardNotifications()
 
     }
@@ -710,26 +770,26 @@ class MainViewController: UIViewController{
             let key1 = key?.replacingOccurrences(of: "Optional(\"", with: "")
             let userId = key1?.replacingOccurrences(of: "\")", with: "")
             
-//            if userId == self.currentUserId {
-//                // user Moved to another place
-//                self.nearbyUsers.removeAll()
-//                usersCircleQuery?.removeObserver(withFirebaseHandle: self.usersExitCircleQueryHandle!)
-//                usersCircleQuery?.removeObserver(withFirebaseHandle: self.usersEnterCircleQueryHandle!)
-//                usersCircleQuery?.removeObserver(withFirebaseHandle: self.usersMovedCircleQueryHandle!)
-//                self.queryUsersAroundCurrentLocation(latitude: (self.locationManager.location?.coordinate.latitude)!, longitude: (self.locationManager.location?.coordinate.longitude)!)
-//
-//                //task Moved to new Location
-//                self.tasksCircleQuery?.removeObserver(withFirebaseHandle: self.tasksDeletedCircleQueryHandle!)
-//                self.tasksCircleQuery?.removeObserver(withFirebaseHandle: self.tasksCircleQueryHandle!)
-//                self.queryTasksAroundCurrentLocation(latitude: (self.locationManager.location?.coordinate.latitude)!, longitude: (self.locationManager.location?.coordinate.longitude)!)
-//
-//
-//            }
+            if userId == self.currentUserId {
+                // user Moved to another place
+                self.nearbyUsers.removeAll()
+                usersCircleQuery?.removeObserver(withFirebaseHandle: self.usersExitCircleQueryHandle!)
+                usersCircleQuery?.removeObserver(withFirebaseHandle: self.usersEnterCircleQueryHandle!)
+                usersCircleQuery?.removeObserver(withFirebaseHandle: self.usersMovedCircleQueryHandle!)
+                self.queryUsersAroundCurrentLocation(latitude: (self.locationManager.location?.coordinate.latitude)!, longitude: (self.locationManager.location?.coordinate.longitude)!)
+
+                //task Moved to new Location
+                self.tasksCircleQuery?.removeObserver(withFirebaseHandle: self.tasksDeletedCircleQueryHandle!)
+                self.tasksCircleQuery?.removeObserver(withFirebaseHandle: self.tasksCircleQueryHandle!)
+                self.queryTasksAroundCurrentLocation(latitude: (self.locationManager.location?.coordinate.latitude)!, longitude: (self.locationManager.location?.coordinate.longitude)!)
+
+
+            }
             
             // remove user in the nearby userlist.
             var index = 0
             for userKey in self.nearbyUsers {
-                if userKey == key {
+                if userKey == userId {
                     self.nearbyUsers.remove(at: index)
                     break
                 }
@@ -737,14 +797,11 @@ class MainViewController: UIViewController{
                 index = index + 1
             }
             
-            
-       
-            
             // loop through the user annotations and remove it
             for annotation in self.mapView.annotations {
                 if annotation is CustomUserMapAnnotation {
                     let customUserAnnotation = annotation as! CustomUserMapAnnotation
-                    if customUserAnnotation.userId == key {
+                    if customUserAnnotation.userId == userId {
                         self.mapView.removeAnnotation(customUserAnnotation)
                     }
                 }
@@ -762,7 +819,7 @@ class MainViewController: UIViewController{
             for annotation in self.mapView.annotations {
                 if annotation is CustomUserMapAnnotation {
                     let customUserAnnotation = annotation as! CustomUserMapAnnotation
-                    if customUserAnnotation.userId == key {
+                    if customUserAnnotation.userId == userId {
                         UIView.animate(withDuration: 1, animations: {
                             customUserAnnotation.coordinate = location.coordinate
                         })
@@ -1132,6 +1189,13 @@ class MainViewController: UIViewController{
             
             // pass the task description for the current task
             let currentTask = self.tasks[channelIndex] as! Task
+            
+            
+            if currentTask.taskDescription == ONBOARDING_TASK_2_DESCRIPTION {
+                chatViewController.isFakeTask = true
+                chatViewController.isOwner = true
+            }
+            
             chatViewController.channelTopic = currentTask.taskDescription
             let chatChannelId = currentTask.taskID
             // pass chat channel id to the chat view controller
@@ -1468,8 +1532,12 @@ class MainViewController: UIViewController{
         
         // convert timeCreated and timeUpdated to string
         let updateDate = dateformatter.convertDateToString(date: Date())
+        
         //remove observer for time
-        self.tasksRef?.child(currentUserTask.taskID!).child("timeUpdated").removeObserver(withHandle: tasksExpireObserver!)
+        if tasksExpireObserver != nil {
+            self.tasksRef?.child(currentUserTask.taskID!).child("timeUpdated").removeObserver(withHandle: tasksExpireObserver!)
+        }
+        
         // Update task as Complete
         let taskUpdate = ["completed": currentUserTask.completed ,
                           "createdby": currentUserTask.userId ,
@@ -1538,25 +1606,25 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         
         // width 335
         // 1st card if user didn't swipe for new task
-        if index == 0 && !self.newItemSwiped && self.tasks.count > 1 && self.currentUserTaskSaved == false{
-    
-                let tempView = UIView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width * 0.9, height:(UIScreen.main.bounds.height * 0.3)+20))
-                tempView.backgroundColor = UIColor.clear
-                
-//                let plusView = UIImageView(frame: CGRect(x: 300, y: 91, width: 30, height: 30))
-//                plusView.image = #imageLiteral(resourceName: "plusIcon")
-//                tempView.addSubview(plusView)
-//                tempView.layer.cornerRadius = 4
+        if index == 0 && !self.newItemSwiped && self.tasks.count > 1 && self.currentUserTaskSaved == false && canCreateNewtask == true {
+            
+            let tempView = UIView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width * 0.9, height:(UIScreen.main.bounds.height * 0.3)+20))
+            tempView.backgroundColor = UIColor.clear
+            
+            //                let plusView = UIImageView(frame: CGRect(x: 300, y: 91, width: 30, height: 30))
+            //                plusView.image = #imageLiteral(resourceName: "plusIcon")
+            //                tempView.addSubview(plusView)
+            //                tempView.layer.cornerRadius = 4
             
             
-                //tempView.layer.cornerRadius = 4
-                tempView.layer.shadowColor = UIColor.black.cgColor
-                tempView.layer.shadowOffset = CGSize(width: 0, height: 10)  //Here you control x and y
-                tempView.layer.shadowOpacity = 0.3
-                tempView.layer.shadowRadius = 15.0 //Here your control your blur
-                tempView.layer.masksToBounds =  false
+            //tempView.layer.cornerRadius = 4
+            tempView.layer.shadowColor = UIColor.black.cgColor
+            tempView.layer.shadowOffset = CGSize(width: 0, height: 10)  //Here you control x and y
+            tempView.layer.shadowOpacity = 0.3
+            tempView.layer.shadowRadius = 15.0 //Here your control your blur
+            tempView.layer.masksToBounds =  false
             
-                return tempView
+            return tempView
             
         }
         
@@ -1611,7 +1679,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             
             // if current user has saved task
             // their task description
-            if self.currentUserTaskSaved {
+            if self.currentUserTaskSaved  {
                 textView.alpha = 1
                 textView.text = task.taskDescription
                 
@@ -1648,8 +1716,8 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                 tempView.addSubview(messageView)
                 
             } else {
-            // if user has not saved task
-            // show close button
+                // if user has not saved task
+                // show close button
                 let closeView = UIButton(frame: CGRect(x: (tempView.bounds.width * 1/4), y: (tempView.bounds.height * 3/4), width: 24, height: 24))
                 closeView.setImage(UIImage(named: "close"), for: .normal)
                 closeView.addTarget(self, action: #selector(discardCurrentUserTask(sender:)), for: .touchUpInside)
@@ -1680,14 +1748,14 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             // complete the task
             if self.currentUserTaskSaved {
                 
-               
+                
                 
                 // add done view to finish or save the task
                 doneView = UIButton(frame: CGRect(x: (tempView.bounds.width * 3/4), y: (tempView.bounds.height * 3/4), width: 24, height: 24))
                 doneView?.setImage(UIImage(named: "check"), for: .normal)
                 doneView?.addTarget(self, action: #selector(self.markTaskAsComplete), for: .touchUpInside)
                 tempView.addSubview(doneView!)
-
+                
             } else {
                 
                 
@@ -1703,7 +1771,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                 doneView?.titleLabel?.font = UIFont.systemFont(ofSize: 24)
                 doneView?.addTarget(self, action: #selector(createTaskForCurrentUser(sender:)), for: .touchUpInside)
                 tempView.addSubview(doneView!)
-            
+                
             }
             
             
@@ -1758,15 +1826,18 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                 
                 // save the colors to the task
                 task.setGradientColors(startColor: randomColorGradient[0], endColor: randomColorGradient[1])
-                task.save()
+                if task.taskDescription != "" {
+                    task.save()
+                }
+                
                 
                 // set the color gradient colors for the card
                 tempView.startColor = UIColor.hexStringToUIColor(hex: randomColorGradient[0])
                 tempView.endColor = UIColor.hexStringToUIColor(hex: randomColorGradient[1])
             } else {
                 
-            // else
-            // use the colors that are already saved for the task
+                // else
+                // use the colors that are already saved for the task
                 tempView.startColor = UIColor.hexStringToUIColor(hex: task.startColor!)
                 tempView.endColor = UIColor.hexStringToUIColor(hex: task.endColor!)
             }
@@ -1777,7 +1848,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             label.numberOfLines = 4
             label.text = task.taskDescription
             label.textAlignment = .left
-
+            
             //label.center.x = tempView.center.x
             //label.center.y = tempView.bounds.minY + 50
             
@@ -1794,7 +1865,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             // add edge constraints to the label
             tempView.addConstraints([horizontalConstraint, verticalConstraint,  widthConstraint])
             
-        
+            
             // setup clickable button for gradient view
             let messageButton = UIButton(frame: CGRect(x: 0, y: (UIScreen.main.bounds.height * 0.3)*3/4, width: 150, height: 20))
             messageButton.center.x = tempView.center.x
@@ -1847,7 +1918,8 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         // check if current card is an onboarding card
         let currentCardIndex = self.carouselView.currentItemIndex
         // if it is delete it
-        self.checkAndRemoveOnboardingTasks(carousel: self.carouselView, cardIndex: currentCardIndex)
+        self.lastCardIndex  = currentCardIndex
+//        self.checkAndRemoveOnboardingTasks(carousel: self.carouselView, cardIndex: currentCardIndex)
     }
     
     // completion function for check mark
@@ -2481,7 +2553,11 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         if self.view.frame.origin.y != 0 {
             UIApplication.shared.sendAction(#selector(UIApplication.resignFirstResponder), to: nil, from: nil, for: nil)
         }
+        let currentTask = self.tasks[self.carouselView.currentItemIndex] as! Task
         
+        if currentTask.taskDescription == ONBOARDING_TASK_1_DESCRIPTION ||  currentTask.taskDescription == ONBOARDING_TASK_3_DESCRIPTION {
+            return
+        }
     
         self.performSegue(withIdentifier: "mainToChatVC", sender: nil)
     }
@@ -2499,7 +2575,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             self.view.frame.origin.y = 0
         }
         
-        if(carousel.scrollOffset < 0.15 && self.newItemSwiped == false) {
+        if(carousel.scrollOffset < 0.15 && self.newItemSwiped == false && canCreateNewtask == true) {
 
             self.newItemSwiped = true
             UIView.animate(withDuration: 1, animations: {
@@ -2532,17 +2608,14 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             defaults.set(true, forKey: self.ONBOARDING_TASK1_VIEWED_KEY)
             self.removeOnboardingFakeTask(carousel: carousel, cardIndex: cardIndex)
             
-        } else if currentTask.taskDescription == self.ONBOARDING_TASK_2_DESCRIPTION {
+        }  else if currentTask.taskDescription == self.ONBOARDING_TASK_3_DESCRIPTION {
             
-            // set onboarding task 1 viewed to true
-            defaults.set(true, forKey: self.ONBOARDING_TASK2_VIEWED_KEY)
-            self.removeOnboardingFakeTask(carousel: carousel, cardIndex: cardIndex)
-            
-        } else if currentTask.taskDescription == self.ONBOARDING_TASK_3_DESCRIPTION {
-            
-            // set onboarding task 1 viewed to true
-            defaults.set(true, forKey: self.ONBOARDING_TASK3_VIEWED_KEY)
-            self.removeOnboardingFakeTask(carousel: carousel, cardIndex: cardIndex)
+            // set onboarding task 3 viewed to true
+            if defaults.bool(forKey: self.ONBOARDING_TASK2_VIEWED_KEY) == true {
+                defaults.set(true, forKey: self.ONBOARDING_TASK3_VIEWED_KEY)
+                initUserAuth()
+                self.removeOnboardingFakeTask(carousel: carousel, cardIndex: cardIndex)
+            }
             
         }
     }
@@ -2551,7 +2624,10 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
     func removeOnboardingFakeTask(carousel: iCarousel, cardIndex: Int) {
         // delete that task and card and map icon
         self.tasks.remove(at: cardIndex)
-        carousel.removeItem(at: cardIndex, animated: true)
+        carouselView.reloadData()
+        carouselView.scrollToItem(at: cardIndex, animated: false)
+        
+        
         for annotation in self.mapView.annotations {
             if annotation is CustomFocusTaskMapAnnotation  {
                 let customAnnotation = annotation as! CustomFocusTaskMapAnnotation
@@ -2668,9 +2744,13 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         
         // use the last item index (it gets updated at the end of the method)
         // and check if the last card is an onboarding task
-        //if let lastCardIndex = self.lastCardIndex, lastCardIndex != carousel.currentItemIndex {
-        //    self.checkAndRemoveOnboardingTasks(carousel: carousel, lastCardIndex: lastCardIndex)
-        //}
+        if let lastCardIndex = self.lastCardIndex, lastCardIndex != carousel.currentItemIndex {
+            let when = DispatchTime.now() + 0.5 // change 2 to desired number of seconds
+            DispatchQueue.main.asyncAfter(deadline: when) {
+                self.checkAndRemoveOnboardingTasks(carousel: carousel, cardIndex: lastCardIndex)
+            }
+            
+        }
         
         // loop through the annotations currently on the map
         let annotations = self.mapView.annotations

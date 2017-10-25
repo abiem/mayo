@@ -19,7 +19,7 @@ extension MainViewController: CLLocationManagerDelegate {
         // check location is working
         //print("current user location \(newLocation)")
         
-        if self.tasks.count == 0 {
+        if self.tasks.count == 0 && checkFakeTakViewed() == true {
             self.setupLocationRegion()
             self.initUserAuth()
         }

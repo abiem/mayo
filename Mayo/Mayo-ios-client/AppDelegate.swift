@@ -84,9 +84,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
             })
             
             // check if MainViewController user init.
-            if self.mainVC != nil {
-                self.mainVC.initUserAuth()
-            }
+//            if self.mainVC != nil {
+//                self.mainVC.initUserAuth()
+//            }
         }
         
         // check if user has gone through the onboarding

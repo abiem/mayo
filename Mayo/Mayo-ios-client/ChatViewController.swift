@@ -12,6 +12,7 @@ import JSQMessagesViewController
 import Alamofire
 
 class ChatViewController: JSQMessagesViewController {
+    var isFakeTask = false
     var isOwner = false
     var channelRef: FIRDatabaseReference?
     var channelId: String?
@@ -177,23 +178,32 @@ class ChatViewController: JSQMessagesViewController {
         // which means that the user who is sending is part of their own
         // if the ids match, then add the screaming face emoticon
         var textToSend = text
+        let dateFormatter = DateStringFormatterHelper()
+        let dateCreated = dateFormatter.convertDateToString(date: Date())
+        
         if isOwner {
             let screamingFaceEmoji = "\u{1F631} " //U+1F631
             textToSend = screamingFaceEmoji + text!
             
         }
-        
+        if isFakeTask {
+            let defaults = UserDefaults.standard
+            defaults.set(true, forKey: "onboardingTask2Viewed")
+            receiveFakeMessage()
+        }
+        else {
+            
+            FIRDatabase.database().reference().child("tasks").child(channelId!).child("timeUpdated").setValue(dateCreated)
+        }
         // get the current user's color index if the user is already in the conversation
         
         // if the user is not currently in the conversation
         // add the user to the conversation and create an index for them
         
-        // the color index is the color of the current user's bubble
-        // it is determined by the current user's position in the current chat channel
-        let dateFormatter = DateStringFormatterHelper()
-        let dateCreated = dateFormatter.convertDateToString(date: Date())
+       
+       
         //self.channelRef?.child("updatedAt").setValue(dateCreated)
-    FIRDatabase.database().reference().child("tasks").child(channelId!).child("timeUpdated").setValue(dateCreated)
+    
         
         let itemRef = messageRef.childByAutoId()
         let messageItem = [
@@ -360,4 +370,16 @@ class ChatViewController: JSQMessagesViewController {
         ref.child(userID).child("taskParticipated").setValue(taskDetail)
     }
 
+    func receiveFakeMessage() {
+        
+        let when = DispatchTime.now() + 2 // change 2 to desired number of seconds
+        DispatchQueue.main.asyncAfter(deadline: when) {
+            let id = "Robot"
+            let name = ""
+            let text = "Woohoo thank you!"
+            let colorIndexAsInt = 1
+            self.addMessage(withId: id, name: name, text: text, colorIndex: colorIndexAsInt)
+            self.finishReceivingMessage()
+        }
+    }
 }
