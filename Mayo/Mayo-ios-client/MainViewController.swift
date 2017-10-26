@@ -18,9 +18,8 @@ import Alamofire
 import AVKit
 import AVFoundation
 
-
 class MainViewController: UIViewController{
-
+    
     @IBOutlet weak var carouselView: iCarousel!
     @IBOutlet weak var mapView: MKMapView!
     var lastUpdatedTime : Date?
@@ -153,6 +152,29 @@ class MainViewController: UIViewController{
             self.mapView.setCenter(userCoordinate, animated: true)
         }
         
+        //Check Fake tasks are available
+        if checkFakeTakViewed() != true {
+            let defaults = UserDefaults.standard
+            let boolForTask2 = defaults.bool(forKey: self.ONBOARDING_TASK2_VIEWED_KEY)
+            if boolForTask2 == true {
+                for (index, element) in tasks.enumerated() {
+                    if element?.taskDescription == ONBOARDING_TASK_2_DESCRIPTION {
+                        //                        self.tasks.remove(at: index)
+                        removeOnboardingFakeTask(carousel: carouselView, cardIndex: index)
+                        
+                    }
+                }
+                canCreateNewtask = true
+                let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
+                self.tasks.insert(Task(userId: self.currentUserId!, taskDescription: "", latitude: self.userLatitude!, longitude: self.userLongitude!, completed: true, timeCreated: Date(), timeUpdated: Date(), taskID: "\(timeStamp)"), at: 0)
+                carouselView.reloadData()
+                if tasks.count > 0 {
+                    carouselView.scrollToItem(at: 1, animated: false)
+                }
+                
+            }
+        }
+        
         /*
         // create fake users when you show
         if self.fakeUsersCreated == false {
@@ -182,23 +204,13 @@ class MainViewController: UIViewController{
             print("InstanceID token: \(refreshedToken)")
         }
         
-        locationManager = CLLocationManager()
-        locationManager.delegate = self
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.distanceFilter = 30
-        // allows location manager to update location in the background
-        locationManager.allowsBackgroundLocationUpdates = true
-        
-        locationManager.startUpdatingLocation()
-        locationManager.startUpdatingHeading()
-        
-        locationManager .stopMonitoringSignificantLocationChanges()
+        // set current user id
+        currentUserId = FIRAuth.auth()?.currentUser?.uid
         
         // reset users to thank dictionary
         self.usersToThank = [:]
         
-        // set current user id
-        currentUserId = FIRAuth.auth()?.currentUser?.uid
+       
         
         // show user's position
         mapView.showsUserLocation = true
@@ -220,6 +232,18 @@ class MainViewController: UIViewController{
         taskViewRef = ref?.child("task_views")
         tasksGeoFire = GeoFire(firebaseRef: tasksLocationsRef)
         usersGeoFire = GeoFire(firebaseRef: usersLocationsRef)
+        
+        //get user Location
+        locationManager = CLLocationManager()
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.distanceFilter = 20
+        // allows location manager to update location in the background
+        locationManager.allowsBackgroundLocationUpdates = true
+        
+        locationManager.startUpdatingLocation()
+        locationManager.startUpdatingHeading()
+        locationManager .stopMonitoringSignificantLocationChanges()
         
         // set region that is shown on the map
         setupLocationRegion()
@@ -683,30 +707,6 @@ class MainViewController: UIViewController{
         
         // hides navigation bar for home viewcontroller
         self.navigationController?.isNavigationBarHidden = true
-        //Check Fake tasks are available
-        if checkFakeTakViewed() != true {
-            let defaults = UserDefaults.standard
-            let boolForTask2 = defaults.bool(forKey: self.ONBOARDING_TASK2_VIEWED_KEY)
-            if boolForTask2 == true {
-                for (index, element) in tasks.enumerated() {
-                    if element?.taskDescription == ONBOARDING_TASK_2_DESCRIPTION {
-//                        self.tasks.remove(at: index)
-                        removeOnboardingFakeTask(carousel: carouselView, cardIndex: index)
-                        
-                    }
-                }
-                canCreateNewtask = true
-                let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
-                self.tasks.insert(Task(userId: self.currentUserId!, taskDescription: "", latitude: self.userLatitude!, longitude: self.userLongitude!, completed: true, timeCreated: Date(), timeUpdated: Date(), taskID: "\(timeStamp)"), at: 0)
-                carouselView.reloadData()
-                if tasks.count > 0 {
-                    carouselView.scrollToItem(at: 1, animated: false)
-                }
-                
-            }
-        }
-        
-        
        // subscribeToKeyboardNotifications()
 
     }
@@ -1133,8 +1133,14 @@ class MainViewController: UIViewController{
     func getCurrentUserLocation() {
         print("getcurrentUserLocation hit")
         // get user location coordinates
-        self.userLatitude = locationManager.location?.coordinate.latitude
-        self.userLongitude = locationManager.location?.coordinate.longitude
+        if locationManager.location?.coordinate.latitude != nil && locationManager.location?.coordinate.longitude != nil {
+            self.userLatitude = locationManager.location?.coordinate.latitude
+            self.userLongitude = locationManager.location?.coordinate.longitude
+        }
+        else {
+            self.userLatitude = Constants.DEFAULT_LAT;
+            self.userLongitude = Constants.DEFAULT_LNG;
+        }
         
         print("current lat = \(String(describing: self.userLatitude))")
         print("current lng = \(String(describing: self.userLongitude))")
@@ -1411,7 +1417,7 @@ class MainViewController: UIViewController{
         }
     }
     
-//    MARK:- Firebase Updation - Lakshmi
+//    MARK:- Firebase Updation
     
     //update last 5 locations at backend
     func UpdateUserLocationServer()  {
@@ -1497,8 +1503,6 @@ class MainViewController: UIViewController{
     UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["taskExpirationNotification"])
         let currentUserKey = FIRAuth.auth()?.currentUser?.uid
         let taskMessage = currentUserTask.taskDescription
-        // unsubscribe current user from their own notification channel
-      //  FIRMessaging.messaging().unsubscribe(fromTopic: "/topics/\(currentUserKey)")
         print("taskMessage \(currentUserTask.taskDescription) \(taskMessage)")
         
         //Send Push notification If task is Completed
@@ -1520,8 +1524,7 @@ class MainViewController: UIViewController{
                     self.usersToThank = [:]
                 }
             })
-//            PushNotificationManager.sendNotificationToTopicOnCompletion(channelId: currentUserTask.taskID!, taskMessage: taskMessage)
-//            self.usersToThank = [:]
+
         }
         else {
             // reset the dictionary
@@ -1562,7 +1565,7 @@ class MainViewController: UIViewController{
         }
         if self.tasks.count <= 1 {
             let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
-            self.tasks.insert(Task(userId: currentUserKey!, taskDescription: "", latitude: (self.locationManager.location?.coordinate.latitude)!, longitude: (self.locationManager.location?.coordinate.longitude)!, completed: true, taskID: "\(timeStamp)"), at: 0)
+            self.tasks.insert(Task(userId: currentUserKey!, taskDescription: "", latitude: (self.locationManager.location?.coordinate.latitude) ?? Constants.DEFAULT_LAT , longitude: (self.locationManager.location?.coordinate.longitude) ?? Constants.DEFAULT_LNG , completed: true, taskID: "\(timeStamp)"), at: 0)
         }
         self.carouselView.reloadItem(at: 0, animated: false)
         
@@ -2375,11 +2378,11 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         
         // TODO keyboard bug when user hits home button
         // create/update new task item for current user
-        if self.view.frame.origin.y != 0 {
-            UIApplication.shared.sendAction(#selector(UIApplication.resignFirstResponder), to: nil, from: nil, for: nil)
-            
-            //set keyboard to off screen
-//            self.keyboardOnScreen = false
+        self.view.endEditing(true)
+        
+        if locationManager.location?.coordinate.latitude == nil && locationManager.location?.coordinate.longitude == nil {
+            showLocationAlert()
+            return
         }
         
         // get textview
@@ -2425,9 +2428,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             // update the number of users in the channel
             // and update the current user to the users list
         self.channelsRef?.child(currentUserTask.taskID!).child("users").child(currentUserChannelId!).setValue(0)
-            //Update Time
-            let dateFormatter = DateStringFormatterHelper()
-            let dateCreated = dateFormatter.convertDateToString(date: Date())
+
             //self.channelsRef?.child(currentUserChannelId!).child("users_count").setValue(1)
             
             //add new annotation to the map for the current user's task
@@ -2501,7 +2502,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
     }
     
     // create custom notification
-    func createLocalNotification(title: String, body: String?, time :Int){
+   func createLocalNotification(title: String, body: String?, time :Int){
         
         // create content
         let content = UNMutableNotificationContent()
@@ -2525,7 +2526,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         // schedule the notification
         let center = UNUserNotificationCenter.current()
         center.add(request, withCompletionHandler: { (error) in
-            print(error)
+            print(error ?? "Error")
         })
 
     }
@@ -2613,8 +2614,9 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             // set onboarding task 3 viewed to true
             if defaults.bool(forKey: self.ONBOARDING_TASK2_VIEWED_KEY) == true {
                 defaults.set(true, forKey: self.ONBOARDING_TASK3_VIEWED_KEY)
-                initUserAuth()
+                self.mapView.removeAnnotations(self.mapView.annotations)
                 self.removeOnboardingFakeTask(carousel: carousel, cardIndex: cardIndex)
+                initUserAuth()
             }
             
         }
@@ -2635,6 +2637,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                     // if its equal to the current index remove it
                     print("customAnnotation \(customAnnotation.currentCarouselIndex)")
                     self.mapView.removeAnnotation(customAnnotation)
+                    return
                 }
             }
             
@@ -2645,6 +2648,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                     // if its equal to the current index remove it
                     print("customAnnotation \(customAnnotation.currentCarouselIndex)")
                     self.mapView.removeAnnotation(customAnnotation)
+                    return
                 }
             }
         }
@@ -2745,7 +2749,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         // use the last item index (it gets updated at the end of the method)
         // and check if the last card is an onboarding task
         if let lastCardIndex = self.lastCardIndex, lastCardIndex != carousel.currentItemIndex {
-            let when = DispatchTime.now() + 0.5 // change 2 to desired number of seconds
+            let when = DispatchTime.now() + 1 // change 2 to desired number of seconds
             DispatchQueue.main.asyncAfter(deadline: when) {
                 self.checkAndRemoveOnboardingTasks(carousel: carousel, cardIndex: lastCardIndex)
             }

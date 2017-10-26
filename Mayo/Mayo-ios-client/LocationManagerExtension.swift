@@ -20,9 +20,16 @@ extension MainViewController: CLLocationManagerDelegate {
         //print("current user location \(newLocation)")
         
         if self.tasks.count == 0 && checkFakeTakViewed() == true {
-            self.setupLocationRegion()
-            self.initUserAuth()
+            if (self.userLatitude != nil && self.userLongitude != nil) {
+                // TODO fix
+                let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
+                tasks.append(
+                    Task(userId: currentUserId!, taskDescription: "", latitude: self.userLatitude!, longitude: self.userLongitude!, completed: true, timeCreated: Date(), timeUpdated: Date(), taskID: "\(timeStamp)")
+                )
+                carouselView.reloadData()
+            }
         }
+        //self.setupLocationRegion()
             
             // get current time
             let currentTime = Date()
@@ -86,6 +93,9 @@ extension MainViewController: CLLocationManagerDelegate {
     
     //Geo Facing for 200 meters
     func setUpGeofenceForTask(_ lat:CLLocationDegrees, _ long:CLLocationDegrees) {
+        if locationManager.location?.coordinate.latitude == nil && locationManager.location?.coordinate.longitude == nil {
+            return
+        }
         if calculateDistance(lat, long) > 200 {
             userMovedAway()
         }
@@ -126,27 +136,36 @@ extension MainViewController: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         if let error = error as? CLError, error.code == .denied {
             // Location updates are not authorized.
+            locationManager.stopUpdatingLocation()
             
             //Show Alert For Location permission Denied
-//            let alertView = SCLAlertView()
-//            alertView.addButton("Settings") {
-//                UIApplication.shared.open(URL(string:UIApplicationOpenSettingsURLString)!, options: [:], completionHandler: nil)
-//            }
-//
-//            alertView.showTitle(
-//                "Mayo", // Title of view
-//                subTitle: "Unable to get location, Please check settings.", // String of view
-//                duration: 0.0, // Duration to show before closing automatically, default: 0.0
-//                completeText: "Cancel", // Optional button value, default: ""
-//                style: .error, // Styles - see below.
-//                colorStyle: 0x508FBC,
-//                colorTextButton: 0xFFFFFF
-//            )
+            showLocationAlert()
+           
             manager.stopMonitoringSignificantLocationChanges()
             return
         }
         // Notify the user of any errors.
         
+    }
+    
+    func showLocationAlert() {
+        let appearance = SCLAlertView.SCLAppearance(
+            showCloseButton: false
+        )
+        let alertView = SCLAlertView(appearance: appearance)
+        alertView.addButton("Settings") {
+            UIApplication.shared.open(URL(string:UIApplicationOpenSettingsURLString)!, options: [:], completionHandler: nil)
+        }
+        
+        alertView.showTitle(
+            "Mayo", // Title of view
+            subTitle: "Unable to get location, Please check settings.", // String of view
+            duration: 0.0, // Duration to show before closing automatically, default: 0.0
+            completeText: "", // Optional button value, default: ""
+            style: .error, // Styles - see below.
+            colorStyle: 0x508FBC,
+            colorTextButton: 0xFFFFFF
+        )
     }
 
 

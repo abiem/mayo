@@ -17,7 +17,7 @@ struct Constants {
     static let DEFAULT_LAT = 47.612441
     static let DEFAULT_LNG = -122.337463
     
-    static let THANKS_ANIMATION_DURATION = 5.0
+    static let THANKS_ANIMATION_DURATION = 3.0
     static let PENDING_TASKS = "PendingTask"
     
     static let STATUS_FOR_THANKED = "Owner marked as done and the people all thanked for"

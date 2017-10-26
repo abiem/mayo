@@ -37,10 +37,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         IQKeyboardManager.sharedManager().enable = true
         IQKeyboardManager.sharedManager().enableAutoToolbar = false
         IQKeyboardManager.sharedManager().shouldResignOnTouchOutside = true
+        
+        //Check internet Connection
         let networkStatus = Reachbility.sharedInstance
         networkStatus.startNetworkReachabilityObserver()
+        
         //Set Up Fabric Crashlystics
-         Fabric.with([Crashlytics.self])
+        // Fabric.with([Crashlytics.self])
         
         // setup firebase
         FIRApp.configure()
@@ -87,6 +90,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
 //            if self.mainVC != nil {
 //                self.mainVC.initUserAuth()
 //            }
+            
         }
         
         // check if user has gone through the onboarding
