@@ -29,8 +29,10 @@ extension MainViewController: CLLocationManagerDelegate {
                 carouselView.reloadData()
             }
         }
-        //self.setupLocationRegion()
-            
+//        self.setupLocationRegion()
+        
+        
+        
             // get current time
             let currentTime = Date()
             if (self.lastUpdatedTime != nil) {

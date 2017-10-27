@@ -18,13 +18,14 @@ import Alamofire
 import AVKit
 import AVFoundation
 
-class MainViewController: UIViewController{
-    
+class MainViewController: UIViewController {
+
     @IBOutlet weak var carouselView: iCarousel!
     @IBOutlet weak var mapView: MKMapView!
     var lastUpdatedTime : Date?
     var pointsLabel: UILabel!
     var thanksAnimImageView: UIImageView!
+    var flareAnimImageView: UIImageView!
     var playingThanksAnim = false
     var canCreateNewtask = false
     var completedTask:Task?
@@ -50,6 +51,9 @@ class MainViewController: UIViewController{
     let ONBOARDING_TASK_2_DESCRIPTION = "So our AI is a bit bored, help us by sending a message!"
     let ONBOARDING_TASK_3_DESCRIPTION = "Need help? Swipe to the very left to setup a help quest."
     
+    //rotation key animation
+    let kRotationAnimationKey = "com.myapplication.rotationanimationkey"
+    
     // onboarding constants for standard user defaults.
     let ONBOARDING_TASK1_VIEWED_KEY = "onboardingTask1Viewed"
     let ONBOARDING_TASK2_VIEWED_KEY = "onboardingTask2Viewed"
@@ -60,6 +64,9 @@ class MainViewController: UIViewController{
     
     // constants for time
     let SECONDS_IN_HOUR = 3600
+    
+    // constants for time
+    let SECONDS_IN_DAY = 86400
     
     //Contant Time for location update
     let LOCATION_UPDATE_IN_SECOND = 600
@@ -156,10 +163,10 @@ class MainViewController: UIViewController{
         if checkFakeTakViewed() != true {
             let defaults = UserDefaults.standard
             let boolForTask2 = defaults.bool(forKey: self.ONBOARDING_TASK2_VIEWED_KEY)
+            // Remove chat task if completed
             if boolForTask2 == true {
                 for (index, element) in tasks.enumerated() {
                     if element?.taskDescription == ONBOARDING_TASK_2_DESCRIPTION {
-                        //                        self.tasks.remove(at: index)
                         removeOnboardingFakeTask(carousel: carouselView, cardIndex: index)
                         
                     }
@@ -216,6 +223,7 @@ class MainViewController: UIViewController{
         mapView.showsUserLocation = true
         // turn off compass on mapview
         mapView.showsCompass = false
+        
         
         
         // setup mapview delegate
@@ -348,7 +356,9 @@ class MainViewController: UIViewController{
         // add current user's location to firebase/geofire
         
         self.getCurrentUserLocation()
-        self.usersGeoFire?.setLocation( self.locationManager.location, forKey: "\(String(describing: FIRAuth.auth()?.currentUser?.uid))")
+        if self.locationManager.location != nil {
+            self.usersGeoFire?.setLocation( self.locationManager.location, forKey: "\(String(describing: FIRAuth.auth()?.currentUser?.uid))")
+        }
         
         //Updated Time
         let dateformatter = DateStringFormatterHelper()
@@ -366,17 +376,20 @@ class MainViewController: UIViewController{
         let centerX = self.view.center.x - CGFloat(imageWidth/2)
         let centerY = self.view.center.y-CGFloat(imageHeight/2) - CGFloat(80)
         thanksAnimImageView = UIImageView(frame: CGRect(x: centerX, y: centerY, width: imageWidth, height: imageHeight))
+        flareAnimImageView = UIImageView(frame: CGRect(x: centerX, y: centerY, width: imageWidth, height: imageHeight))
+        flareAnimImageView.image = #imageLiteral(resourceName: "flareImage");
         
         let imageListArray: NSMutableArray = []
         for countValue in 1...51
         {
             let imageName : String = "fux00\(countValue).png"
             let image  = UIImage(named:imageName)
-            imageListArray.add(image)
+            imageListArray.add(image!)
         }
-        
+        flareAnimation(view: flareAnimImageView, duration: Constants.THANKS_ANIMATION_DURATION)
         thanksAnimImageView.animationImages = imageListArray as? [UIImage]
         thanksAnimImageView.animationDuration = Constants.THANKS_ANIMATION_DURATION
+        self.view.addSubview(flareAnimImageView)
         self.view.addSubview(thanksAnimImageView)
         
         playingThanksAnim = true
@@ -384,7 +397,28 @@ class MainViewController: UIViewController{
         self.perform(#selector(MainViewController.afterThanksAnimation), with: nil, afterDelay: thanksAnimImageView.animationDuration)
     }
     
+    //Start Flare Animation for thanks
+    func flareAnimation(view: UIView, duration: Double = 1) {
+        if view.layer.animation(forKey: kRotationAnimationKey) == nil {
+            let rotationAnimation = CABasicAnimation(keyPath: "transform.rotation")
+            rotationAnimation.fromValue = 0.0
+            rotationAnimation.toValue = Float(.pi * 2.0)
+            rotationAnimation.duration = duration
+            rotationAnimation.repeatCount = Float.infinity
+            view.layer.add(rotationAnimation, forKey: kRotationAnimationKey)
+        }
+    }
+    
+    //Stop flare Animation
+    func stopFlareAnimation(view: UIView) {
+        if view.layer.animation(forKey: kRotationAnimationKey) != nil {
+            view.layer.removeAnimation(forKey: kRotationAnimationKey)
+        }
+    }
+    
     func afterThanksAnimation() {
+        stopFlareAnimation(view: flareAnimImageView)
+        flareAnimImageView.removeFromSuperview()
         thanksAnimImageView.stopAnimating()
         thanksAnimImageView.removeFromSuperview()
         playingThanksAnim = false
@@ -725,24 +759,34 @@ class MainViewController: UIViewController{
         let center = CLLocation(latitude: latitude, longitude: longitude)
         let usersCircleQuery = usersGeoFire?.query(at: center, withRadius: queryDistance/1000)
         
-        
        usersEnterCircleQueryHandle = usersCircleQuery?.observe(.keyEntered, with: { (key: String?, location: CLLocation?) in
             print("Key '\(key!)' entered the search are and is at location '\(location!)'")
-            
-            if !self.nearbyUsers.contains(key!) && key! != FIRAuth.auth()!.currentUser!.uid {
-                
-                let key1 = key?.replacingOccurrences(of: "Optional(\"", with: "")
-                let userId = key1?.replacingOccurrences(of: "\")", with: "")
-                
-                if self.nearbyUsers.contains(userId!) == false {
-                    self.nearbyUsers.append(userId!)
-                    self.addUserPin(latitude: (location?.coordinate.latitude)!, longitude: (location?.coordinate.longitude)!, userId: userId!)
+        
+            let key1 = key?.replacingOccurrences(of: "Optional(\"", with: "")
+            let userId = key1?.replacingOccurrences(of: "\")", with: "")
+        
+        self.usersRef?.child(userId!).child("UpdatedAt").observeSingleEvent(of: .value, with: { (snapshot) in
+            if let lastUpdateTime = snapshot.value as? String {
+                let currentDate = Date()
+                let dateformatter = DateStringFormatterHelper()
+                //check user active from 3 days
+                if currentDate.seconds(from: dateformatter.convertStringToDate(datestring: lastUpdateTime)) < self.SECONDS_IN_DAY * 3 {
+                    if !self.nearbyUsers.contains(key!) && key! != FIRAuth.auth()!.currentUser!.uid {
+                        //Create marker for user
+                        if self.nearbyUsers.contains(userId!) == false {
+                            self.nearbyUsers.append(userId!)
+                            self.addUserPin(latitude: (location?.coordinate.latitude)!, longitude: (location?.coordinate.longitude)!, userId: userId!)
+                        }
+                    }
                 }
-                
-
+                else {
+                    // Remove inactive user location
+                    self.usersLocationsRef?.child(key!).removeValue()
+                }
             }
             
             
+        })
             
             /*
             // check that the user is not current user
@@ -773,6 +817,15 @@ class MainViewController: UIViewController{
             if userId == self.currentUserId {
                 // user Moved to another place
                 self.nearbyUsers.removeAll()
+                
+                //remove all users
+                self.mapView.annotations.forEach {
+                    if ($0 is CustomUserMapAnnotation) {
+                        self.mapView.removeAnnotation($0)
+                    }
+                }
+                
+                //remove user observers
                 usersCircleQuery?.removeObserver(withFirebaseHandle: self.usersExitCircleQueryHandle!)
                 usersCircleQuery?.removeObserver(withFirebaseHandle: self.usersEnterCircleQueryHandle!)
                 usersCircleQuery?.removeObserver(withFirebaseHandle: self.usersMovedCircleQueryHandle!)
@@ -802,7 +855,13 @@ class MainViewController: UIViewController{
                 if annotation is CustomUserMapAnnotation {
                     let customUserAnnotation = annotation as! CustomUserMapAnnotation
                     if customUserAnnotation.userId == userId {
-                        self.mapView.removeAnnotation(customUserAnnotation)
+                        let viewAnnotation = self.mapView.view(for: annotation)
+                        UIView.animate(withDuration: 2, animations: {
+                            viewAnnotation?.alpha = 0
+                        }, completion: { (complete) in
+                            self.mapView.removeAnnotation(customUserAnnotation)
+                        })
+                        
                     }
                 }
             }
@@ -920,7 +979,6 @@ class MainViewController: UIViewController{
                 print("key: \(key) task dictionary: \(taskDict)")
                 
                 let dateformatter = DateStringFormatterHelper()
-                
                 // Check - don't add tasks that are older than 1 hour
                 if !taskDict.isEmpty && taskDict["completed"] as! Bool == false {
                     
@@ -1417,7 +1475,7 @@ class MainViewController: UIViewController{
         }
     }
     
-//    MARK:- Firebase Updation
+//MARK:- Firebase Updation
     
     //update last 5 locations at backend
     func UpdateUserLocationServer()  {
@@ -2371,7 +2429,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         
     }
     
-    // MARK: new task created
+//MARK:- new task created
     
     // action for done button item
     func createTaskForCurrentUser(sender: UIButton) {
@@ -2452,7 +2510,6 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
 //          startTimer(SECONDS_IN_HOUR)
             checkTaskTimeLeft()
             
-            
         }
         self.currentUserTaskSaved = true
         self.carouselView.reloadItem(at: 0, animated: false)
@@ -2468,7 +2525,6 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                     
                     // get the user's current deviceToken
                     let deviceToken = value?["deviceToken"] as? String
-                    
                     
                     // send the user a notification to nearby users.
                     if deviceToken != nil && userId != self.currentUserId {
@@ -2652,7 +2708,6 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                 }
             }
         }
-        
         // update the rest of the annotations
         self.updateMapAnnotationCardIndexes()
     }
@@ -2845,25 +2900,10 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
     
 }
 
-
 // MARK: - MainViewController (Notifications)
 
 extension MainViewController {
 
-//    func subscribeToKeyboardNotifications() {
-//        subscribeToNotification(.UIKeyboardWillShow, selector: #selector(keyboardWillShow))
-//        subscribeToNotification(.UIKeyboardWillHide, selector: #selector(keyboardWillHide))
-//        subscribeToNotification(.UIKeyboardDidShow, selector: #selector(keyboardDidShow))
-//        subscribeToNotification(.UIKeyboardDidHide, selector: #selector(keyboardDidHide))
-//    }
-//
-//    func subscribeToNotification(_ name: NSNotification.Name, selector: Selector) {
-//        NotificationCenter.default.addObserver(self, selector: selector, name: name, object: nil)
-//    }
-//
-//    func unsubscribeFromAllNotifications() {
-//        NotificationCenter.default.removeObserver(self)
-//    }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         
