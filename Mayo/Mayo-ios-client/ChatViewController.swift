@@ -281,12 +281,6 @@ class ChatViewController: JSQMessagesViewController {
         let cell = super.collectionView(collectionView, cellForItemAt: indexPath) as! JSQMessagesCollectionViewCell
         let message = messages[indexPath.item]
         cell.textView?.textColor = UIColor.white
-        
-        //if message.senderId == senderId {
-        //  cell.textView?.textColor = UIColor.white
-        //} else {
-        //    cell.textView?.textColor = UIColor.black
-        //}
         return cell
     }
     

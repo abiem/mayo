@@ -38,10 +38,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         IQKeyboardManager.sharedManager().enableAutoToolbar = false
         IQKeyboardManager.sharedManager().shouldResignOnTouchOutside = true
         
-        //Check internet Connection
-        let networkStatus = Reachbility.sharedInstance
-        networkStatus.startNetworkReachabilityObserver()
-        
         //Set Up Fabric Crashlystics
         // Fabric.with([Crashlytics.self])
         

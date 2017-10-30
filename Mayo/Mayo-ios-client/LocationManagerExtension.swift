@@ -13,11 +13,8 @@ import SCLAlertView
 extension MainViewController: CLLocationManagerDelegate {
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        // if the user moves
-        let newLocation = locations.last
+        // if the user moves 10 m
         self.addCurrentUserLocationToFirebase()
-        // check location is working
-        //print("current user location \(newLocation)")
         
         if self.tasks.count == 0 && checkFakeTakViewed() == true {
             if (self.userLatitude != nil && self.userLongitude != nil) {
@@ -29,9 +26,6 @@ extension MainViewController: CLLocationManagerDelegate {
                 carouselView.reloadData()
             }
         }
-//        self.setupLocationRegion()
-        
-        
         
             // get current time
             let currentTime = Date()
@@ -54,43 +48,7 @@ extension MainViewController: CLLocationManagerDelegate {
                 self.UpdateUserLocationServer()
                 
             }
-        
-        
-        // get the difference between time created and current time
-       
-        /*
-        // check if he/she has a task that is currently active
-        if self.tasks.count > 0 && self.currentUserTaskSaved == true {
-            let currentUserTask = self.tasks[0]
-            
-            if currentUserTask?.completed == false {
-                
-                
-                // if they have a task active, check the distance to the task
-                let distanceToOwnTask = newLocation?.distance(from: CLLocation(latitude: currentUserTask!.latitude, longitude: currentUserTask!.longitude))
-                
-                // if the location is greater than queryDistance(200 m)
-                if distanceToOwnTask! >  self.queryDistance {
-                    self.currentUserTaskSaved = false
-                    userMovedAway()
-                    // then notify user that their task is has deleted
-                  //  self.createLocalNotification(title: "You’re out of range so the quest ended :(", body: "Post again if you still need help.")
 
-                    // delete the task
-                    //self.deleteAndResetCurrentUserTask()
-
-                    // remove own annotation from mapview
-                   // self.removeCurrentUserTaskAnnotation()
-
-                    // invalidate the timer for expiration
-                    if self.expirationTimer != nil {
-                        self.expirationTimer?.invalidate()
-                        self.expirationTimer = nil
-                    }
-                }
-            }
-        }
- */
     }
     
     //Geo Facing for 200 meters
@@ -109,7 +67,7 @@ extension MainViewController: CLLocationManagerDelegate {
         }
         
     }
-    
+    // user move away task area
     func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
         userMovedAway()
         self.locationManager.stopMonitoring(for: region)
@@ -121,7 +79,7 @@ extension MainViewController: CLLocationManagerDelegate {
     }
     
     func userMovedAway()  {
-        var currentUserTask = self.tasks[0] as! Task
+        let currentUserTask = self.tasks[0]!
         if currentUserTask.taskDescription != "" {
             currentUserTask.completed = true;
             currentUserTask.completeType = Constants.STATUS_FOR_MOVING_OUT

@@ -38,13 +38,24 @@ extension MainViewController: MKMapViewDelegate {
         
         if annotation is CustomUserMapAnnotation {
             
-//            let customAnnotation = annotation as! CustomUserMapAnnotation
-            let annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: "customUser")
-//            self.usersRef?.child(customAnnotation.userId!).child("location").observeSingleEvent(of: .value, with: { (snapshot) in
-//                annotationView.image = UIImage(named: "currentUserMapTaskIcon")
-//            })
-            annotationView.image = UIImage(named: "greenDot")
             
+            let annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: "customUser")
+            // get last updated time
+            let customAnnotation = annotation as! CustomUserMapAnnotation
+           annotationView.alpha = 0
+        self.usersRef?.child(customAnnotation.userId!).child("UpdatedAt").observeSingleEvent(of: .value, with: { (snapshot) in
+                if let updatedTimeString = snapshot.value as? String {
+                    let currentTime = Date();
+                    let updatedTime = DateStringFormatterHelper().convertStringToDate(datestring: updatedTimeString)
+                    let timeDifference = currentTime.seconds(from: updatedTime)
+                    annotationView.image  = self.getUserLocationImage(timeDifference)
+                    UIView.animate(withDuration: 0.4, animations: {
+                        annotationView.alpha = 1
+                    })
+                }
+                
+            })
+//            annotationView.image = UIImage(named: "greenDot")
             
             return annotationView
         }
@@ -141,5 +152,27 @@ extension MainViewController: MKMapViewDelegate {
         }
         
         
+    }
+    
+    func getUserLocationImage(_ time:Int) -> UIImage? {
+        if time <= 60 { // 1 minute
+           return #imageLiteral(resourceName: "greenDot")
+        }
+        else if time <= 120 { // 2 minutes
+           return #imageLiteral(resourceName: "greenDot")
+        }
+        else if time <= 180 { // 3 minutes
+            return #imageLiteral(resourceName: "greenDot")
+        }
+        else if time <= 240 { // 4 minutes
+            return #imageLiteral(resourceName: "greenDot")
+        }
+        else if time <= 300 { // 5 minutes
+            return #imageLiteral(resourceName: "greenDot")
+        }
+        else if time <= 360 { // 6 minutes
+            return #imageLiteral(resourceName: "greenDot")
+        }
+        return nil
     }
 }

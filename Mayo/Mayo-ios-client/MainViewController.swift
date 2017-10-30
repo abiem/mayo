@@ -52,7 +52,7 @@ class MainViewController: UIViewController {
     let ONBOARDING_TASK_3_DESCRIPTION = "Need help? Swipe to the very left to setup a help quest."
     
     //rotation key animation
-    let kRotationAnimationKey = "com.myapplication.rotationanimationkey"
+    let kRotationAnimationKey = "com.mayo.rotationanimationkey"
     
     // onboarding constants for standard user defaults.
     let ONBOARDING_TASK1_VIEWED_KEY = "onboardingTask1Viewed"
@@ -142,6 +142,7 @@ class MainViewController: UIViewController {
     
     // task self destruct timer
     var expirationTimer: Timer? = nil
+    var locationUpdateTimer: Timer? = nil
     var fakeUsersTimer: Timer? = nil
     var fakeUsersCreated = false
     
@@ -158,6 +159,8 @@ class MainViewController: UIViewController {
         if let userCoordinate = locationManager.location?.coordinate {
             self.mapView.setCenter(userCoordinate, animated: true)
         }
+        //start updationg users icons
+        startUpdationForUserLocation()
         
         //Check Fake tasks are available
         if checkFakeTakViewed() != true {
@@ -211,6 +214,10 @@ class MainViewController: UIViewController {
             print("InstanceID token: \(refreshedToken)")
         }
         
+        //Check internet Connection
+        let networkStatus = Reachbility.sharedInstance
+        networkStatus.startNetworkReachabilityObserver()
+        
         // set current user id
         currentUserId = FIRAuth.auth()?.currentUser?.uid
         
@@ -245,7 +252,7 @@ class MainViewController: UIViewController {
         locationManager = CLLocationManager()
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.distanceFilter = 20
+        locationManager.distanceFilter = 10
         // allows location manager to update location in the background
         locationManager.allowsBackgroundLocationUpdates = true
         
@@ -370,14 +377,13 @@ class MainViewController: UIViewController {
     func showUserThankedAnimation() {
         
         if playingThanksAnim == true { return }
-        
-        let imageHeight = CGFloat(300)
-        let imageWidth = CGFloat(300 * 1.43)
-        let centerX = self.view.center.x - CGFloat(imageWidth/2)
-        let centerY = self.view.center.y-CGFloat(imageHeight/2) - CGFloat(80)
-        thanksAnimImageView = UIImageView(frame: CGRect(x: centerX, y: centerY, width: imageWidth, height: imageHeight))
-        flareAnimImageView = UIImageView(frame: CGRect(x: centerX, y: centerY, width: imageWidth, height: imageHeight))
+        let viewFrame = self.view.frame
+        thanksAnimImageView = UIImageView(frame: CGRect(x: viewFrame.origin.x, y: viewFrame.origin.y, width: viewFrame.size.width, height: viewFrame.size.height))
+        flareAnimImageView = UIImageView(frame: CGRect(x: viewFrame.origin.x, y: viewFrame.origin.y, width: viewFrame.size.width, height: viewFrame.size.height))
         flareAnimImageView.image = #imageLiteral(resourceName: "flareImage");
+        
+        thanksAnimImageView.contentMode = .scaleAspectFit
+        flareAnimImageView.contentMode = .scaleAspectFit
         
         let imageListArray: NSMutableArray = []
         for countValue in 1...51
@@ -394,7 +400,7 @@ class MainViewController: UIViewController {
         
         playingThanksAnim = true
         thanksAnimImageView.startAnimating()
-        self.perform(#selector(MainViewController.afterThanksAnimation), with: nil, afterDelay: thanksAnimImageView.animationDuration)
+        self.perform(#selector(MainViewController.afterThanksAnimation), with: nil, afterDelay: thanksAnimImageView.animationDuration-0.5)
     }
     
     //Start Flare Animation for thanks
@@ -651,7 +657,7 @@ class MainViewController: UIViewController {
         let newLoc = CLLocationCoordinate2D(latitude: self.userLatitude! + randomLatOffset, longitude: self.userLongitude! + randomLongOffset)
         
         // annotation for user markers
-        let fakePin = CustomUserMapAnnotation(userId: "")
+        let fakePin = CustomUserMapAnnotation(userId: "", date: Date())
         
         fakePin.coordinate = newLoc
         
@@ -747,7 +753,9 @@ class MainViewController: UIViewController {
     override func viewWillDisappear(_ animated: Bool) {
         // show navigation bar on chat view controller
         self.navigationController?.isNavigationBarHidden = false
-       // unsubscribeFromAllNotifications()
+        locationUpdateTimer?.invalidate()
+        locationUpdateTimer = nil
+        
 
     }
     
@@ -769,13 +777,14 @@ class MainViewController: UIViewController {
             if let lastUpdateTime = snapshot.value as? String {
                 let currentDate = Date()
                 let dateformatter = DateStringFormatterHelper()
+                let userLastUpdate = dateformatter.convertStringToDate(datestring: lastUpdateTime)
                 //check user active from 3 days
-                if currentDate.seconds(from: dateformatter.convertStringToDate(datestring: lastUpdateTime)) < self.SECONDS_IN_DAY * 3 {
+                if currentDate.seconds(from: userLastUpdate ) < self.SECONDS_IN_DAY * 3 {
                     if !self.nearbyUsers.contains(key!) && key! != FIRAuth.auth()!.currentUser!.uid {
                         //Create marker for user
                         if self.nearbyUsers.contains(userId!) == false {
                             self.nearbyUsers.append(userId!)
-                            self.addUserPin(latitude: (location?.coordinate.latitude)!, longitude: (location?.coordinate.longitude)!, userId: userId!)
+                            self.addUserPin(latitude: (location?.coordinate.latitude)!, longitude: (location?.coordinate.longitude)!, userId: userId!, updatedTime:userLastUpdate )
                         }
                     }
                 }
@@ -866,6 +875,7 @@ class MainViewController: UIViewController {
                 }
             }
             
+            
         })
         
         // update user location when it moves
@@ -878,13 +888,19 @@ class MainViewController: UIViewController {
             for annotation in self.mapView.annotations {
                 if annotation is CustomUserMapAnnotation {
                     let customUserAnnotation = annotation as! CustomUserMapAnnotation
+                    //view for annotation
+                    let viewAnnotation = self.mapView.view(for: annotation)
                     if customUserAnnotation.userId == userId {
+                        viewAnnotation?.image = #imageLiteral(resourceName: "greenDot")
+                        customUserAnnotation.lastUpdatedTime = Date()
                         UIView.animate(withDuration: 1, animations: {
                             customUserAnnotation.coordinate = location.coordinate
+                            viewAnnotation?.alpha = 1
                         })
                     }
                 }
             }
+            
             
         })
         
@@ -1069,8 +1085,8 @@ class MainViewController: UIViewController {
                     if taskDict["startColor"] != nil,  taskDict["endColor"] != nil
                     {
                         // if they have start color and end color
-                        taskStartColor = taskDict["startColor"] as! String
-                        taskEndColor = taskDict["endColor"] as! String
+                        taskStartColor = taskDict["startColor"] as? String
+                        taskEndColor = taskDict["endColor"] as? String
                         
                         newTask.setGradientColors(startColor: taskStartColor, endColor: taskEndColor)
                     } else {
@@ -1177,11 +1193,11 @@ class MainViewController: UIViewController {
         
     }
     
-    func addUserPin(latitude: CLLocationDegrees, longitude: CLLocationDegrees, userId: String) {
+    func addUserPin(latitude: CLLocationDegrees, longitude: CLLocationDegrees, userId: String, updatedTime: Date) {
         
         // check that the pin is not the same as current user 
         if userId != FIRAuth.auth()?.currentUser?.uid {
-            let userAnnotation = CustomUserMapAnnotation(userId: userId)
+            let userAnnotation = CustomUserMapAnnotation(userId: userId, date: updatedTime)
             userAnnotation.coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
             self.mapView.addAnnotation(userAnnotation)
         }
@@ -1275,6 +1291,11 @@ class MainViewController: UIViewController {
 
 //MARK:- Custome Methods
     
+    @IBAction func actionMapStartFollow(_ sender: UIButton) {
+        mapView.setUserTrackingMode(.follow, animated: true)
+    }
+    
+    
     // Remove marker for tasks
     func removeAnnotationForTask(_ taskID:String) {
         for annotation in self.mapView.annotations {
@@ -1349,6 +1370,20 @@ class MainViewController: UIViewController {
             }
         })
         
+    }
+    
+    //Start timer to change user lcoation icon
+    func startUpdationForUserLocation()  {
+       self.locationUpdateTimer =  Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { (Timer) in
+            for annotation in self.mapView.annotations {
+                if annotation is CustomUserMapAnnotation {
+                    let annotationCustom = annotation as! CustomUserMapAnnotation
+                    let viewAnnotation = self.mapView.view(for: annotation)
+                    viewAnnotation?.image = self.getUserLocationImage(Date().seconds(from: annotationCustom.lastUpdatedTime ?? Date()))
+                }
+            }
+            
+        }
     }
     
     

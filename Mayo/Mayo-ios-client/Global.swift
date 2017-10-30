@@ -17,12 +17,13 @@ struct Constants {
     static let DEFAULT_LAT = 47.612441
     static let DEFAULT_LNG = -122.337463
     
-    static let THANKS_ANIMATION_DURATION = 4.0
+    static let THANKS_ANIMATION_DURATION = 5.0
     static let PENDING_TASKS = "PendingTask"
     
     static let STATUS_FOR_THANKED = "Owner marked as done and the people all thanked for"
     static let STATUS_FOR_NOT_HELPED = "Owner marked as done and no one helped"
     static let STATUS_FOR_TIME_EXPIRED = "Expired due to time limit"
     static let STATUS_FOR_MOVING_OUT = "Expired due to moving out of area"
+    
 }
 

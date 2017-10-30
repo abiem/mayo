@@ -34,15 +34,24 @@
                                     <outlet property="delegate" destination="BYZ-38-t0r" id="NA1-It-sA5"/>
                                 </connections>
                             </view>
+                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zu9-BV-I7e">
+                                <rect key="frame" x="299" y="413" width="46" height="30"/>
+                                <state key="normal" title="Button"/>
+                                <connections>
+                                    <action selector="actionMapStartFollow:" destination="BYZ-38-t0r" eventType="touchUpInside" id="0sI-bZ-tzW"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="msr-mv-p4J" firstAttribute="bottom" secondItem="wfy-db-euE" secondAttribute="top" id="2yT-Cx-Axy"/>
+                            <constraint firstAttribute="trailing" secondItem="zu9-BV-I7e" secondAttribute="trailing" constant="30" id="BPf-L2-zmC"/>
                             <constraint firstItem="msr-mv-p4J" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="-22" id="H2x-I6-qsS"/>
                             <constraint firstItem="XoD-Fb-pV5" firstAttribute="height" secondItem="msr-mv-p4J" secondAttribute="height" multiplier="35%" id="MTU-0w-5G9"/>
                             <constraint firstAttribute="trailing" secondItem="msr-mv-p4J" secondAttribute="trailing" id="ZRj-OZ-dFE"/>
                             <constraint firstItem="msr-mv-p4J" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="topMargin" constant="-8" id="Zvx-Lz-3p3"/>
                             <constraint firstItem="XoD-Fb-pV5" firstAttribute="leading" secondItem="msr-mv-p4J" secondAttribute="leading" id="n3L-jy-COS"/>
+                            <constraint firstItem="XoD-Fb-pV5" firstAttribute="top" secondItem="zu9-BV-I7e" secondAttribute="bottom" constant="10" id="pcL-CR-HfJ"/>
                             <constraint firstItem="XoD-Fb-pV5" firstAttribute="bottom" secondItem="wfy-db-euE" secondAttribute="top" id="va3-cH-7cr"/>
                             <constraint firstItem="XoD-Fb-pV5" firstAttribute="trailing" secondItem="msr-mv-p4J" secondAttribute="trailing" id="yjq-oP-Syt"/>
                         </constraints>

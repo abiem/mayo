@@ -26,12 +26,18 @@ class Reachbility: NSObject {
     let reachabilityManager = Alamofire.NetworkReachabilityManager(host: "www.apple.com")
     
     func startNetworkReachabilityObserver() {
+        
+        if !(reachabilityManager?.isReachable)! {
+            print("The network is not reachable")
+            self.alertView?.showWarning("No Internet Connection", subTitle: "", duration: 0)
+        }
         reachabilityManager?.listener = { status in
             
             switch status {
                 
             case .notReachable:
                 print("The network is not reachable")
+                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                 self.alertView?.showWarning("No Internet Connection", subTitle: "", duration: 0)
                 
             case .unknown :

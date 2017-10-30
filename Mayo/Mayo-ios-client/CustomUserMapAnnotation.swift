@@ -11,8 +11,10 @@ import MapKit
 
 class CustomUserMapAnnotation: MKPointAnnotation {
     var userId: String?
+    var lastUpdatedTime:Date?
     
-    init(userId: String ) {
+    init(userId: String, date:Date ) {
         self.userId = userId
+        self.lastUpdatedTime = date
     }
 }

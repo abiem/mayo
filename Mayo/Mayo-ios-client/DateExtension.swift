@@ -15,5 +15,4 @@ extension Date {
         return Calendar.current.dateComponents([.second], from: date, to: self).second ?? 0
     }
     
-    
 }
