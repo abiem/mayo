@@ -375,7 +375,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
                 
                 // save device token for push notifications
                 ref.child("users/\(userId)/deviceToken").setValue(refreshedToken)
-                
             }
             
         }

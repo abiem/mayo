@@ -102,12 +102,9 @@ extension MainViewController: MKMapViewDelegate {
         }
     }
     
-    
-    
     // runs when an annotation is tapped on
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
         print("annoation selected")
-        
         
         if view.annotation is CustomUserMapAnnotation {
             // if its a custom user annotation
@@ -119,7 +116,6 @@ extension MainViewController: MKMapViewDelegate {
                 return
             }
         }
-        
         //if the annotation is the current user task annotation
         if view.annotation is CustomCurrentUserTaskAnnotation {
             // move carousel to the current user's card
@@ -129,12 +125,10 @@ extension MainViewController: MKMapViewDelegate {
                 if let index = annotation.currentCarouselIndex {
                     self.carouselView.scrollToItem(at: index, animated: true)
                 }
-                
                 // exit delegate method
                 return
             }
         }
-        
         // if the annotation is a task
         if view.annotation is CustomTaskMapAnnotation {
             // move the carousel to the right task card
@@ -144,35 +138,30 @@ extension MainViewController: MKMapViewDelegate {
                 if let index = annotation.currentCarouselIndex {
                     self.carouselView.scrollToItem(at: index, animated: true)
                 }
-                
                 // exit delegate method
                 return
             }
-            
         }
-        
-        
     }
-    
     func getUserLocationImage(_ time:Int) -> UIImage? {
-        if time <= 60 { // 1 minute
+        if time <= locationIconTime.first.rawValue { // 1 min
            return #imageLiteral(resourceName: "greenDot")
         }
-        else if time <= 120 { // 2 minutes
+        else if time <= locationIconTime.second.rawValue { // 2 min
            return #imageLiteral(resourceName: "greenDot")
         }
-        else if time <= 180 { // 3 minutes
+        else if time <= locationIconTime.third.rawValue { // 3 min
             return #imageLiteral(resourceName: "greenDot")
         }
-        else if time <= 240 { // 4 minutes
+        else if time <= locationIconTime.fourth.rawValue { // 4 min
             return #imageLiteral(resourceName: "greenDot")
         }
-        else if time <= 300 { // 5 minutes
+        else if time <= locationIconTime.fifth.rawValue { // 5 min
             return #imageLiteral(resourceName: "greenDot")
         }
-        else if time <= 360 { // 6 minutes
+        else if time <= locationIconTime.sixth.rawValue { // 6 min
             return #imageLiteral(resourceName: "greenDot")
         }
-        return nil
+        return #imageLiteral(resourceName: "greenDot")
     }
 }
