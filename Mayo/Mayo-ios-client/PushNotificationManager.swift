@@ -102,7 +102,7 @@ class PushNotificationManager {
             "to": "\(deviceToken)",
             "priority": "high",
             "notification": [
-                "body": "the task was completed and you were thanked",
+                "body": "The task was completed and you were thanked",
                 "title": "You were thanked!",
                 "sound": "default"
             ],

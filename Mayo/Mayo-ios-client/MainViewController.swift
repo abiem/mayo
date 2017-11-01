@@ -732,7 +732,6 @@ class MainViewController: UIViewController {
     
     // setup pins for nearby tasks
     func addMapPin(task: Task, carouselIndex: Int) {
-        
         // add pin for task
         //let annotation = MKPointAnnotation()
         let annotation = CustomTaskMapAnnotation(currentCarouselIndex: carouselIndex, taskUserId: task.userId)
@@ -756,7 +755,6 @@ class MainViewController: UIViewController {
         locationUpdateTimer?.invalidate()
         locationUpdateTimer = nil
         
-
     }
     
     // query users nearby

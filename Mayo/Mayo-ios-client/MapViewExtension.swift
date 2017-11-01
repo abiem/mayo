@@ -144,24 +144,24 @@ extension MainViewController: MKMapViewDelegate {
         }
     }
     func getUserLocationImage(_ time:Int) -> UIImage? {
-        if time <= locationIconTime.first.rawValue { // 1 min
-           return #imageLiteral(resourceName: "greenDot")
-        }
-        else if time <= locationIconTime.second.rawValue { // 2 min
-           return #imageLiteral(resourceName: "greenDot")
-        }
-        else if time <= locationIconTime.third.rawValue { // 3 min
+        if time <= locationIconTime.first.rawValue {
             return #imageLiteral(resourceName: "greenDot")
         }
-        else if time <= locationIconTime.fourth.rawValue { // 4 min
+        else if time <= locationIconTime.second.rawValue {
             return #imageLiteral(resourceName: "greenDot")
         }
-        else if time <= locationIconTime.fifth.rawValue { // 5 min
+        else if time <= locationIconTime.third.rawValue {
             return #imageLiteral(resourceName: "greenDot")
         }
-        else if time <= locationIconTime.sixth.rawValue { // 6 min
+        else if time <= locationIconTime.fourth.rawValue {
             return #imageLiteral(resourceName: "greenDot")
         }
-        return #imageLiteral(resourceName: "greenDot")
+        else if time <= locationIconTime.fifth.rawValue {
+            return #imageLiteral(resourceName: "greenDot")
+        }
+        else if time <= locationIconTime.sixth.rawValue {
+            return #imageLiteral(resourceName: "greenDot")
+        }
+        return nil
     }
 }

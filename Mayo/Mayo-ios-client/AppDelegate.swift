@@ -39,7 +39,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         IQKeyboardManager.sharedManager().shouldResignOnTouchOutside = true
         
         //Set Up Fabric Crashlystics
-        // Fabric.with([Crashlytics.self])
+        Fabric.with([Crashlytics.self])
         
         // setup firebase
         FIRApp.configure()

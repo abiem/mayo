@@ -28,10 +28,10 @@ struct Constants {
 }
 
 enum locationIconTime : Int {
-    case first = 60
+    case first = 60  // active users
     case second = 120
     case third = 180
     case fourth = 240
     case fifth = 300
-    case sixth = 360
+    case sixth = 360 // in active users
 }
