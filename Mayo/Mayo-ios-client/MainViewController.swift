@@ -171,7 +171,6 @@ class MainViewController: UIViewController {
                 for (index, element) in tasks.enumerated() {
                     if element?.taskDescription == ONBOARDING_TASK_2_DESCRIPTION {
                         removeOnboardingFakeTask(carousel: carouselView, cardIndex: index)
-                        
                     }
                 }
                 canCreateNewtask = true
@@ -255,9 +254,7 @@ class MainViewController: UIViewController {
         locationManager.distanceFilter = 10
         // allows location manager to update location in the background
         locationManager.allowsBackgroundLocationUpdates = true
-        
         locationManager.startUpdatingLocation()
-        locationManager.startUpdatingHeading()
         locationManager .stopMonitoringSignificantLocationChanges()
         
         // set region that is shown on the map
@@ -728,7 +725,6 @@ class MainViewController: UIViewController {
         self.mapView.removeAnnotation(annotation)
         
     }
-
     
     // setup pins for nearby tasks
     func addMapPin(task: Task, carouselIndex: Int) {
@@ -739,8 +735,6 @@ class MainViewController: UIViewController {
         self.mapView.addAnnotation(annotation)
         
     }
-    
-    
 
     override func viewWillAppear(_ animated: Bool) {
         
@@ -771,46 +765,29 @@ class MainViewController: UIViewController {
             let key1 = key?.replacingOccurrences(of: "Optional(\"", with: "")
             let userId = key1?.replacingOccurrences(of: "\")", with: "")
         
-        self.usersRef?.child(userId!).child("UpdatedAt").observeSingleEvent(of: .value, with: { (snapshot) in
-            if let lastUpdateTime = snapshot.value as? String {
-                let currentDate = Date()
-                let dateformatter = DateStringFormatterHelper()
-                let userLastUpdate = dateformatter.convertStringToDate(datestring: lastUpdateTime)
-                //check user active from 3 days
-                if currentDate.seconds(from: userLastUpdate ) < self.SECONDS_IN_DAY * 3 {
-                    if !self.nearbyUsers.contains(key!) && key! != FIRAuth.auth()!.currentUser!.uid {
-                        //Create marker for user
-                        if self.nearbyUsers.contains(userId!) == false {
-                            self.nearbyUsers.append(userId!)
-                            self.addUserPin(latitude: (location?.coordinate.latitude)!, longitude: (location?.coordinate.longitude)!, userId: userId!, updatedTime:userLastUpdate )
+            self.usersRef?.child(userId!).child("UpdatedAt").observeSingleEvent(of: .value, with: { (snapshot) in
+                if let lastUpdateTime = snapshot.value as? String {
+                    let currentDate = Date()
+                    let dateformatter = DateStringFormatterHelper()
+                    let userLastUpdate = dateformatter.convertStringToDate(datestring: lastUpdateTime)
+                    //check user active from 3 days
+                    if currentDate.seconds(from: userLastUpdate ) < self.SECONDS_IN_DAY * 3 {
+                        if !self.nearbyUsers.contains(key!) && key! != FIRAuth.auth()!.currentUser!.uid {
+                            //Create marker for user
+                            if self.nearbyUsers.contains(userId!) == false {
+                                self.nearbyUsers.append(userId!)
+                                self.addUserPin(latitude: (location?.coordinate.latitude)!, longitude: (location?.coordinate.longitude)!, userId: userId!, updatedTime:userLastUpdate )
+                            }
                         }
                     }
+                    else {
+                        // Remove inactive user location
+                        self.usersLocationsRef?.child(key!).removeValue()
+                    }
                 }
-                else {
-                    // Remove inactive user location
-                    self.usersLocationsRef?.child(key!).removeValue()
-                }
-            }
-            
-            
-        })
-            
-            /*
-            // check that the user is not current user
-            if key != FIRAuth.auth()?.currentUser?.uid {
                 
-                let userId = "\(key!)"
-                print(userId)
                 
-                // get data and place on map
-                self.addUserPin(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude, userId: key)
-                
-                // add the user in the nearby userlist.
-                if self.nearbyUsers.index(of: key) == nil {
-                    self.nearbyUsers.append(key)
-                }
-            }
- */
+            })
         })
         
         // remove users circle when it leaves
@@ -881,7 +858,7 @@ class MainViewController: UIViewController {
             print("user \(key) moved ")
             let key1 = key?.replacingOccurrences(of: "Optional(\"", with: "")
             let userId = key1?.replacingOccurrences(of: "\")", with: "")
-
+            
             // loop through the user annotations and remove it
             for annotation in self.mapView.annotations {
                 if annotation is CustomUserMapAnnotation {
@@ -890,6 +867,7 @@ class MainViewController: UIViewController {
                     let viewAnnotation = self.mapView.view(for: annotation)
                     if customUserAnnotation.userId == userId {
                         viewAnnotation?.image = #imageLiteral(resourceName: "greenDot")
+                        
                         customUserAnnotation.lastUpdatedTime = Date()
                         UIView.animate(withDuration: 1, animations: {
                             customUserAnnotation.coordinate = location.coordinate
@@ -898,7 +876,10 @@ class MainViewController: UIViewController {
                     }
                 }
             }
-            
+            if !self.nearbyUsers.contains(userId!)  && userId != FIRAuth.auth()!.currentUser!.uid  {
+                self.nearbyUsers.append(userId!)
+                self.addUserPin(latitude: (location?.coordinate.latitude)!, longitude: (location?.coordinate.longitude)!, userId: userId!, updatedTime: Date() )
+            }
             
         })
         

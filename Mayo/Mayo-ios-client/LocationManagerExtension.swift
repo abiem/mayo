@@ -97,11 +97,10 @@ extension MainViewController: CLLocationManagerDelegate {
         if let error = error as? CLError, error.code == .denied {
             // Location updates are not authorized.
             locationManager.stopUpdatingLocation()
-            
+            locationManager.stopUpdatingHeading()
+            manager.stopMonitoringSignificantLocationChanges()
             //Show Alert For Location permission Denied
             showLocationAlert()
-           
-            manager.stopMonitoringSignificantLocationChanges()
             return
         }
         // Notify the user of any errors.

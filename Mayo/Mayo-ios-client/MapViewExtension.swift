@@ -55,7 +55,6 @@ extension MainViewController: MKMapViewDelegate {
                 }
                 
             })
-//            annotationView.image = UIImage(named: "greenDot")
             
             return annotationView
         }
