@@ -994,20 +994,21 @@ class MainViewController: UIViewController {
                         self.tasksRef?.child(snapshot.key).child("completeType").setValue(Constants.STATUS_FOR_TIME_EXPIRED);
                         for (index, task) in self.tasks.enumerated() {
                             if task?.taskID == taskDict["taskID"] as? String {
-
                                 self.tasks.remove(at: index);
                                 self.removeAnnotationForTask((task?.taskID)!)
                                 self.updateMapAnnotationCardIndexes()
                                 self.carouselView.reloadData()
                             }
+                            else {
+                                
+                                self.tasksRef?.child(taskDict["taskID"] as! String).child("completed").setValue(true);
+                                self.tasksRef?.child(taskDict["taskID"] as! String).child("completeType").setValue(Constants.STATUS_FOR_TIME_EXPIRED);
+                                self.tasksRef?.child(taskDict["taskID"] as! String).child("timeUpdated").setValue(DateStringFormatterHelper().convertDateToString(date: Date()));
+                            }
                         }
                         return
                     }
                 }
-                
-                
-                
-
                 
                 // only process taskDict if not completed 
                 // and not equal to own uid
