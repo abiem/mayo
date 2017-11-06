@@ -1490,6 +1490,7 @@ class MainViewController: UIViewController {
         }
     }
     
+    
 //MARK:- Firebase Updation
     
     //update last 5 locations at backend

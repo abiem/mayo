@@ -70,8 +70,6 @@ class ChatViewController: JSQMessagesViewController {
         self.senderId = FIRAuth.auth()?.currentUser?.uid
         self.senderDisplayName = ""
         
-        
-        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -249,9 +247,7 @@ class ChatViewController: JSQMessagesViewController {
                 }
             }
 
-
         })
-//        PushNotificationManager.sendNotificationToTopic(channelId: channelId, topic: channelTopicMessage, currentUserId: currentUserId!)
     }
     
     //reload messages.

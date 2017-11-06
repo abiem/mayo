@@ -38,6 +38,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         IQKeyboardManager.sharedManager().enableAutoToolbar = false
         IQKeyboardManager.sharedManager().shouldResignOnTouchOutside = true
         
+        
         //Set Up Fabric Crashlystics
         Fabric.with([Crashlytics.self])
         
