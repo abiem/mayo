@@ -23,7 +23,6 @@ extension MainViewController: UITextViewDelegate {
         }
     }
     
-    
     func textViewDidChange(_ textView: UITextView) {
         
         
@@ -69,35 +68,7 @@ extension MainViewController: UITextViewDelegate {
     
     
     
-    // MARK: Show/Hide Keyboard
-    
-    func keyboardWillShow(_ notification: Notification) {
-        if self.view.frame.origin.y == 0 {
-            self.view.frame.origin.y -= self.keyboardHeight(notification)
-        }
-    }
-
-    func keyboardWillHide(_ notification: Notification) {
-        if self.view.frame.origin.y != 0 {
-            self.view.frame.origin.y += self.keyboardHeight(notification)
-        }
-    }
-
-    func keyboardDidShow(_ notification: Notification) {
-        if self.view.frame.origin.y == 0 {
-            self.view.frame.origin.y -= self.keyboardHeight(notification)
-        }
-    }
-
-    func keyboardDidHide(_ notification: Notification) {
-        if self.view.frame.origin.y != 0 {
-            self.view.frame.origin.y += self.keyboardHeight(notification)
-        }
-    }
-
-    func keyboardHeight(_ notification: Notification) -> CGFloat {
-        return ((notification as NSNotification).userInfo![UIKeyboardFrameBeginUserInfoKey] as! NSValue).cgRectValue.height
-    }
+  
     
 }
 

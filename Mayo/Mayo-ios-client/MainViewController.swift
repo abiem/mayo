@@ -183,24 +183,7 @@ class MainViewController: UIViewController {
                 
             }
         }
-        
-        /*
-        // create fake users when you show
-        if self.fakeUsersCreated == false {
-            createFakeUsers()
-            self.fakeUsersCreated = true
-            //setup timer for 7 mins
-            Timer.scheduledTimer(withTimeInterval: 240, repeats: false, block: { (Timer) in
-                
-                // reset the fake users created flag
-                self.fakeUsersCreated = false
-                
-                // invalidate the timer
-                Timer.invalidate()
     
-            })
-        }
-        */
     }
     
     
@@ -737,11 +720,8 @@ class MainViewController: UIViewController {
     }
 
     override func viewWillAppear(_ animated: Bool) {
-        
         // hides navigation bar for home viewcontroller
         self.navigationController?.isNavigationBarHidden = true
-       // subscribeToKeyboardNotifications()
-
     }
     override func viewWillDisappear(_ animated: Bool) {
         // show navigation bar on chat view controller
@@ -2919,7 +2899,6 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
 // MARK: - MainViewController (Notifications)
 
 extension MainViewController {
-
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         
