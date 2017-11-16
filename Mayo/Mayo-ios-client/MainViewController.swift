@@ -235,10 +235,11 @@ class MainViewController: UIViewController {
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.distanceFilter = 10
+        locationManager .stopMonitoringSignificantLocationChanges()
         // allows location manager to update location in the background
         locationManager.allowsBackgroundLocationUpdates = true
         locationManager.startUpdatingLocation()
-        locationManager .stopMonitoringSignificantLocationChanges()
+        
         
         // set region that is shown on the map
         setupLocationRegion()
@@ -478,7 +479,7 @@ class MainViewController: UIViewController {
         if let userCenterCoordinate = locationManager.location?.coordinate {
             self.mapView.setCenter(userCenterCoordinate, animated: true)
         }
-        
+        mapView.setUserTrackingMode(.follow, animated: true)
         // show points pofile view
         let pointsProfileView = UIView(frame: CGRect(x: 0, y: 0, width: mapView.frame.size.width, height: self.view.bounds.height))
         pointsProfileView.center = self.view.center
@@ -759,10 +760,6 @@ class MainViewController: UIViewController {
                                 self.addUserPin(latitude: (location?.coordinate.latitude)!, longitude: (location?.coordinate.longitude)!, userId: userId!, updatedTime:userLastUpdate )
                             }
                         }
-                    }
-                    else {
-                        // Remove inactive user location
-                        self.usersLocationsRef?.child(key!).removeValue()
                     }
                 }
                 
@@ -1314,7 +1311,7 @@ class MainViewController: UIViewController {
                 // return and don't add this task to tasks
 
                 if timeDifference > self.SECONDS_IN_HOUR {
-                    self.createLocalNotification(title: "Your help quest expired. Still need help?", body: "Click to make a new help task", time: Int(0.5))
+                    self.createLocalNotification(title: "Your help quest expired", body: "🕐 Still need help?", time: Int(0.5))
                     currentUserTask?.completed = true;
                     currentUserTask?.completeType = Constants.STATUS_FOR_TIME_EXPIRED
                     UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
@@ -1351,7 +1348,12 @@ class MainViewController: UIViewController {
     func startTimer(_ interval :Int)  {
         // save current user task description to check if its
         // the same when timer is done
-       
+        
+        // reset expiration timer
+        self.expirationTimer = nil
+        
+        // invalidate the current timer
+        self.expirationTimer?.invalidate()
         // start timer to check if it has expired
         self.expirationTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(interval), repeats: false) { (Timer) in
             
@@ -1420,35 +1422,24 @@ class MainViewController: UIViewController {
                         let latitude = dicTask["latitude"] as! CLLocationDegrees
                         let longitude = dicTask["longitude"] as! CLLocationDegrees
                         let completed = dicTask["completed"] as! Bool
+                        let startColor = dicTask["startColor"] as! String
+                        let endColor = dicTask["endColor"] as! String
                         let timeCreated = dicTask["timeCreated"] as! Date
                         let timeUpdated = dicTask["timeUpdated"] as! Date
                         let taskID = dicTask["taskID"] as! String
                         
                         let currentTask =  Task(userId: userID , taskDescription: taskDescription , latitude: latitude , longitude: longitude, completed: completed, timeCreated: timeCreated , timeUpdated: timeUpdated, taskID: taskID)
-                        //
-                        let dateformatter = DateStringFormatterHelper()
+                        currentTask.startColor = startColor
+                        currentTask.endColor = endColor
+
                         
                         // get current time
                         let currentTime = Date()
                         
                         // get the difference between time created and current time
-                        var timeDifference = currentTime.seconds(from: currentTask.timeCreated)
+                        let timeDifference = currentTime.seconds(from: currentTask.timeCreated)
                         print("time difference for task: \(timeDifference)")
                         
-                        // if time difference is greater than 1 hour (3600 seconds)
-                        // return and don't add this task to tasks
-                        
-//                        if timeDifference > self.SECONDS_IN_HOUR {
-//
-//                            currentTask.completed = true;
-//                            currentTask.completeType = Constants.STATUS_FOR_TIME_EXPIRED
-//                            self.removeTaskAfterComplete(currentTask)
-//                            UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
-//                            return
-//                        }
-//                        else {
-//                            timeDifference = self.SECONDS_IN_HOUR - timeDifference
-//                            startTimer(timeDifference)
                             self.newItemSwiped = true
                             self.currentUserTaskSaved = true
                             self.tasks.append(currentTask)
@@ -1616,6 +1607,7 @@ class MainViewController: UIViewController {
         //reload Carousel
         if self.tasks.count > 0 {
             self.tasks.remove(at: 0)
+            
         }
         if self.tasks.count <= 1 {
             let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
@@ -1623,7 +1615,6 @@ class MainViewController: UIViewController {
         }
         self.carouselView.reloadItem(at: 0, animated: false)
         
-       
     }
 
     //update Task views count at firebase
@@ -2331,7 +2322,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                     
                     // send the user a notification that they were thanked
                     if deviceToken != nil && deviceToken != self.currentUserId {
-                        PushNotificationManager.sendYouWereThankedNotification(deviceToken: deviceToken!)
+                        PushNotificationManager.sendYouWereThankedNotification(deviceToken: deviceToken!, currentUserTask.taskDescription)
                     }
 
                 }, withCancel: { (error) in
@@ -2466,6 +2457,8 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             dicTask["userId"] = currentUserTask.userId
             dicTask["taskDescription"] = currentUserTask.taskDescription
             dicTask["latitude"] = currentUserTask.latitude
+            dicTask["startColor"] = currentUserTask.startColor
+            dicTask["endColor"] = currentUserTask.endColor
             dicTask["longitude"] = currentUserTask.longitude
             dicTask["completed"] = currentUserTask.completed
             dicTask["timeCreated"] = currentUserTask.timeCreated

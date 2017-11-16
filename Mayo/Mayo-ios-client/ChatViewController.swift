@@ -51,6 +51,12 @@ class ChatViewController: JSQMessagesViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        if #available(iOS 11.0, *){
+            self.collectionView.contentInsetAdjustmentBehavior = .never
+            self.collectionView.contentInset = UIEdgeInsetsMake(64, 0, 0, 0)
+            self.collectionView.scrollIndicatorInsets = self.collectionView.contentInset
+            
+        }
         // disable swipe to navigate
         self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         
@@ -179,7 +185,7 @@ class ChatViewController: JSQMessagesViewController {
         let dateFormatter = DateStringFormatterHelper()
         let dateCreated = dateFormatter.convertDateToString(date: Date())
         
-        if isOwner {
+         if isOwner && !isFakeTask  {
             let screamingFaceEmoji = "\u{1F631} " //U+1F631
             textToSend = screamingFaceEmoji + text!
             
@@ -366,7 +372,7 @@ class ChatViewController: JSQMessagesViewController {
         DispatchQueue.main.asyncAfter(deadline: when) {
             let id = "Robot"
             let name = ""
-            let text = "Woohoo thank you!"
+            let text = "\u{1F631} Woohoo thank you!"
             let colorIndexAsInt = 1
             self.addMessage(withId: id, name: name, text: text, colorIndex: colorIndexAsInt)
             self.finishReceivingMessage()

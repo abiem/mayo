@@ -88,7 +88,7 @@ class PushNotificationManager {
         print("notification posted")
     }
     
-    static func sendYouWereThankedNotification(deviceToken: String) {
+    static func sendYouWereThankedNotification(deviceToken: String, _ pTaskDescription: String) {
         
         if deviceToken.isEmpty || deviceToken.characters.count == 0 {
             return
@@ -102,7 +102,7 @@ class PushNotificationManager {
             "to": "\(deviceToken)",
             "priority": "high",
             "notification": [
-                "body": "The task was completed and you were thanked",
+                "body": "🤜🏻🤛🏻The quest \(pTaskDescription) was completed and you were thanked!",
                 "title": "You were thanked!",
                 "sound": "default"
             ],
@@ -138,8 +138,8 @@ class PushNotificationManager {
             "to": "\(deviceToken)",
             "priority": "high",
             "notification": [
-                "body": "A new task was created nearby",
-                "title": "New task nearby",
+                "body": "Someone has a new quest nearby",
+                "title": "New quest available",
                 "sound": "default"
             ],
             "data": [
@@ -170,8 +170,8 @@ class PushNotificationManager {
             "to": "/topics/\(channelId)",
             "priority": "high",
             "notification": [
-                "body": "'\(taskMessage)' was completed",
-                "title": "Nearby Task Completed",
+                "body": "'The quest \(taskMessage) was completed",
+                "title": "Nearby quest Completed",
                 "content_available": true,
                 "sound": "default"
             ],
@@ -206,8 +206,8 @@ class PushNotificationManager {
             "to": "\(deviceToken)",
             "priority": "high",
             "notification": [
-                "body": "'\(taskMessage)' was completed",
-                "title": "Nearby Task Completed",
+                "body": "The quest \(taskMessage) was completed",
+                "title": "Nearby quest Completed",
                 "content_available": true,
                 "sound": "default"
             ],
