@@ -217,8 +217,7 @@ class MainViewController: UIViewController {
         
         // setup mapview delegate
         mapView.delegate = self
-        
-        
+    
         // setup firebase/geofire
         ref = FIRDatabase.database().reference()
         tasksRef = ref?.child("tasks")
@@ -714,6 +713,7 @@ class MainViewController: UIViewController {
     func addMapPin(task: Task, carouselIndex: Int) {
         // add pin for task
         //let annotation = MKPointAnnotation()
+
         let annotation = CustomTaskMapAnnotation(currentCarouselIndex: carouselIndex, taskUserId: task.userId)
         annotation.coordinate = CLLocationCoordinate2D(latitude: (task.latitude), longitude: (task.longitude))
         self.mapView.addAnnotation(annotation)
@@ -972,9 +972,12 @@ class MainViewController: UIViewController {
                         for (index, task) in self.tasks.enumerated() {
                             if task?.taskID == taskDict["taskID"] as? String {
                                 self.tasks.remove(at: index);
+                                self.removeCarousel(index)
                                 self.removeAnnotationForTask((task?.taskID)!)
                                 self.updateMapAnnotationCardIndexes()
-                                self.carouselView.reloadData()
+                                if self.tasks.count <= 0 {
+                                    self.carouselView.reloadData()
+                                }
                             }
                             else {
                                 
@@ -1004,11 +1007,13 @@ class MainViewController: UIViewController {
                             if taskDict["completed"] as! Bool == true {
                                 for (index, task) in self.tasks.enumerated() {
                                     if task?.taskID == taskDict["taskID"] as? String {
-                                        
                                         self.tasks.remove(at: index);
+                                        self.removeCarousel(index)
                                         self.removeAnnotationForTask((task?.taskID)!)
                                         self.updateMapAnnotationCardIndexes()
-                                        self.carouselView.reloadData()
+                                        if self.tasks.count <= 0 {
+                                            self.carouselView.reloadData()
+                                        }
                                     }
                                 }
                             }
@@ -1076,7 +1081,7 @@ class MainViewController: UIViewController {
                 else if  !taskDict.isEmpty && taskDict["completed"] as! Bool == true {
                     for (index, task) in self.tasks.enumerated() {
                         if task?.taskID == taskDict["taskID"] as? String {
-                            
+                            self.removeCarousel(index)
                             self.tasks.remove(at: index);
                             self.removeAnnotationForTask((task?.taskID)!)
                             self.updateMapAnnotationCardIndexes()
@@ -1100,7 +1105,7 @@ class MainViewController: UIViewController {
                                     }
                                 }
                                 else {
-                                    self.carouselView.reloadData()
+                                  //  self.carouselView.reloadData()
                                 }
                             
                             }
@@ -1252,6 +1257,19 @@ class MainViewController: UIViewController {
         mapView.setUserTrackingMode(.follow, animated: true)
     }
     
+    func removeCarousel(_ index: Int)  {
+        UIView.transition(with: carouselView!,
+                                  duration: 0.4,
+                                  options: .transitionCrossDissolve,
+                                  animations: { () -> Void in
+                                    self.carouselView.currentItemView?.alpha = 0
+        },
+                                  completion:{ (success) in
+                                    self.carouselView.removeItem(at: index, animated: true)
+        })
+      
+
+    }
     
     // Remove marker for tasks
     func removeAnnotationForTask(_ taskID:String) {
@@ -1607,13 +1625,15 @@ class MainViewController: UIViewController {
         //reload Carousel
         if self.tasks.count > 0 {
             self.tasks.remove(at: 0)
+            self.removeCarousel(0)
             
         }
         if self.tasks.count <= 1 {
             let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
             self.tasks.insert(Task(userId: currentUserKey!, taskDescription: "", latitude: (self.locationManager.location?.coordinate.latitude) ?? Constants.DEFAULT_LAT , longitude: (self.locationManager.location?.coordinate.longitude) ?? Constants.DEFAULT_LNG , completed: true, taskID: "\(timeStamp)"), at: 0)
+            self.carouselView.reloadData()
         }
-        self.carouselView.reloadItem(at: 0, animated: false)
+        
         
     }
 
@@ -1647,6 +1667,10 @@ class MainViewController: UIViewController {
 
 // MARK: carousel view
 extension MainViewController: iCarouselDelegate, iCarouselDataSource {
+    
+   
+
+    
     
     func carousel(_ carousel: iCarousel, viewForItemAt index: Int, reusing view: UIView?) -> UIView {
         
@@ -1925,7 +1949,9 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             messageButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 10)
             messageButton.titleEdgeInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 0)
             messageButton.addTarget(self, action: #selector(goToChat(sender:)), for: .touchUpInside)
-            tempView.addSubview(messageButton)
+            if task.taskDescription != ONBOARDING_TASK_1_DESCRIPTION && task.taskDescription != ONBOARDING_TASK_3_DESCRIPTION {
+                    tempView.addSubview(messageButton)
+            }
             
             // add temp view to shadow view
             
@@ -2036,8 +2062,6 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                     }
                     
                 }
-            
-                
                 
                 //set textView back to editable
                 let currentUserTextView = self.view.viewWithTag(self.CURRENT_USER_TEXTVIEW_TAG) as! UITextView
@@ -2881,6 +2905,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         if option == iCarouselOption.spacing {
             return value * 1.03
         }
+        
         return value
     }
     func numberOfItems(in carousel: iCarousel) -> Int {

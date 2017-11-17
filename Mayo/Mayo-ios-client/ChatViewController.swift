@@ -10,6 +10,7 @@ import UIKit
 import Firebase
 import JSQMessagesViewController
 import Alamofire
+import IQKeyboardManagerSwift
 
 class ChatViewController: JSQMessagesViewController {
     var isFakeTask = false
@@ -45,18 +46,12 @@ class ChatViewController: JSQMessagesViewController {
     
     private lazy var messageRef: FIRDatabaseReference = self.channelRef!.child("messages")
     private var newMessageRefHandle: FIRDatabaseHandle?
-    
- 
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        //Chat pods Issue
+            self.topContentAdditionalInset = 0.0
         
-        if #available(iOS 11.0, *){
-            self.collectionView.contentInsetAdjustmentBehavior = .never
-            self.collectionView.contentInset = UIEdgeInsetsMake(64, 0, 0, 0)
-            self.collectionView.scrollIndicatorInsets = self.collectionView.contentInset
-            
-        }
         // disable swipe to navigate
         self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         
@@ -80,10 +75,13 @@ class ChatViewController: JSQMessagesViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         // listen for new messages
+        IQKeyboardManager.sharedManager().enable = false
         observeMessages()
     }
+    
     override func viewWillDisappear(_ animated: Bool) {
         // remove observer for messages
+        IQKeyboardManager.sharedManager().enable = true
         messageRef.removeObserver(withHandle: newMessageRefHandle!)
     }
     
@@ -102,7 +100,6 @@ class ChatViewController: JSQMessagesViewController {
     
     // create new message
     private func addMessage(withId id: String, name: String, text: String, colorIndex: Int) {
-        
         let message = Message(senderId: id, senderDisplayName: name, text: text, colorIndex: colorIndex)
         //JSQMessage(senderId: id, displayName: name, text: text) {
         messages.append(message)
@@ -116,6 +113,9 @@ class ChatViewController: JSQMessagesViewController {
     
     override func didPressSend(_ button: UIButton!, withMessageText text: String!, senderId: String!, senderDisplayName: String!, date: Date!) {
         
+        if #available(iOS 11.0, *){
+            self.topContentAdditionalInset = -64
+        }
         // check if current user color index is set
         if self.currentUserColorIndex == nil {
             // check if current user is in the conversation
