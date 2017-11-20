@@ -126,13 +126,13 @@ class PushNotificationManager {
     
     static func sendNearbyTaskNotification(deviceToken: String, taskID : String) {
         
-        if deviceToken.isEmpty || deviceToken.characters.count == 0 {
+        if deviceToken.isEmpty || deviceToken.count == 0 {
             return
         }
         
         // setup alamofire url
         let fcmURL = "https://fcm.googleapis.com/fcm/send"
-        print("device token \(deviceToken.characters.count) \(deviceToken)")
+        print("device token \(deviceToken.count) \(deviceToken)")
         // add application/json and add authorization key
         let parameters: Parameters = [
             "to": "\(deviceToken)",

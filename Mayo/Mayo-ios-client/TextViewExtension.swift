@@ -9,6 +9,7 @@
 import UIKit
 
 extension MainViewController: UITextViewDelegate {
+    
     func textViewDidBeginEditing(_ textView: UITextView) {
         if textView.alpha == 0.5 {
             textView.text = nil
@@ -61,14 +62,18 @@ extension MainViewController: UITextViewDelegate {
     func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
         
         let maxtext: Int = 78
+
         //If the text is larger than the maxtext, the return is false
+//        if range.length > 0 && text == "" {
+//            textView.text = (textView.text as NSString).substring(to: textView.text.count - 1)
+//        }
+//        else if textView.text.count < maxtext {
+//           textView.text = textView.text + text
+//        }
+//        return false
         
-        return textView.text.characters.count + (text.characters.count - range.length) <= maxtext
+        return textView.text.count + (text.count - range.length) <= maxtext
     }
-    
-    
-    
-  
     
 }
 

@@ -1259,13 +1259,14 @@ class MainViewController: UIViewController {
     
     func removeCarousel(_ index: Int)  {
         UIView.transition(with: carouselView!,
-                                  duration: 0.4,
+                                  duration: 0.2,
                                   options: .transitionCrossDissolve,
                                   animations: { () -> Void in
                                     self.carouselView.currentItemView?.alpha = 0
         },
                                   completion:{ (success) in
                                     self.carouselView.removeItem(at: index, animated: true)
+                                    
         })
       
 
@@ -1625,14 +1626,13 @@ class MainViewController: UIViewController {
         //reload Carousel
         if self.tasks.count > 0 {
             self.tasks.remove(at: 0)
-            self.removeCarousel(0)
-            
         }
-        if self.tasks.count <= 1 {
+        if self.tasks.count <= 1  {
             let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
+            let currentUserKey = FIRAuth.auth()?.currentUser?.uid
             self.tasks.insert(Task(userId: currentUserKey!, taskDescription: "", latitude: (self.locationManager.location?.coordinate.latitude) ?? Constants.DEFAULT_LAT , longitude: (self.locationManager.location?.coordinate.longitude) ?? Constants.DEFAULT_LNG , completed: true, taskID: "\(timeStamp)"), at: 0)
-            self.carouselView.reloadData()
         }
+        self.carouselView.reloadItem(at: 0, animated: true)
         
         
     }
@@ -1748,6 +1748,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             textView.contentInset = UIEdgeInsets(top: 15, left: 0, bottom: 0, right: 0)
             // turn off auto correction
             textView.autocorrectionType = .no
+           
             
             // if current user has saved task
             // their task description
@@ -1819,8 +1820,6 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             // if current user task saved
             // complete the task
             if self.currentUserTaskSaved {
-                
-                
                 
                 // add done view to finish or save the task
                 doneView = UIButton(frame: CGRect(x: (tempView.bounds.width * 3/4), y: (tempView.bounds.height * 3/4), width: 24, height: 24))
