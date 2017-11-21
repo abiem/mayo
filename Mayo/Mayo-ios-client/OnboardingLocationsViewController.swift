@@ -10,6 +10,7 @@ import UIKit
 import CoreLocation
 import AVKit
 import AVFoundation
+import Firebase
 
 
 class OnboardingLocationsViewController: UIViewController {
@@ -19,8 +20,17 @@ class OnboardingLocationsViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         playVideo()
+    FIRDatabase.database().reference().child("users").child((FIRAuth.auth()?.currentUser?.uid)!).child("isDemoTaskShown").observeSingleEvent(of: .value, with: { (snapshot) in
+            if let isIntroTasksDone = snapshot.value as? Bool {
+                if isIntroTasksDone == true {
+                    let defaults = UserDefaults.standard
+                    defaults.set(true, forKey: Constants.ONBOARDING_TASK1_VIEWED_KEY)
+                    defaults.set(true, forKey: Constants.ONBOARDING_TASK2_VIEWED_KEY)
+                    defaults.set(true, forKey: Constants.ONBOARDING_TASK3_VIEWED_KEY)
+                }
+            }
+        })
     }
     
     private func playVideo() {

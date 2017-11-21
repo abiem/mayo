@@ -25,6 +25,11 @@ struct Constants {
     static let STATUS_FOR_TIME_EXPIRED = "Expired due to time limit"
     static let STATUS_FOR_MOVING_OUT = "Expired due to moving out of area"
     
+    // onboarding constants for standard user defaults.
+    static let ONBOARDING_TASK1_VIEWED_KEY = "onboardingTask1Viewed"
+    static let ONBOARDING_TASK2_VIEWED_KEY = "onboardingTask2Viewed"
+    static let ONBOARDING_TASK3_VIEWED_KEY = "onboardingTask3Viewed"
+    
 }
 
 enum locationIconTime : Int {

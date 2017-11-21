@@ -16,6 +16,8 @@ class ChatViewController: JSQMessagesViewController {
     var isFakeTask = false
     var isOwner = false
     var channelRef: FIRDatabaseReference?
+    var taskRef: FIRDatabaseReference?
+    var taskHandler : FIRDatabaseHandle?
     var channelId: String?
     var channelTopic: String?
     var messages = [Message]()
@@ -49,8 +51,10 @@ class ChatViewController: JSQMessagesViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        taskRef = FIRDatabase.database().reference().child("tasks").child(channelId!).child("completed")
         //Chat pods Issue
-            self.topContentAdditionalInset = 0.0
+        self.topContentAdditionalInset = 0.0
+        
         
         // disable swipe to navigate
         self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
@@ -77,12 +81,15 @@ class ChatViewController: JSQMessagesViewController {
         // listen for new messages
         IQKeyboardManager.sharedManager().enable = false
         observeMessages()
+        checkTaskCompletion()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         // remove observer for messages
         IQKeyboardManager.sharedManager().enable = true
         messageRef.removeObserver(withHandle: newMessageRefHandle!)
+        taskRef?.removeObserver(withHandle: taskHandler!)
+        
     }
     
     private func checkColorIndexForCurrentUserIfOwner() {
@@ -110,12 +117,13 @@ class ChatViewController: JSQMessagesViewController {
         // If the text is not empty, the user is typing
         print(textView.text != "")
     }
-    
-    override func didPressSend(_ button: UIButton!, withMessageText text: String!, senderId: String!, senderDisplayName: String!, date: Date!) {
-        
+    override func textViewShouldBeginEditing(_ textView: UITextView) -> Bool {
         if #available(iOS 11.0, *){
             self.topContentAdditionalInset = -64
         }
+        return true
+    }
+    override func didPressSend(_ button: UIButton!, withMessageText text: String!, senderId: String!, senderDisplayName: String!, date: Date!) {
         // check if current user color index is set
         if self.currentUserColorIndex == nil {
             // check if current user is in the conversation
@@ -376,6 +384,20 @@ class ChatViewController: JSQMessagesViewController {
             let colorIndexAsInt = 1
             self.addMessage(withId: id, name: name, text: text, colorIndex: colorIndexAsInt)
             self.finishReceivingMessage()
+            DispatchQueue.main.asyncAfter(deadline: when + 4) {
+             self.navigationController?.popViewController(animated: true)
+            }
         }
     }
+    
+    func checkTaskCompletion() {
+        taskHandler = taskRef?.observe(.value, with: { (snapshot) -> Void in
+             if let isCompleted = snapshot.value as? Bool {
+                if isCompleted ==  true {
+                    self.navigationController?.popViewController(animated: true)
+                }
+            }
+        })
+    }
+    
 }

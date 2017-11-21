@@ -56,4 +56,8 @@ class Reachbility: NSObject {
         }
         reachabilityManager?.startListening()
     }
+    
+    func isReachable() -> Bool {
+        return reachabilityManager?.isReachable ?? false
+    }
 }

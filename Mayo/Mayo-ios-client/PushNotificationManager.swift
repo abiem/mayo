@@ -90,7 +90,7 @@ class PushNotificationManager {
     
     static func sendYouWereThankedNotification(deviceToken: String, _ pTaskDescription: String) {
         
-        if deviceToken.isEmpty || deviceToken.characters.count == 0 {
+        if deviceToken.isEmpty || deviceToken.count == 0 {
             return
         }
         
@@ -102,7 +102,7 @@ class PushNotificationManager {
             "to": "\(deviceToken)",
             "priority": "high",
             "notification": [
-                "body": "🤜🏻🤛🏻The quest \(pTaskDescription) was completed and you were thanked!",
+                "body": "🤜🏻🤛🏻The quest \(pTaskDescription) was completed. Thanks for helping! ",
                 "title": "You were thanked!",
                 "sound": "default"
             ],

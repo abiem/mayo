@@ -12,7 +12,6 @@ target 'Mayo-ios-client' do
   # pin clustering
   pod 'FBAnnotationClusteringSwift'
 
-
   # firebase
   pod 'Firebase'
   pod 'Firebase/Core'
@@ -20,6 +19,7 @@ target 'Mayo-ios-client' do
   pod 'Firebase/Messaging'
   pod 'Firebase/Database'
   pod 'Firebase/Auth'
+  pod 'ReachabilitySwift'
   pod 'IQKeyboardManagerSwift'
   pod 'iCarousel'
   pod 'SwiftMoment'
@@ -28,5 +28,7 @@ target 'Mayo-ios-client' do
   pod 'Crashlytics'
   pod 'SCLAlertView'
   pod 'GeoFire', :git => 'https://github.com/firebase/geofire-objc.git'
+ 
+
 
 end

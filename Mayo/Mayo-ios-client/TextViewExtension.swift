@@ -30,7 +30,7 @@ extension MainViewController: UITextViewDelegate {
         // change the post button isEnabled
         // if there is text inside the textView
         // also check that it is alpha of 1 so it is not the placeholder
-        if textView.alpha == 1 && textView.text.characters.count > 0 {
+        if textView.alpha == 1 && textView.text.count > 0 {
             
             if let post_new_task_button = self.view.viewWithTag(self.POST_NEW_TASK_BUTTON_TAG) as? UIButton {
                 

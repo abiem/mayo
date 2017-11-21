@@ -54,11 +54,6 @@ class MainViewController: UIViewController {
     //rotation key animation
     let kRotationAnimationKey = "com.mayo.rotationanimationkey"
     
-    // onboarding constants for standard user defaults.
-    let ONBOARDING_TASK1_VIEWED_KEY = "onboardingTask1Viewed"
-    let ONBOARDING_TASK2_VIEWED_KEY = "onboardingTask2Viewed"
-    let ONBOARDING_TASK3_VIEWED_KEY = "onboardingTask3Viewed"
-    
     // save the last index for the carousel view
     var lastCardIndex: Int?
     
@@ -165,12 +160,17 @@ class MainViewController: UIViewController {
         //Check Fake tasks are available
         if checkFakeTakViewed() != true {
             let defaults = UserDefaults.standard
-            let boolForTask2 = defaults.bool(forKey: self.ONBOARDING_TASK2_VIEWED_KEY)
+            let boolForTask2 = defaults.bool(forKey: Constants.ONBOARDING_TASK2_VIEWED_KEY)
             // Remove chat task if completed
             if boolForTask2 == true {
                 for (index, element) in tasks.enumerated() {
                     if element?.taskDescription == ONBOARDING_TASK_2_DESCRIPTION {
+                        UpdatePointsServer(1, (FIRAuth.auth()?.currentUser?.uid)!)
+                        self.usersRef?.child((FIRAuth.auth()?.currentUser?.uid)!).child("score").setValue(3)
                         removeOnboardingFakeTask(carousel: carouselView, cardIndex: index)
+                        showUserThankedAnimation()
+                        self.pointsLabel.text = String(2)
+                        
                     }
                 }
                 canCreateNewtask = true
@@ -286,9 +286,9 @@ class MainViewController: UIViewController {
     
     func checkFakeTakViewed() -> Bool {
         let defaults = UserDefaults.standard
-        let boolForTask1 = defaults.bool(forKey: self.ONBOARDING_TASK1_VIEWED_KEY)
-        let boolForTask2 = defaults.bool(forKey: self.ONBOARDING_TASK2_VIEWED_KEY)
-        let boolForTask3 = defaults.bool(forKey: self.ONBOARDING_TASK3_VIEWED_KEY)
+        let boolForTask1 = defaults.bool(forKey: Constants.ONBOARDING_TASK1_VIEWED_KEY)
+        let boolForTask2 = defaults.bool(forKey: Constants.ONBOARDING_TASK2_VIEWED_KEY)
+        let boolForTask3 = defaults.bool(forKey: Constants.ONBOARDING_TASK3_VIEWED_KEY)
         if boolForTask1 != true || boolForTask2 != true || boolForTask3 != true {
             return false
         }
@@ -563,7 +563,7 @@ class MainViewController: UIViewController {
         let defaults = UserDefaults.standard
         
         // get the first bool for the onboarding task
-        let boolForTask1 = defaults.bool(forKey: self.ONBOARDING_TASK1_VIEWED_KEY)
+        let boolForTask1 = defaults.bool(forKey: Constants.ONBOARDING_TASK1_VIEWED_KEY)
         
         // only show the first onboarding task if it hasn't been shown before
         if boolForTask1 != true {
@@ -578,7 +578,7 @@ class MainViewController: UIViewController {
         
             
         // get the second bool for the onboarding task
-        let boolForTask2 = defaults.bool(forKey: self.ONBOARDING_TASK2_VIEWED_KEY)
+        let boolForTask2 = defaults.bool(forKey: Constants.ONBOARDING_TASK2_VIEWED_KEY)
         
         // only show if the second onboarding task if it hasn't been shown before
         if boolForTask2 != true {
@@ -593,7 +593,7 @@ class MainViewController: UIViewController {
         }
         
         // get the third bool for the onboarding task
-        let boolForTask3 = defaults.bool(forKey: self.ONBOARDING_TASK3_VIEWED_KEY)
+        let boolForTask3 = defaults.bool(forKey: Constants.ONBOARDING_TASK3_VIEWED_KEY)
         
         // only show if the third onboarding task if it hasn't been shown before
         if boolForTask3 != true {
@@ -1259,13 +1259,18 @@ class MainViewController: UIViewController {
     
     func removeCarousel(_ index: Int)  {
         UIView.transition(with: carouselView!,
-                                  duration: 0.2,
+                                  duration: 0.5,
                                   options: .transitionCrossDissolve,
                                   animations: { () -> Void in
                                     self.carouselView.currentItemView?.alpha = 0
         },
                                   completion:{ (success) in
-                                    self.carouselView.removeItem(at: index, animated: true)
+                                    if self.tasks.count < index {
+                                     self.carouselView.reloadItem(at: index, animated: true)
+                                    }
+                                    else {
+                                        self.carouselView.reloadData()
+                                    }
                                     
         })
       
@@ -2667,21 +2672,24 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         if cardIndex < 0 || cardIndex >= self.tasks.count {
             return
         }
-        
+    
         // check if one of the onboarding tasks is at the current index
         let currentTask = self.tasks[cardIndex] as! Task
         
         if currentTask.taskDescription == self.ONBOARDING_TASK_1_DESCRIPTION {
             
             // set onboarding task 1 viewed to true
-            defaults.set(true, forKey: self.ONBOARDING_TASK1_VIEWED_KEY)
+            defaults.set(true, forKey: Constants.ONBOARDING_TASK1_VIEWED_KEY)
+            self.pointsLabel.text = String(1)
             self.removeOnboardingFakeTask(carousel: carousel, cardIndex: cardIndex)
             
         }  else if currentTask.taskDescription == self.ONBOARDING_TASK_3_DESCRIPTION {
             
             // set onboarding task 3 viewed to true
-            if defaults.bool(forKey: self.ONBOARDING_TASK2_VIEWED_KEY) == true {
-                defaults.set(true, forKey: self.ONBOARDING_TASK3_VIEWED_KEY)
+            if defaults.bool(forKey: Constants.ONBOARDING_TASK2_VIEWED_KEY) == true {
+                self.usersRef?.child(currentUserId!).child("isDemoTaskShown").setValue(true)
+                self.pointsLabel.text = String(3)
+                defaults.set(true, forKey: Constants.ONBOARDING_TASK3_VIEWED_KEY)
                 self.mapView.removeAnnotations(self.mapView.annotations)
                 self.removeOnboardingFakeTask(carousel: carousel, cardIndex: cardIndex)
                 initUserAuth()
@@ -2703,6 +2711,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                 let customAnnotation = annotation as! CustomFocusTaskMapAnnotation
                 if customAnnotation.currentCarouselIndex == cardIndex {
                     // if its equal to the current index remove it
+                    
                     print("customAnnotation \(customAnnotation.currentCarouselIndex)")
                     self.mapView.removeAnnotation(customAnnotation)
                     return

@@ -105,7 +105,7 @@ class Task: NSObject {
             "taskID": self.taskID!,
             "completeType" : self.completeType ?? "" ,
             "helpedBy" : "" ]
-        tasksRef.child(self.taskID!).setValue(taskDictionary)
+        tasksRef.child(self.taskID!).setValue(taskDictionary) 
         
         //Update Task at user Profile
         updateTasksCreated(userId)
