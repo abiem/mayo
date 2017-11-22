@@ -24,27 +24,7 @@ class ChatViewController: JSQMessagesViewController {
     var currentUserColorIndex: Int? = nil
     var isParticipated = false;
     
-    // array of color hex colors for chat bubbles
-    let chatBubbleColors = [
-        "C2C2C2", // task owner's bubble color gray
-        "08BBDB",
-        "FC8FA3",
-        "9CD72F",
-        "ED801F",
-        "B664C4",
-        "4A4A4A",
-        "4FB5B2",
-        "2F96FF",
-        "E86D5D",
-        "1DAE73",
-        "AC664C",
-        "508FBC",
-        "BCCB4C",
-        "7C3EC1",
-        "D36679",
-        "5AC7CF",
-        "CAA63C"
-    ]
+    
     
     private lazy var messageRef: FIRDatabaseReference = self.channelRef!.child("messages")
     private var newMessageRefHandle: FIRDatabaseHandle?
@@ -317,8 +297,8 @@ class ChatViewController: JSQMessagesViewController {
    
     private func setupOutgoingBubble(colorIndex: Int) -> JSQMessagesBubbleImage {
         let bubbleImageFactory = JSQMessagesBubbleImageFactory()
-        let indexAfterModulo = colorIndex % self.chatBubbleColors.count
-        return bubbleImageFactory!.outgoingMessagesBubbleImage(with: UIColor.hexStringToUIColor(hex: self.chatBubbleColors[indexAfterModulo]))
+        let indexAfterModulo = colorIndex % Constants.chatBubbleColors.count
+        return bubbleImageFactory!.outgoingMessagesBubbleImage(with: UIColor.hexStringToUIColor(hex: Constants.chatBubbleColors[indexAfterModulo]))
     }
     
     // TODO: change the color of the chat user
@@ -326,8 +306,8 @@ class ChatViewController: JSQMessagesViewController {
     // annonymous colors
     private func setupIncomingBubble(colorIndex: Int) -> JSQMessagesBubbleImage {
         let bubbleImageFactory = JSQMessagesBubbleImageFactory()
-        let indexAfterModulo = colorIndex % self.chatBubbleColors.count
-        return bubbleImageFactory!.incomingMessagesBubbleImage(with: UIColor.hexStringToUIColor(hex: self.chatBubbleColors[indexAfterModulo]))//UIColor.jsq_messageBubbleLightGray())
+        let indexAfterModulo = colorIndex % Constants.chatBubbleColors.count
+        return bubbleImageFactory!.incomingMessagesBubbleImage(with: UIColor.hexStringToUIColor(hex: Constants.chatBubbleColors[indexAfterModulo]))//UIColor.jsq_messageBubbleLightGray())
     }
     
     override func collectionView(_ collectionView: JSQMessagesCollectionView!, messageDataForItemAt indexPath: IndexPath!) -> JSQMessageData! {

@@ -37,10 +37,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         IQKeyboardManager.sharedManager().enable = true
         IQKeyboardManager.sharedManager().enableAutoToolbar = false
         IQKeyboardManager.sharedManager().shouldResignOnTouchOutside = true
+        IQKeyboardManager.sharedManager().keyboardDistanceFromTextField = 75
         
         
         //Set Up Fabric Crashlystics
-        Fabric.with([Crashlytics.self])
+        //Fabric.with([Crashlytics.self])
         
         // setup firebase
         FIRApp.configure()

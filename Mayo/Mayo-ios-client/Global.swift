@@ -30,6 +30,28 @@ struct Constants {
     static let ONBOARDING_TASK2_VIEWED_KEY = "onboardingTask2Viewed"
     static let ONBOARDING_TASK3_VIEWED_KEY = "onboardingTask3Viewed"
     
+    // array of color hex colors for chat bubbles
+    static let chatBubbleColors = [
+        "C2C2C2", // task owner's bubble color gray
+        "08BBDB",
+        "FC8FA3",
+        "9CD72F",
+        "ED801F",
+        "B664C4",
+        "4A4A4A",
+        "4FB5B2",
+        "2F96FF",
+        "E86D5D",
+        "1DAE73",
+        "AC664C",
+        "508FBC",
+        "BCCB4C",
+        "7C3EC1",
+        "D36679",
+        "5AC7CF",
+        "CAA63C"
+    ]
+    
 }
 
 enum locationIconTime : Int {
@@ -40,3 +62,5 @@ enum locationIconTime : Int {
     case fifth = 300
     case sixth = 360 // in active users
 }
+
+

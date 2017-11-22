@@ -100,6 +100,7 @@ extension MainViewController: CLLocationManagerDelegate {
             locationManager.stopUpdatingHeading()
             manager.stopMonitoringSignificantLocationChanges()
             //Show Alert For Location permission Denied
+            self.isLocationNotAuthorised = true
             showLocationAlert()
             return
         }
@@ -126,6 +127,6 @@ extension MainViewController: CLLocationManagerDelegate {
             colorTextButton: 0xFFFFFF
         )
     }
-
+    
 
 }

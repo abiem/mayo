@@ -124,7 +124,9 @@ class MainViewController: UIViewController {
     
     // create location manager variable
     var locationManager:CLLocationManager!
-
+    
+    //Notification center
+    private var notification: NSObjectProtocol?
     
     // tasks array for nearby tasks
     var tasks = [Task?]()
@@ -140,7 +142,7 @@ class MainViewController: UIViewController {
     var locationUpdateTimer: Timer? = nil
     var fakeUsersTimer: Timer? = nil
     var fakeUsersCreated = false
-    
+    var isLocationNotAuthorised = false
     
     deinit {
         // get rid of observers when denit
@@ -149,6 +151,8 @@ class MainViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        //Check for location when user come foreground
+        observeUserLocationAuth()
         
         // center map to user's location when map appears
         if let userCoordinate = locationManager.location?.coordinate {
@@ -167,7 +171,7 @@ class MainViewController: UIViewController {
                     if element?.taskDescription == ONBOARDING_TASK_2_DESCRIPTION {
                         UpdatePointsServer(1, (FIRAuth.auth()?.currentUser?.uid)!)
                         self.usersRef?.child((FIRAuth.auth()?.currentUser?.uid)!).child("score").setValue(3)
-                        removeOnboardingFakeTask(carousel: carouselView, cardIndex: index)
+                        removeOnboardingFakeTask(carousel: carouselView, cardIndex: index, userId: (element?.userId)!)
                         showUserThankedAnimation()
                         self.pointsLabel.text = String(2)
                         
@@ -251,6 +255,7 @@ class MainViewController: UIViewController {
         carouselView.isPagingEnabled = true
         carouselView.bounces = true
         carouselView.bounceDistance = 0.2
+        carouselView.scrollSpeed = 1.0
         
         // add gesture swipe to carousel
         // check if current card is a onboarding task by check the description by adding gesture recognizer
@@ -713,11 +718,16 @@ class MainViewController: UIViewController {
     func addMapPin(task: Task, carouselIndex: Int) {
         // add pin for task
         //let annotation = MKPointAnnotation()
-
-        let annotation = CustomTaskMapAnnotation(currentCarouselIndex: carouselIndex, taskUserId: task.userId)
-        annotation.coordinate = CLLocationCoordinate2D(latitude: (task.latitude), longitude: (task.longitude))
-        self.mapView.addAnnotation(annotation)
-        
+        if carouselIndex == 0 {
+            let annotation = CustomFocusTaskMapAnnotation(currentCarouselIndex: carouselIndex, taskUserId: task.userId)
+            annotation.coordinate = CLLocationCoordinate2D(latitude: (task.latitude), longitude: (task.longitude))
+            self.mapView.addAnnotation(annotation)
+        }
+        else {
+            let annotation = CustomTaskMapAnnotation(currentCarouselIndex: carouselIndex, taskUserId: task.userId)
+            annotation.coordinate = CLLocationCoordinate2D(latitude: (task.latitude), longitude: (task.longitude))
+            self.mapView.addAnnotation(annotation)
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -729,6 +739,10 @@ class MainViewController: UIViewController {
         self.navigationController?.isNavigationBarHidden = false
         locationUpdateTimer?.invalidate()
         locationUpdateTimer = nil
+        
+        if let notification = notification {
+            NotificationCenter.default.removeObserver(notification)
+        }
         
     }
     
@@ -1251,11 +1265,44 @@ class MainViewController: UIViewController {
         }
     }
 
-//MARK:- Custome Methods
+//MARK:- Custom Methods
     
     @IBAction func actionMapStartFollow(_ sender: UIButton) {
         mapView.setUserTrackingMode(.follow, animated: true)
     }
+
+    func observeUserLocationAuth()  {
+        notification = NotificationCenter.default.addObserver(forName: .UIApplicationWillEnterForeground, object: nil, queue: .main) {
+            [unowned self] notification in
+            
+            let authorizationStatus = CLLocationManager.authorizationStatus()
+            if (authorizationStatus == .denied || authorizationStatus == .notDetermined) && self.isLocationNotAuthorised  {
+                // User has not authorized access to location information.
+                self.showLocationAlert()
+                return
+            }
+            
+            // do whatever you want when the app is brought back to the foreground
+        }
+    }
+    
+    func sortMessageArray(_ pMessages:NSDictionary) -> [NSDictionary] {
+        var messageArray = [NSDictionary]()
+        let helper = DateStringFormatterHelper()
+        for message in pMessages.allKeys {
+            var messageDic =  pMessages[message] as! [String:Any]
+            messageDic["dateCreated"] = helper.convertStringToDate(datestring: messageDic["dateCreated"] as! String)
+            messageArray.append(messageDic as NSDictionary)
+        }
+        messageArray.sort {
+            item1, item2 in
+            let date1 = item1["dateCreated"] as! Date
+            let date2 = item2["dateCreated"] as! Date
+            return date1.compare(date2) == ComparisonResult.orderedDescending
+        }
+        return messageArray
+    }
+    
     
     func removeCarousel(_ index: Int)  {
         UIView.transition(with: carouselView!,
@@ -1353,7 +1400,7 @@ class MainViewController: UIViewController {
         
     }
     
-    //Start timer to change user lcoation icon
+    //Start timer to change user location icon
     func startUpdationForUserLocation()  {
        self.locationUpdateTimer =  Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { (Timer) in
             for annotation in self.mapView.annotations {
@@ -2039,7 +2086,8 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                 print("users \(users)")
                 print("messages \(messages) keys \(messages.allKeys)")
                 //let username = value?["username"] as? String ?? ""
-                var usersMessagesDictionary: [String:String] = [:]
+                let messagesSorted = self.sortMessageArray(messages)
+                var usersMessagesDictionary: [String:Any] = [:]
                 for userKey in users.allKeys{
                     
                     if let userKeyString = userKey as? String {
@@ -2052,13 +2100,13 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                     // if the current userkey is not the current user
                     // use it to find the last message for this user
                     // add the user key and message to usermessages dictionary
-                        for messageKey in messages.allKeys {
-                            let message = messages[messageKey] as? [String: String]
-                            if userKeyString == message?["senderId"] {
+                        for messageKey in messagesSorted {
+                           // let message = messages[messageKey] as? [String: String]
+                            if userKeyString == messageKey["senderId"] as! String {
                                 
                                 // we found last message for this user,
                                 // add data to users messages dictionary
-                                usersMessagesDictionary[userKeyString] = message?["text"]!
+                                usersMessagesDictionary[userKeyString] = messageKey
                                 break
                             }
                         }
@@ -2103,10 +2151,18 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                 for (userKey, userMessage) in usersMessagesDictionary {
                     // loop through the dictionary and create
                     // a button with message for each of the users up to 5
+                    let message = userMessage as! NSDictionary
                     if count < 5 {
                         //create a button view and add it to the completion view
-                        let chatUserMessageButton = self.createMessageToThankUser(messageText: userMessage, completionView: completionView, tagNumber: count, userId: userKey)
+                        let chatUserMessageButton = self.createMessageToThankUser(messageText: message["text"] as! String , completionView: completionView, tagNumber: count, userId: userKey)
+                        let lineView = UIView(frame: CGRect(x:      0,
+                                                            y:      chatUserMessageButton.frame.size.height-6,
+                                                            width:  chatUserMessageButton.frame.size.width,
+                                                            height: 6.0))
                         
+                        lineView.backgroundColor = UIColor.hexStringToUIColor(hex: Constants.chatBubbleColors[Int(message["colorIndex"] as! String)!])
+                        chatUserMessageButton.addSubview(lineView)
+
                         completionView.addSubview(chatUserMessageButton)
                         // update the count
                         count+=1
@@ -2681,7 +2737,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             // set onboarding task 1 viewed to true
             defaults.set(true, forKey: Constants.ONBOARDING_TASK1_VIEWED_KEY)
             self.pointsLabel.text = String(1)
-            self.removeOnboardingFakeTask(carousel: carousel, cardIndex: cardIndex)
+            self.removeOnboardingFakeTask(carousel: carousel, cardIndex: cardIndex, userId: currentTask.userId)
             
         }  else if currentTask.taskDescription == self.ONBOARDING_TASK_3_DESCRIPTION {
             
@@ -2691,7 +2747,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                 self.pointsLabel.text = String(3)
                 defaults.set(true, forKey: Constants.ONBOARDING_TASK3_VIEWED_KEY)
                 self.mapView.removeAnnotations(self.mapView.annotations)
-                self.removeOnboardingFakeTask(carousel: carousel, cardIndex: cardIndex)
+                self.removeOnboardingFakeTask(carousel: carousel, cardIndex: cardIndex, userId: currentTask.userId)
                 initUserAuth()
             }
             
@@ -2699,7 +2755,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
     }
     
     // remove the task if it is onboarding task
-    func removeOnboardingFakeTask(carousel: iCarousel, cardIndex: Int) {
+    func removeOnboardingFakeTask(carousel: iCarousel, cardIndex: Int, userId: String) {
         // delete that task and card and map icon
         self.tasks.remove(at: cardIndex)
         carouselView.reloadData()
@@ -2709,7 +2765,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         for annotation in self.mapView.annotations {
             if annotation is CustomFocusTaskMapAnnotation  {
                 let customAnnotation = annotation as! CustomFocusTaskMapAnnotation
-                if customAnnotation.currentCarouselIndex == cardIndex {
+                if customAnnotation.taskUserId == userId {
                     // if its equal to the current index remove it
                     
                     print("customAnnotation \(customAnnotation.currentCarouselIndex)")
@@ -2721,7 +2777,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             if annotation is CustomTaskMapAnnotation  {
                 let customAnnotation = annotation as! CustomTaskMapAnnotation
                 
-                if customAnnotation.currentCarouselIndex == cardIndex {
+                if customAnnotation.taskUserId == userId {
                     // if its equal to the current index remove it
                     print("customAnnotation \(customAnnotation.currentCarouselIndex)")
                     self.mapView.removeAnnotation(customAnnotation)
@@ -2820,8 +2876,6 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         // test for bugs for map annotations
         testMapAnnotations()
         
-        self.updateMapAnnotationCardIndexes()
-        
         // use the last item index (it gets updated at the end of the method)
         // and check if the last card is an onboarding task
         if let lastCardIndex = self.lastCardIndex, lastCardIndex != carousel.currentItemIndex {
@@ -2832,81 +2886,88 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             
         }
         
-        // loop through the annotations currently on the map
-        let annotations = self.mapView.annotations
-        for annotation in annotations {
+        let when = DispatchTime.now() + 0.2 // change 2 to desired number of seconds
+        DispatchQueue.main.asyncAfter(deadline: when) {
+           
+            self.updateMapAnnotationCardIndexes()
             
-            // check if the annotation is a custom current user task annotation
-            if annotation is CustomCurrentUserTaskAnnotation{
-                // remove and add it back on
+            // loop through the annotations currently on the map
+            let annotations = self.mapView.annotations
+            for annotation in annotations {
                 
-                // reload annotation
-                let annotationClone = annotation
-                self.mapView.removeAnnotation(annotation)
-                self.mapView.addAnnotation(annotationClone)
+                // check if the annotation is a custom current user task annotation
+                if annotation is CustomCurrentUserTaskAnnotation{
+                    // remove and add it back on
+                    
+                    // reload annotation
+                    let annotationClone = annotation
+                    self.mapView.removeAnnotation(annotation)
+                    self.mapView.addAnnotation(annotationClone)
+                    
+                }
                 
-            }
-            
-            // check for the annotation for current card
-            if annotation is CustomTaskMapAnnotation  {
-                let mapTaskAnnotation = annotation as! CustomTaskMapAnnotation
-                if mapTaskAnnotation.currentCarouselIndex == self.carouselView.currentItemIndex {
-                    // once the right annotation is found
+                // check for the annotation for current card
+                if annotation is CustomTaskMapAnnotation  {
+                    let mapTaskAnnotation = annotation as! CustomTaskMapAnnotation
+                    if mapTaskAnnotation.currentCarouselIndex == self.carouselView.currentItemIndex {
+                        // once the right annotation is found
+                        
+                        // add the annotation with a different class
+                        // create new focus annotation class for the current map icon
+                        let index = self.carouselView.currentItemIndex
+                        
+                        // get user id for the task
+                        let taskUserId = (mapTaskAnnotation.taskUserId != nil) ? mapTaskAnnotation.taskUserId! : ""
+                        
+                        let focusAnnotation = CustomFocusTaskMapAnnotation(currentCarouselIndex: index, taskUserId: taskUserId)
+                        focusAnnotation.coordinate = mapTaskAnnotation.coordinate
+                        self.mapView.addAnnotation(focusAnnotation)
+                        
+                        // remove the annotation from the map
+                        self.mapView.removeAnnotation(mapTaskAnnotation)
+                    }
+                }
                 
-                    // add the annotation with a different class
-                    // create new focus annotation class for the current map icon
+                if annotation is CustomFocusTaskMapAnnotation {
+                    let customFocusTaskAnnotation = annotation as! CustomFocusTaskMapAnnotation
+                    // get the current index
                     let index = self.carouselView.currentItemIndex
                     
-                    // get user id for the task
-                    let taskUserId = (mapTaskAnnotation.taskUserId != nil) ? mapTaskAnnotation.taskUserId! : ""
+                    // get the user id from the annotation
+                    let taskUserId = (customFocusTaskAnnotation.taskUserId != nil) ? customFocusTaskAnnotation.taskUserId! : ""
                     
-                    let focusAnnotation = CustomFocusTaskMapAnnotation(currentCarouselIndex: index, taskUserId: taskUserId)
-                    focusAnnotation.coordinate = mapTaskAnnotation.coordinate
-                    self.mapView.addAnnotation(focusAnnotation)
-                    let focusAnnotationView = self.mapView.view(for: focusAnnotation)
+                    // add regular task icon
+                    let taskAnnoation = CustomTaskMapAnnotation(currentCarouselIndex: index, taskUserId: taskUserId)
+                    taskAnnoation.coordinate = customFocusTaskAnnotation.coordinate
+                    self.mapView.addAnnotation(taskAnnoation)
                     
-                    // remove the annotation from the map
-                    self.mapView.removeAnnotation(mapTaskAnnotation)
+                    // remove focus task icon
+                    self.mapView.removeAnnotation(customFocusTaskAnnotation)
+                }
+                
+            }
+            
+            let taskIndex = self.carouselView.currentItemIndex
+            
+            if taskIndex >= 0 && taskIndex < self.tasks.count {
+                
+                if let task = self.tasks[taskIndex] {
+                    if task.taskDescription != "" {
+                        self.updateViewsCount(task.taskID!)
+                    }
+                    let taskLat = task.latitude
+                    let taskLong = task.longitude
+                    let taskCoordinate = CLLocationCoordinate2D(latitude: taskLat, longitude: taskLong)
+                    self.mapView.setCenter(taskCoordinate, animated: true)
+                    print("map center changed to lat:\(task.latitude) long:\(task.longitude)")
                 }
             }
             
-            if annotation is CustomFocusTaskMapAnnotation {
-                let customFocusTaskAnnotation = annotation as! CustomFocusTaskMapAnnotation
-                // get the current index
-                let index = self.carouselView.currentItemIndex
-                
-                // get the user id from the annotation
-                let taskUserId = (customFocusTaskAnnotation.taskUserId != nil) ? customFocusTaskAnnotation.taskUserId! : ""
-
-                // add regular task icon
-                let taskAnnoation = CustomTaskMapAnnotation(currentCarouselIndex: index, taskUserId: taskUserId)
-                taskAnnoation.coordinate = customFocusTaskAnnotation.coordinate
-                self.mapView.addAnnotation(taskAnnoation)
-                
-                // remove focus task icon
-                self.mapView.removeAnnotation(customFocusTaskAnnotation)
-            }
-            
+            // update the last carousel card index
+            //self.lastCardIndex = carousel.currentItemIndex
         }
         
-        let taskIndex = carouselView.currentItemIndex
         
-        if taskIndex >= 0 && taskIndex < tasks.count {
-            
-            if let task = tasks[taskIndex] {
-                if task.taskDescription != "" {
-                    updateViewsCount(task.taskID!)
-                }
-                let taskLat = task.latitude
-                let taskLong = task.longitude
-                let taskCoordinate = CLLocationCoordinate2D(latitude: taskLat, longitude: taskLong)
-                self.mapView.setCenter(taskCoordinate, animated: true)
-                print("map center changed to lat:\(task.latitude) long:\(task.longitude)")
-            }
-        }
-        
-        // update the last carousel card index
-        //self.lastCardIndex = carousel.currentItemIndex
         
     }
     func carousel(_ carousel: iCarousel, valueFor option: iCarouselOption, withDefault value: CGFloat) -> CGFloat {
