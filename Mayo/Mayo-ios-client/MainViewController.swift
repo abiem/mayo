@@ -19,7 +19,7 @@ import AVKit
 import AVFoundation
 
 class MainViewController: UIViewController {
-
+    
     @IBOutlet weak var carouselView: iCarousel!
     @IBOutlet weak var mapView: MKMapView!
     var lastUpdatedTime : Date?
@@ -143,6 +143,9 @@ class MainViewController: UIViewController {
     var fakeUsersTimer: Timer? = nil
     var fakeUsersCreated = false
     var isLocationNotAuthorised = false
+    
+    //indicator
+    @IBOutlet weak var indicatorView : UIActivityIndicatorView!
     
     deinit {
         // get rid of observers when denit
@@ -368,7 +371,7 @@ class MainViewController: UIViewController {
         flareAnimImageView.image = #imageLiteral(resourceName: "flareImage");
         
         thanksAnimImageView.contentMode = .scaleAspectFit
-        flareAnimImageView.contentMode = .scaleAspectFit
+        flareAnimImageView.contentMode = .scaleAspectFill
         
         let imageListArray: NSMutableArray = []
         for countValue in 1...51
@@ -756,7 +759,7 @@ class MainViewController: UIViewController {
         
        usersEnterCircleQueryHandle = usersCircleQuery?.observe(.keyEntered, with: { (key: String?, location: CLLocation?) in
             print("Key '\(key!)' entered the search are and is at location '\(location!)'")
-        
+    
             let key1 = key?.replacingOccurrences(of: "Optional(\"", with: "")
             let userId = key1?.replacingOccurrences(of: "\")", with: "")
         
@@ -878,7 +881,14 @@ class MainViewController: UIViewController {
     
     // get tasks around current location
     func queryTasksAroundCurrentLocation(latitude: CLLocationDegrees, longitude: CLLocationDegrees) {
+        self.indicatorView.isHidden = false
         
+        let when = DispatchTime.now() + 8
+        DispatchQueue.main.asyncAfter(deadline: when){
+            // When No Task available
+            self.indicatorView.isHidden = true
+        }
+
         let center = CLLocation(latitude: latitude, longitude: longitude)
         
         
@@ -886,6 +896,8 @@ class MainViewController: UIViewController {
         // 200 meters = .2 for geofire units
         tasksCircleQuery = tasksGeoFire?.query(at: center, withRadius: queryDistance/1000)
         
+        //self.removeCircle()
+        //self.addRadiusCircle(location: center)
         tasksDeletedCircleQueryHandle = tasksCircleQuery?.observe(.keyExited, with: { (key: String!, location: CLLocation!) in
             
             // when a new task is deleted
@@ -956,6 +968,7 @@ class MainViewController: UIViewController {
         
         // listen for changes for when new tasks are created
         tasksCircleQueryHandle = tasksCircleQuery?.observe(.keyEntered, with: { (key: String!, location: CLLocation!) in
+            self.indicatorView.isHidden = true
             print("Key '\(key)' entered the search area and is at location '\(location)'")
             
             let taskRef = self.tasksRef?.child(key)
@@ -1267,6 +1280,7 @@ class MainViewController: UIViewController {
 
 //MARK:- Custom Methods
     
+    
     @IBAction func actionMapStartFollow(_ sender: UIButton) {
         mapView.setUserTrackingMode(.follow, animated: true)
     }
@@ -1486,15 +1500,15 @@ class MainViewController: UIViewController {
             //Decode data
             let currentTaskData = UserDefaults.standard.object(forKey: Constants.PENDING_TASKS)
                 if let task = currentTaskData as? Data {
-                
+              
                     if  let dicTask = NSKeyedUnarchiver.unarchiveObject(with: task as! Data) as? Dictionary<String, Any> {
                         let userID = dicTask["userId"] as! String
                         let taskDescription = dicTask["taskDescription"] as! String
                         let latitude = dicTask["latitude"] as! CLLocationDegrees
                         let longitude = dicTask["longitude"] as! CLLocationDegrees
                         let completed = dicTask["completed"] as! Bool
-                        let startColor = dicTask["startColor"] as! String
-                        let endColor = dicTask["endColor"] as! String
+                        let startColor =  dicTask["startColor"] as! String
+                        let endColor =  dicTask["endColor"] as! String
                         let timeCreated = dicTask["timeCreated"] as! Date
                         let timeUpdated = dicTask["timeUpdated"] as! Date
                         let taskID = dicTask["taskID"] as! String

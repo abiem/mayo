@@ -163,4 +163,28 @@ extension MainViewController: MKMapViewDelegate {
         }
         return nil
     }
+    
+    func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
+        if overlay is MKCircle {
+            let circleRenderer = TWOGradientCircleRenderer(overlay: overlay)
+            return circleRenderer
+        } else {
+            return MKOverlayRenderer()
+        }
+    }
+    
+    func addRadiusCircle(location: CLLocation){
+        self.mapView.delegate = self
+        let circle = MKCircle(center: location.coordinate, radius: 200 as CLLocationDistance)
+        self.mapView.add(circle)
+    }
+    
+    func removeCircle() {
+        self.mapView.overlays.forEach {
+            if ($0 is MKCircle) {
+                self.mapView.remove($0)
+            }
+        }
+    }
+
 }

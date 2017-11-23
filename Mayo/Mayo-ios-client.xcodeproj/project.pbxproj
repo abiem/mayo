@@ -117,6 +117,7 @@
 		35F81DA01EA6E2520066439F /* FUX1.4.png in Resources */ = {isa = PBXBuildFile; fileRef = 35F81D9C1EA6E2520066439F /* FUX1.4.png */; };
 		35F81DA21EA72FE30066439F /* CustomUserMapAnnotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35F81DA11EA72FE30066439F /* CustomUserMapAnnotation.swift */; };
 		72B83B7C561184A96CA6184A /* Pods_Mayo_ios_client.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0FED37B2F877E9F57E8E0C07 /* Pods_Mayo_ios_client.framework */; };
+		7B6E3FC51FC6973400919494 /* MKCircleExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B6E3FC41FC6973400919494 /* MKCircleExtension.swift */; };
 		7B7607D21F9DD47A001E2CCA /* Reachbility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B7607D11F9DD479001E2CCA /* Reachbility.swift */; };
 		F80C07961F55D62E00E0F8FB /* PushNotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F80C07951F55D62E00E0F8FB /* PushNotificationManager.swift */; };
 		F80C07981F55D64D00E0F8FB /* Global.swift in Sources */ = {isa = PBXBuildFile; fileRef = F80C07971F55D64D00E0F8FB /* Global.swift */; };
@@ -250,6 +251,7 @@
 		35F81D9C1EA6E2520066439F /* FUX1.4.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = FUX1.4.png; sourceTree = "<group>"; };
 		35F81DA11EA72FE30066439F /* CustomUserMapAnnotation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomUserMapAnnotation.swift; sourceTree = "<group>"; };
 		4C2DCF535B9E43BECA946ED2 /* Pods-Mayo-ios-client.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Mayo-ios-client.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Mayo-ios-client/Pods-Mayo-ios-client.debug.xcconfig"; sourceTree = "<group>"; };
+		7B6E3FC41FC6973400919494 /* MKCircleExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MKCircleExtension.swift; sourceTree = "<group>"; };
 		7B7607D11F9DD479001E2CCA /* Reachbility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reachbility.swift; sourceTree = "<group>"; };
 		7DD01FA87B2CDE0C2F4B9481 /* Pods-Mayo-ios-client.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Mayo-ios-client.release.xcconfig"; path = "Pods/Target Support Files/Pods-Mayo-ios-client/Pods-Mayo-ios-client.release.xcconfig"; sourceTree = "<group>"; };
 		F80C07951F55D62E00E0F8FB /* PushNotificationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PushNotificationManager.swift; sourceTree = "<group>"; };
@@ -478,6 +480,7 @@
 				35B9A85D1EC4D164007E4CF7 /* DateExtension.swift */,
 				359CA4501ED4AE1900B2C350 /* UIColorExtension.swift */,
 				7B7607D11F9DD479001E2CCA /* Reachbility.swift */,
+				7B6E3FC41FC6973400919494 /* MKCircleExtension.swift */,
 			);
 			name = Common;
 			sourceTree = "<group>";
@@ -876,6 +879,7 @@
 				35F43C0F1EB014BD00FCD052 /* CustomFocusTaskMapAnnotation.swift in Sources */,
 				357A16501ED74E5700FDF96A /* TextViewExtension.swift in Sources */,
 				3529A9E31E99936A003C815A /* Task.swift in Sources */,
+				7B6E3FC51FC6973400919494 /* MKCircleExtension.swift in Sources */,
 				3599D7FF1EAA950D008BEE21 /* CustomTaskMapAnnotation.swift in Sources */,
 				35D39E4C1EB85BB800DB41FE /* HorizontalGradientView.swift in Sources */,
 				35F6F3041E9B210400747104 /* GradientView.swift in Sources */,

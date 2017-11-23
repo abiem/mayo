@@ -38,12 +38,17 @@
                                     <action selector="actionMapStartFollow:" destination="BYZ-38-t0r" eventType="touchUpInside" id="0sI-bZ-tzW"/>
                                 </connections>
                             </button>
+                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" animating="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="PlW-He-o8Z">
+                                <rect key="frame" x="178" y="323.5" width="20" height="20"/>
+                            </activityIndicatorView>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="msr-mv-p4J" firstAttribute="bottom" secondItem="Pzq-Yw-fyq" secondAttribute="bottom" id="2yT-Cx-Axy"/>
                             <constraint firstItem="Pzq-Yw-fyq" firstAttribute="trailing" secondItem="zu9-BV-I7e" secondAttribute="trailing" constant="30" id="BPf-L2-zmC"/>
                             <constraint firstItem="msr-mv-p4J" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="-22" id="H2x-I6-qsS"/>
+                            <constraint firstItem="PlW-He-o8Z" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="IN6-nd-a5O"/>
+                            <constraint firstItem="PlW-He-o8Z" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="KU1-Sd-Je5"/>
                             <constraint firstItem="XoD-Fb-pV5" firstAttribute="height" secondItem="msr-mv-p4J" secondAttribute="height" multiplier="35%" id="MTU-0w-5G9"/>
                             <constraint firstItem="Pzq-Yw-fyq" firstAttribute="trailing" secondItem="msr-mv-p4J" secondAttribute="trailing" id="ZRj-OZ-dFE"/>
                             <constraint firstItem="msr-mv-p4J" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="topMargin" constant="-8" id="Zvx-Lz-3p3"/>
@@ -57,6 +62,7 @@
                     <navigationItem key="navigationItem" id="ree-q5-OYT"/>
                     <connections>
                         <outlet property="carouselView" destination="XoD-Fb-pV5" id="Q6w-it-bPZ"/>
+                        <outlet property="indicatorView" destination="PlW-He-o8Z" id="tjD-GE-Kbv"/>
                         <outlet property="mapView" destination="msr-mv-p4J" id="M78-TW-ROU"/>
                         <segue destination="Jg4-hv-oBL" kind="show" identifier="mainToChatVC" id="oYW-4n-a3T"/>
                     </connections>

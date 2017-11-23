@@ -41,7 +41,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         
         
         //Set Up Fabric Crashlystics
-        //Fabric.with([Crashlytics.self])
+        Fabric.with([Crashlytics.self])
         
         // setup firebase
         FIRApp.configure()
@@ -260,12 +260,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
     
     func processMessageNotification(userInfo: [AnyHashable : Any]) {
         
-        let state = UIApplication.shared.applicationState
-        if state == .active {
-
-            // foreground
-            return
-        }
+//        let state = UIApplication.shared.applicationState
+//        if state == .active {
+//
+//            // foreground
+//            return
+//        }
         
         //Get Current ViewController.
         let currentViewController = getCurrentViewController()

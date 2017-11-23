@@ -22,7 +22,7 @@ class PushNotificationManager {
             "notification": [
                 "body": "Someone posted in \(topic)",
                 "title": "New Message Posted",
-                "content_available": true,
+//                "content_available": true,
                 "sound": "default"
             ],
             "data": [
@@ -60,7 +60,7 @@ class PushNotificationManager {
             "notification": [
                 "body": "Someone posted in \(topic)",
                 "title": "New Message Posted",
-                "content_available": true,
+//                "content_available": true,
                 "sound": "default"
             ],
             "data": [
@@ -172,7 +172,7 @@ class PushNotificationManager {
             "notification": [
                 "body": "'The quest \(taskMessage) was completed",
                 "title": "Nearby quest Completed",
-                "content_available": true,
+//                "content_available": true,
                 "sound": "default"
             ],
             "data": [
@@ -208,7 +208,7 @@ class PushNotificationManager {
             "notification": [
                 "body": "The quest \(taskMessage) was completed",
                 "title": "Nearby quest Completed",
-                "content_available": true,
+//                "content_available": true,
                 "sound": "default"
             ],
             "data": [
