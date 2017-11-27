@@ -41,6 +41,7 @@ class MainViewController: UIViewController {
     let POINTS_GRADIENT_VIEW_LABEL_TAG = 103
     let POST_NEW_TASK_BUTTON_TAG = 104
     let POINTS_PROFILE_VIEW_TAG = 105
+    let CURRENT_USER_CANCEL_BUTTON = 106
     
     // z index for map annotations
     let FOCUS_MAP_TASK_ANNOTATION_Z_INDEX = 5.0
@@ -287,7 +288,9 @@ class MainViewController: UIViewController {
         }
         else {
             canCreateNewtask = false
+            getPreviousTask()
             createFakeTasks()
+            initUserAuth()
         }
         
     }
@@ -644,26 +647,14 @@ class MainViewController: UIViewController {
         // create new location coordinate
         let newLoc = CLLocationCoordinate2D(latitude: self.userLatitude! + randomLatOffset, longitude: self.userLongitude! + randomLongOffset)
         
+        //Add Exipre Time for users
+        let calendar = Calendar.current
+        let minutesAgo = generateRandomNumber(endingNumber: 7)
+        let date = calendar.date(byAdding: .minute, value: -minutesAgo, to: Date())
+        
         // annotation for user markers
-        let fakePin = CustomUserMapAnnotation(userId: "", date: Date())
-        
-        fakePin.coordinate = newLoc
-        
-        
-        // add fake user to the map
-        self.mapView.addAnnotation(fakePin)
-        
-        // generate random time interval from 1s to 6 mins
-        let timeInterval = generateWeightedTimeInterval()
-        
-        // remove fake user pin from the map
-        _ = Timer.scheduledTimer(withTimeInterval: TimeInterval(timeInterval), repeats: false) { (Timer) in
-            print("user deleted")
-            UIView.animate(withDuration: 1, animations: {
-                self.mapView.removeAnnotation(fakePin)
-            })
-            Timer.invalidate()
-        }
+        self.addUserPin(latitude: newLoc.latitude, longitude: newLoc.longitude, userId: Constants.FAKE_USER_ID, updatedTime:date! )
+
     }
     
     // creates random degrees offset from .0001 to .001
@@ -751,7 +742,7 @@ class MainViewController: UIViewController {
     
     // query users nearby
     func queryUsersAroundCurrentLocation(latitude: CLLocationDegrees, longitude: CLLocationDegrees) {
-        
+        fakeUsersCreated = false
         // Query locations at latitude, longitutde with a radius of queryDistance
         // 200 meters = .2 for geofire units
         let center = CLLocation(latitude: latitude, longitude: longitude)
@@ -779,9 +770,18 @@ class MainViewController: UIViewController {
                         }
                     }
                 }
-                
-                
+                                
             })
+
+    let when = DispatchTime.now() + 6 // change 6 to desired number of seconds
+    DispatchQueue.main.asyncAfter(deadline: when) {
+        if self.nearbyUsers.count <= 3  && self.fakeUsersCreated == false {
+            self.fakeUsersCreated = true
+            self.createFakeUsers()
+        }
+    }
+        
+
         })
         
         // remove users circle when it leaves
@@ -994,25 +994,6 @@ class MainViewController: UIViewController {
                     // if time difference is greater than 1 hour (3600 seconds)
                     // return and don't add this task to tasks
                     if timeDifference > self.SECONDS_IN_HOUR {
-                        self.tasksRef?.child(snapshot.key).child("completed").setValue(true);
-                        self.tasksRef?.child(snapshot.key).child("completeType").setValue(Constants.STATUS_FOR_TIME_EXPIRED);
-                        for (index, task) in self.tasks.enumerated() {
-                            if task?.taskID == taskDict["taskID"] as? String {
-                                self.tasks.remove(at: index);
-                                self.removeCarousel(index)
-                                self.removeAnnotationForTask((task?.taskID)!)
-                                self.updateMapAnnotationCardIndexes()
-                                if self.tasks.count <= 0 {
-                                    self.carouselView.reloadData()
-                                }
-                            }
-                            else {
-                                
-                                self.tasksRef?.child(taskDict["taskID"] as! String).child("completed").setValue(true);
-                                self.tasksRef?.child(taskDict["taskID"] as! String).child("completeType").setValue(Constants.STATUS_FOR_TIME_EXPIRED);
-                                self.tasksRef?.child(taskDict["taskID"] as! String).child("timeUpdated").setValue(DateStringFormatterHelper().convertDateToString(date: Date()));
-                            }
-                        }
                         return
                     }
                 }
@@ -1090,10 +1071,9 @@ class MainViewController: UIViewController {
                     self.carouselView.reloadData()
                     
                     // scroll to first view only if its on first card
-                    if self.carouselView.currentItemIndex == 0 {
+                    if self.carouselView.currentItemIndex == 0 && self.tasks[self.carouselView.currentItemIndex]?.taskDescription == "" {
                         self.carouselView.scrollToItem(at: 1, animated: false)
                     }
-                    
                     
                     // add map pin for new task
                     // add carousel index
@@ -1130,9 +1110,6 @@ class MainViewController: UIViewController {
                                             self.updateMapAnnotationCardIndexes()
                                         }
                                     }
-                                }
-                                else {
-                                  //  self.carouselView.reloadData()
                                 }
                             
                             }
@@ -1421,7 +1398,17 @@ class MainViewController: UIViewController {
                 if annotation is CustomUserMapAnnotation {
                     let annotationCustom = annotation as! CustomUserMapAnnotation
                     let viewAnnotation = self.mapView.view(for: annotation)
-                    viewAnnotation?.image = self.getUserLocationImage(Date().seconds(from: annotationCustom.lastUpdatedTime ?? Date()))
+                    let imageAnnotation = self.getUserLocationImage(Date().seconds(from: annotationCustom.lastUpdatedTime ?? Date()))
+                    if imageAnnotation != nil {
+                        viewAnnotation?.image = imageAnnotation
+                    }
+                    else {
+                        UIView.animate(withDuration: 0.5, animations: {
+                            viewAnnotation?.alpha = 0.0
+                        }, completion: { (isCompleted) in
+                            self.mapView.removeAnnotation(annotation)
+                        })
+                    }
                 }
             }
             
@@ -1631,7 +1618,6 @@ class MainViewController: UIViewController {
  // Remove task and Update completeion details at Firebase
     func removeTaskAfterComplete(_ currentUserTask: Task)  {
     UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["taskExpirationNotification"])
-        let currentUserKey = FIRAuth.auth()?.currentUser?.uid
         let taskMessage = currentUserTask.taskDescription
         print("taskMessage \(currentUserTask.taskDescription) \(taskMessage)")
         
@@ -1860,7 +1846,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                 let closeView = UIButton(frame: CGRect(x: (tempView.bounds.width * 1/4), y: (tempView.bounds.height * 3/4), width: 24, height: 24))
                 closeView.setImage(UIImage(named: "close"), for: .normal)
                 closeView.addTarget(self, action: #selector(discardCurrentUserTask(sender:)), for: .touchUpInside)
-                
+                closeView.tag = self.CURRENT_USER_CANCEL_BUTTON
                 // check if there are more than 1 card
                 // if there is only 1 card disable the close button
                 if self.tasks.count <= 1 {
@@ -2676,17 +2662,19 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
     
     // action for close button item
     func discardCurrentUserTask(sender: UIButton) {
-        
-        // flip flag for new item swiped
-        self.newItemSwiped = false
-        
-        // and scroll to index 1 task card
-        if (self.carouselView.itemView(at: 1) != nil) {
-            self.carouselView.scrollToItem(at: 1, animated: false)
-        }
-        
-        // reload the first card with animation
-        self.carouselView.reloadItem(at: 0, animated: true)
+        let currentUserTextView = self.view.viewWithTag(self.CURRENT_USER_TEXTVIEW_TAG) as! UITextView
+        currentUserTextView.text = ""
+        sender.isEnabled = false
+//        // flip flag for new item swiped
+//        self.newItemSwiped = false
+//
+//        // and scroll to index 1 task card
+//        if (self.carouselView.itemView(at: 1) != nil) {
+//            self.carouselView.scrollToItem(at: 1, animated: false)
+//        }
+//
+//        // reload the first card with animation
+//        self.carouselView.reloadItem(at: 0, animated: true)
         
     }
     
@@ -2697,9 +2685,9 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         if self.view.frame.origin.y != 0 {
             UIApplication.shared.sendAction(#selector(UIApplication.resignFirstResponder), to: nil, from: nil, for: nil)
         }
-        let currentTask = self.tasks[self.carouselView.currentItemIndex] as! Task
+        let currentTask = self.tasks[self.carouselView.currentItemIndex]
         
-        if currentTask.taskDescription == ONBOARDING_TASK_1_DESCRIPTION ||  currentTask.taskDescription == ONBOARDING_TASK_3_DESCRIPTION {
+        if currentTask?.taskDescription == ONBOARDING_TASK_1_DESCRIPTION ||  currentTask?.taskDescription == ONBOARDING_TASK_3_DESCRIPTION {
             return
         }
     
@@ -2720,8 +2708,12 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         }
         
         if(carousel.scrollOffset < 0.15 && self.newItemSwiped == false && canCreateNewtask == true) {
-
             self.newItemSwiped = true
+            let defaults = UserDefaults.standard
+            let boolForTask3 = defaults.bool(forKey: Constants.ONBOARDING_TASK3_VIEWED_KEY)
+            if boolForTask3 == false {
+                self.checkAndRemoveOnboardingTasks(carousel: carousel, cardIndex: 1)
+            }
             UIView.animate(withDuration: 1, animations: {
                 carousel.reloadItem(at: 0, animated: true)
             })
@@ -2752,6 +2744,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             defaults.set(true, forKey: Constants.ONBOARDING_TASK1_VIEWED_KEY)
             self.pointsLabel.text = String(1)
             self.removeOnboardingFakeTask(carousel: carousel, cardIndex: cardIndex, userId: currentTask.userId)
+            carouselView.scrollToItem(at: cardIndex, animated: false)
             
         }  else if currentTask.taskDescription == self.ONBOARDING_TASK_3_DESCRIPTION {
             
@@ -2760,9 +2753,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                 self.usersRef?.child(currentUserId!).child("isDemoTaskShown").setValue(true)
                 self.pointsLabel.text = String(3)
                 defaults.set(true, forKey: Constants.ONBOARDING_TASK3_VIEWED_KEY)
-                self.mapView.removeAnnotations(self.mapView.annotations)
                 self.removeOnboardingFakeTask(carousel: carousel, cardIndex: cardIndex, userId: currentTask.userId)
-                initUserAuth()
             }
             
         }
@@ -2773,8 +2764,6 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         // delete that task and card and map icon
         self.tasks.remove(at: cardIndex)
         carouselView.reloadData()
-        carouselView.scrollToItem(at: cardIndex, animated: false)
-        
         
         for annotation in self.mapView.annotations {
             if annotation is CustomFocusTaskMapAnnotation  {
@@ -2892,10 +2881,17 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         
         // use the last item index (it gets updated at the end of the method)
         // and check if the last card is an onboarding task
-        if let lastCardIndex = self.lastCardIndex, lastCardIndex != carousel.currentItemIndex {
+        let defaults = UserDefaults.standard
+        let boolForTask1 = defaults.bool(forKey: Constants.ONBOARDING_TASK1_VIEWED_KEY)
+        if let lastCardIndex = self.lastCardIndex, lastCardIndex != carousel.currentItemIndex, boolForTask1 == false {
             let when = DispatchTime.now() + 1 // change 2 to desired number of seconds
             DispatchQueue.main.asyncAfter(deadline: when) {
-                self.checkAndRemoveOnboardingTasks(carousel: carousel, cardIndex: lastCardIndex)
+                if let swipedTask:Task = self.tasks[lastCardIndex] {
+                    if swipedTask.taskDescription == self.ONBOARDING_TASK_1_DESCRIPTION  {
+                            self.checkAndRemoveOnboardingTasks(carousel: carousel, cardIndex: lastCardIndex)
+                    }
+                }
+                
             }
             
         }

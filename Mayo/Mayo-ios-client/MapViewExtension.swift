@@ -42,7 +42,18 @@ extension MainViewController: MKMapViewDelegate {
             let annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: "customUser")
             // get last updated time
             let customAnnotation = annotation as! CustomUserMapAnnotation
-           annotationView.alpha = 0
+            annotationView.alpha = 0
+            //Fake Users
+            if customAnnotation.userId == Constants.FAKE_USER_ID {
+                let currentTime = Date();
+                let timeDifference = currentTime.seconds(from: customAnnotation.lastUpdatedTime!)
+                annotationView.image  = self.getUserLocationImage(timeDifference)
+                UIView.animate(withDuration: 0.4, animations: {
+                    annotationView.alpha = 1
+                })
+                return annotationView
+            }
+           
         self.usersRef?.child(customAnnotation.userId!).child("UpdatedAt").observeSingleEvent(of: .value, with: { (snapshot) in
                 if let updatedTimeString = snapshot.value as? String {
                     let currentTime = Date();
@@ -162,6 +173,7 @@ extension MainViewController: MKMapViewDelegate {
             return #imageLiteral(resourceName: "greenDot")
         }
         return nil
+        
     }
     
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
