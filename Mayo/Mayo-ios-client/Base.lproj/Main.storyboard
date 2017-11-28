@@ -7,7 +7,6 @@
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13527"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
-        <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -26,6 +25,9 @@
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="XoD-Fb-pV5" customClass="iCarousel">
                                 <rect key="frame" x="-6" y="453" width="381" height="214"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="214" id="J6B-wB-FIi"/>
+                                </constraints>
                                 <connections>
                                     <outlet property="dataSource" destination="BYZ-38-t0r" id="7Im-kZ-0t6"/>
                                     <outlet property="delegate" destination="BYZ-38-t0r" id="NA1-It-sA5"/>
@@ -49,7 +51,6 @@
                             <constraint firstItem="msr-mv-p4J" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="-22" id="H2x-I6-qsS"/>
                             <constraint firstItem="PlW-He-o8Z" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="IN6-nd-a5O"/>
                             <constraint firstItem="PlW-He-o8Z" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="KU1-Sd-Je5"/>
-                            <constraint firstItem="XoD-Fb-pV5" firstAttribute="height" secondItem="msr-mv-p4J" secondAttribute="height" multiplier="35%" id="MTU-0w-5G9"/>
                             <constraint firstItem="Pzq-Yw-fyq" firstAttribute="trailing" secondItem="msr-mv-p4J" secondAttribute="trailing" id="ZRj-OZ-dFE"/>
                             <constraint firstItem="msr-mv-p4J" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="topMargin" constant="-8" id="Zvx-Lz-3p3"/>
                             <constraint firstItem="XoD-Fb-pV5" firstAttribute="leading" secondItem="msr-mv-p4J" secondAttribute="leading" id="n3L-jy-COS"/>

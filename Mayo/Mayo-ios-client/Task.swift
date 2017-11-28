@@ -101,14 +101,14 @@ class Task: NSObject {
             "completed": self.completed,
             "startColor": self.startColor,
             "endColor": self.endColor,
-            "createdby": userId,
+            "createdby": self.userId,
             "taskID": self.taskID!,
             "completeType" : self.completeType ?? "" ,
             "helpedBy" : "" ]
         tasksRef.child(self.taskID!).setValue(taskDictionary) 
         
         //Update Task at user Profile
-        updateTasksCreated(userId)
+        updateTasksCreated(self.userId)
         
         // save task location to database with user id as key
         geoFire?.setLocation(CLLocation(latitude:latitude, longitude: longitude), forKey: "\(self.taskID!)") { (error) in

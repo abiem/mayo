@@ -80,9 +80,14 @@ class ChatViewController: JSQMessagesViewController {
                 // if the user id and the channel id match
                 // set the current color index to 0
                 self.currentUserColorIndex = 0
+
                 print("current user color index was set")
             }
+            else if isFakeTask == true {
+                self.currentUserColorIndex = 1
+            }
         }
+        
     }
     
     // create new message
@@ -181,11 +186,32 @@ class ChatViewController: JSQMessagesViewController {
         if isFakeTask {
             let defaults = UserDefaults.standard
             defaults.set(true, forKey: "onboardingTask2Viewed")
+            self.addMessage(withId: self.senderId, name: "", text: text, colorIndex: self.currentUserColorIndex!)
+            self.finishSendingMessage()
             receiveFakeMessage()
         }
         else {
             
             FIRDatabase.database().reference().child("tasks").child(channelId!).child("timeUpdated").setValue(dateCreated)
+            let itemRef = messageRef.childByAutoId()
+            let messageItem = [
+                "senderId": senderId!,
+                "senderName": senderDisplayName!,
+                "text": textToSend!,
+                "colorIndex": "\(self.currentUserColorIndex!)",
+                "dateCreated": dateCreated
+            ]
+            
+            itemRef.setValue(messageItem)
+            
+            JSQSystemSoundPlayer.jsq_playMessageSentSound()
+            if let channelId = self.channelId {
+                
+                self.sendNotificationToTopic(channelId: channelId)
+                
+                FIRMessaging.messaging().subscribe(toTopic: "/topics/\(channelId)")
+                
+            }
         }
         // get the current user's color index if the user is already in the conversation
         
@@ -196,26 +222,6 @@ class ChatViewController: JSQMessagesViewController {
        
         //self.channelRef?.child("updatedAt").setValue(dateCreated)
     
-        
-        let itemRef = messageRef.childByAutoId()
-        let messageItem = [
-            "senderId": senderId!,
-            "senderName": senderDisplayName!,
-            "text": textToSend!,
-            "colorIndex": "\(self.currentUserColorIndex!)",
-            "dateCreated": dateCreated
-        ]
-        
-        itemRef.setValue(messageItem)
-        
-        JSQSystemSoundPlayer.jsq_playMessageSentSound()
-        if let channelId = self.channelId {
-            
-            self.sendNotificationToTopic(channelId: channelId)
-            
-            FIRMessaging.messaging().subscribe(toTopic: "/topics/\(channelId)")
-            
-        }
         finishSendingMessage()
     }
     
@@ -361,7 +367,7 @@ class ChatViewController: JSQMessagesViewController {
             let id = "Robot"
             let name = ""
             let text = "\u{1F631} Woohoo thank you!"
-            let colorIndexAsInt = 1
+            let colorIndexAsInt = 0
             self.addMessage(withId: id, name: name, text: text, colorIndex: colorIndexAsInt)
             self.finishReceivingMessage()
             DispatchQueue.main.asyncAfter(deadline: when + 4) {

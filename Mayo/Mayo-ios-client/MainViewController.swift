@@ -241,7 +241,7 @@ class MainViewController: UIViewController {
         locationManager = CLLocationManager()
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.distanceFilter = 10
+        locationManager.distanceFilter = 20
         locationManager .stopMonitoringSignificantLocationChanges()
         // allows location manager to update location in the background
         locationManager.allowsBackgroundLocationUpdates = true
@@ -775,7 +775,7 @@ class MainViewController: UIViewController {
 
     let when = DispatchTime.now() + 6 // change 6 to desired number of seconds
     DispatchQueue.main.asyncAfter(deadline: when) {
-        if self.nearbyUsers.count <= 3  && self.fakeUsersCreated == false {
+        if self.nearbyUsers.count <= 6  && self.fakeUsersCreated == false {
             self.fakeUsersCreated = true
             self.createFakeUsers()
         }
@@ -1072,6 +1072,7 @@ class MainViewController: UIViewController {
                     
                     // scroll to first view only if its on first card
                     if self.carouselView.currentItemIndex == 0 && self.tasks[self.carouselView.currentItemIndex]?.taskDescription == "" {
+//                        self.newItemSwiped = true
                         self.carouselView.scrollToItem(at: 1, animated: false)
                     }
                     
@@ -1297,17 +1298,16 @@ class MainViewController: UIViewController {
     
     func removeCarousel(_ index: Int)  {
         UIView.transition(with: carouselView!,
-                                  duration: 0.5,
+                                  duration: 0.6,
                                   options: .transitionCrossDissolve,
                                   animations: { () -> Void in
-                                    self.carouselView.currentItemView?.alpha = 0
+                                    self.carouselView.itemView(at: index)?.alpha = 0;
         },
                                   completion:{ (success) in
-                                    if self.tasks.count < index {
-                                     self.carouselView.reloadItem(at: index, animated: true)
-                                    }
-                                    else {
-                                        self.carouselView.reloadData()
+                                     self.carouselView.removeItem(at: index, animated: true)
+                                    
+                                    if self.carouselView.itemView(at: index)?.alpha == 0 {
+                                        self.carouselView.itemView(at: index)?.alpha = 1
                                     }
                                     
         })
@@ -1684,6 +1684,7 @@ class MainViewController: UIViewController {
             let currentUserKey = FIRAuth.auth()?.currentUser?.uid
             self.tasks.insert(Task(userId: currentUserKey!, taskDescription: "", latitude: (self.locationManager.location?.coordinate.latitude) ?? Constants.DEFAULT_LAT , longitude: (self.locationManager.location?.coordinate.longitude) ?? Constants.DEFAULT_LNG , completed: true, taskID: "\(timeStamp)"), at: 0)
         }
+        self.carouselView.reloadData()
         self.carouselView.reloadItem(at: 0, animated: true)
         
         
@@ -1732,16 +1733,9 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         // 1st card if user didn't swipe for new task
         if index == 0 && !self.newItemSwiped && self.tasks.count > 1 && self.currentUserTaskSaved == false && canCreateNewtask == true {
             
-            let tempView = UIView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width * 0.9, height:(UIScreen.main.bounds.height * 0.3)+20))
+            let tempView = UIView(frame: CGRect(x: 0, y: 0, width: 320 * 0.9, height:carousel.frame.size.height-30))
             tempView.backgroundColor = UIColor.clear
             
-            //                let plusView = UIImageView(frame: CGRect(x: 300, y: 91, width: 30, height: 30))
-            //                plusView.image = #imageLiteral(resourceName: "plusIcon")
-            //                tempView.addSubview(plusView)
-            //                tempView.layer.cornerRadius = 4
-            
-            
-            //tempView.layer.cornerRadius = 4
             tempView.layer.shadowColor = UIColor.black.cgColor
             tempView.layer.shadowOffset = CGSize(width: 0, height: 10)  //Here you control x and y
             tempView.layer.shadowOpacity = 0.3
@@ -1760,7 +1754,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             // setup temporary view as gradient view
             
             //carousel.frame.size.height-15
-            let tempView = GradientView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width * 0.9, height:UIScreen.main.bounds.height * 0.3))
+            let tempView = GradientView(frame: CGRect(x: 0, y: 0, width: 320 * 0.9, height:carousel.frame.size.height-30))
             
             
             // get the first task
@@ -1786,6 +1780,8 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                 task.startColor = randomStartColor
                 task.endColor = randomEndColor
                 
+                self.tasks[index] = task
+                
                 // use task's start and end color for the view
                 tempView.startColor = UIColor.hexStringToUIColor(hex: randomStartColor)
                 tempView.endColor = UIColor.hexStringToUIColor(hex: randomEndColor)
@@ -1795,7 +1791,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             
             // width 8.5/10
             //setup textView for gradient viwe
-            let textView = UITextView(frame: CGRect(x: 0, y: 0, width: (tempView.bounds.width*0.9), height: (UIScreen.main.bounds.height*0.3)*3/4))
+            let textView = UITextView(frame: CGRect(x: 0, y: 0, width: (tempView.bounds.width*0.9), height: (carousel.frame.size.height-30)*3/4))
             textView.textColor = UIColor.white
             textView.contentInset = UIEdgeInsets(top: 15, left: 0, bottom: 0, right: 0)
             // turn off auto correction
@@ -1899,7 +1895,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             
             
             // add temp view to shadow view
-            let shadowView = UIView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width * 0.9, height: (UIScreen.main.bounds.height * 0.3)+20))
+            let shadowView = UIView(frame: CGRect(x: 0, y: 0, width: 320 * 0.9, height: (carousel.frame.size.height-30)+20))
             shadowView.backgroundColor = UIColor.clear
             shadowView.layer.shadowColor = UIColor.black.cgColor
             shadowView.layer.shadowOffset = CGSize(width: 0, height: 10)
@@ -1925,7 +1921,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         if (index >= (self.tasks.count)) {
             // create invisible card
             print("clear card created")
-            let tempView = UIView(frame: CGRect(x: 0, y: 0, width: 335, height:UIScreen.main.bounds.height * 0.3))
+            let tempView = UIView(frame: CGRect(x: 0, y: 0, width: 335, height:carousel.frame.size.height-30))
             tempView.backgroundColor = UIColor.clear
             tempView.layer.masksToBounds = false
             return tempView
@@ -1937,7 +1933,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             let task = self.tasks[index] as! Task
             
             // setup temporary view as gradient view
-            let tempView = GradientView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width * 0.9, height:UIScreen.main.bounds.height * 0.3))
+            let tempView = GradientView(frame: CGRect(x: 0, y: 0, width: 320 * 0.9, height:carousel.frame.size.height-30))
             let cardColor = CardColor()
             
             // if task doesn't have a  start color and end color
@@ -1966,7 +1962,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             }
             
             // setup label for gradient view
-            let label = UILabel(frame: CGRect(x: 0, y: 0, width: (tempView.bounds.width*0.9), height: (UIScreen.main.bounds.height * 0.3)*3/4))
+            let label = UILabel(frame: CGRect(x: 0, y: 0, width: (tempView.bounds.width*0.9), height: (carousel.frame.size.height-30)*3/4))
             label.lineBreakMode = NSLineBreakMode.byWordWrapping
             label.numberOfLines = 4
             label.text = task.taskDescription
@@ -1990,7 +1986,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             
             
             // setup clickable button for gradient view
-            let messageButton = UIButton(frame: CGRect(x: 0, y: (UIScreen.main.bounds.height * 0.3)*3/4, width: 150, height: 20))
+            let messageButton = UIButton(frame: CGRect(x: 0, y: (carousel.frame.size.height-30)*3/4, width: 150, height: 20))
             messageButton.center.x = tempView.center.x
             messageButton.setTitle("I can help", for: .normal)
             let messageImage = UIImage(named: "messageImage") as UIImage?
@@ -2007,7 +2003,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             // add temp view to shadow view
             
             
-            let shadowView = UIView(frame: CGRect(x: 0, y: 0, width: Int(UIScreen.main.bounds.width * 0.9), height: Int((UIScreen.main.bounds.height * 0.3)+20)))
+            let shadowView = UIView(frame: CGRect(x: 0, y: 0, width: Int(320 * 0.9), height: Int((carousel.frame.size.height-30)+20)))
             shadowView.backgroundColor = UIColor.clear
             shadowView.layer.shadowColor = UIColor.black.cgColor
             shadowView.layer.shadowOffset = CGSize(width: 0, height: 10)
@@ -2131,10 +2127,10 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                 // complete the current task
                 self.newItemSwiped = false
                 
-                self.carouselView.reloadItem(at: 0, animated: false)
-                
                 // remove task annotation on mapview
                 self.removeCurrentUserTaskAnnotation()
+                
+                self.carouselView.reloadItem(at: 0, animated: false)
                 
                 // create shadow view for completion view
                 let completionShadowView = self.createCompletionShadowView()
@@ -2517,11 +2513,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         // get textview
         let currentUserTextView = self.view.viewWithTag(CURRENT_USER_TEXTVIEW_TAG) as! UITextView
         
-        if self.tasks[0]?.taskDescription != "" {
-            let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
-            let task = Task(userId: self.currentUserId!, taskDescription: "", latitude: self.userLatitude!, longitude: self.userLongitude!, completed: true, timeCreated: Date(), timeUpdated: Date(), taskID: "\(timeStamp)")
-            self.tasks.insert(task, at: 0)
-        }
+     
         if let currentUserTask = self.tasks[0] {
             // taskdescription to be textView
             currentUserTask.latitude = (locationManager.location?.coordinate.latitude)!
@@ -2744,7 +2736,6 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             defaults.set(true, forKey: Constants.ONBOARDING_TASK1_VIEWED_KEY)
             self.pointsLabel.text = String(1)
             self.removeOnboardingFakeTask(carousel: carousel, cardIndex: cardIndex, userId: currentTask.userId)
-            carouselView.scrollToItem(at: cardIndex, animated: false)
             
         }  else if currentTask.taskDescription == self.ONBOARDING_TASK_3_DESCRIPTION {
             
@@ -2763,7 +2754,8 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
     func removeOnboardingFakeTask(carousel: iCarousel, cardIndex: Int, userId: String) {
         // delete that task and card and map icon
         self.tasks.remove(at: cardIndex)
-        carouselView.reloadData()
+        self.carouselView.removeItem(at: cardIndex, animated: true)
+       // carouselView.reloadData()
         
         for annotation in self.mapView.annotations {
             if annotation is CustomFocusTaskMapAnnotation  {
@@ -2883,21 +2875,19 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         // and check if the last card is an onboarding task
         let defaults = UserDefaults.standard
         let boolForTask1 = defaults.bool(forKey: Constants.ONBOARDING_TASK1_VIEWED_KEY)
-        if let lastCardIndex = self.lastCardIndex, lastCardIndex != carousel.currentItemIndex, boolForTask1 == false {
-            let when = DispatchTime.now() + 1 // change 2 to desired number of seconds
-            DispatchQueue.main.asyncAfter(deadline: when) {
-                if let swipedTask:Task = self.tasks[lastCardIndex] {
-                    if swipedTask.taskDescription == self.ONBOARDING_TASK_1_DESCRIPTION  {
-                            self.checkAndRemoveOnboardingTasks(carousel: carousel, cardIndex: lastCardIndex)
-                    }
-                }
-                
-            }
-            
-        }
         
         let when = DispatchTime.now() + 0.2 // change 2 to desired number of seconds
         DispatchQueue.main.asyncAfter(deadline: when) {
+            if let lastCardIndex = self.lastCardIndex, lastCardIndex != carousel.currentItemIndex, boolForTask1 == false {
+                if let swipedTask:Task = self.tasks[self.lastCardIndex!] {
+                    if swipedTask.taskDescription == self.ONBOARDING_TASK_1_DESCRIPTION  {
+                        self.checkAndRemoveOnboardingTasks(carousel: carousel, cardIndex: self.lastCardIndex!)
+                        self.carouselView.scrollToItem(at: self.lastCardIndex!, animated: false)
+                       return
+                        
+                    }
+                }
+            }
            
             self.updateMapAnnotationCardIndexes()
             

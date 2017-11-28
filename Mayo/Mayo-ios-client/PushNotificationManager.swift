@@ -20,7 +20,7 @@ class PushNotificationManager {
             "to": "/topics/\(channelId)",
             "priority": "high",
             "notification": [
-                "body": "Someone posted in \(topic)",
+                "body": "Someone posted in \"\(topic)\"",
                 "title": "New Message Posted",
 //                "content_available": true,
                 "sound": "default"
@@ -58,7 +58,7 @@ class PushNotificationManager {
             "to": "\(device)",
             "priority": "high",
             "notification": [
-                "body": "Someone posted in \(topic)",
+                "body": "Someone posted in \"\(topic)\"",
                 "title": "New Message Posted",
 //                "content_available": true,
                 "sound": "default"
@@ -102,7 +102,7 @@ class PushNotificationManager {
             "to": "\(deviceToken)",
             "priority": "high",
             "notification": [
-                "body": "🤜🏻🤛🏻The quest \(pTaskDescription) was completed. Thanks for helping! ",
+                "body": "🤜🏻🤛🏻 \"\(pTaskDescription)\" was completed. Thanks for helping! ",
                 "title": "You were thanked!",
                 "sound": "default"
             ],
@@ -170,7 +170,7 @@ class PushNotificationManager {
             "to": "/topics/\(channelId)",
             "priority": "high",
             "notification": [
-                "body": "'The quest \(taskMessage) was completed",
+                "body": "\"\(taskMessage)\" was completed",
                 "title": "Nearby quest Completed",
 //                "content_available": true,
                 "sound": "default"
@@ -206,7 +206,7 @@ class PushNotificationManager {
             "to": "\(deviceToken)",
             "priority": "high",
             "notification": [
-                "body": "The quest \(taskMessage) was completed",
+                "body": "\"\(taskMessage)\" was completed",
                 "title": "Nearby quest Completed",
 //                "content_available": true,
                 "sound": "default"

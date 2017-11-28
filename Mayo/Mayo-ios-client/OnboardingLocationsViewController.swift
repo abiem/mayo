@@ -25,9 +25,9 @@ class OnboardingLocationsViewController: UIViewController {
             if let isIntroTasksDone = snapshot.value as? Bool {
                 if isIntroTasksDone == true {
                     let defaults = UserDefaults.standard
-                    defaults.set(true, forKey: Constants.ONBOARDING_TASK1_VIEWED_KEY)
-                    defaults.set(true, forKey: Constants.ONBOARDING_TASK2_VIEWED_KEY)
-                    defaults.set(true, forKey: Constants.ONBOARDING_TASK3_VIEWED_KEY)
+                    defaults.set(false, forKey: Constants.ONBOARDING_TASK1_VIEWED_KEY)
+                    defaults.set(false, forKey: Constants.ONBOARDING_TASK2_VIEWED_KEY)
+                    defaults.set(false, forKey: Constants.ONBOARDING_TASK3_VIEWED_KEY)
                 }
             }
         })
