@@ -42,6 +42,7 @@ class MainViewController: UIViewController {
     let POST_NEW_TASK_BUTTON_TAG = 104
     let POINTS_PROFILE_VIEW_TAG = 105
     let CURRENT_USER_CANCEL_BUTTON = 106
+    let LOADER_VIEW = 107
     
     // z index for map annotations
     let FOCUS_MAP_TASK_ANNOTATION_Z_INDEX = 5.0
@@ -143,7 +144,9 @@ class MainViewController: UIViewController {
     var locationUpdateTimer: Timer? = nil
     var fakeUsersTimer: Timer? = nil
     var fakeUsersCreated = false
+    //Checks
     var isLocationNotAuthorised = false
+    var isLoadingFirebase = false
     
     //indicator
     @IBOutlet weak var indicatorView : UIActivityIndicatorView!
@@ -157,7 +160,9 @@ class MainViewController: UIViewController {
         super.viewDidAppear(animated)
         //Check for location when user come foreground
         observeUserLocationAuth()
-        
+        if isLoadingFirebase {
+            startLoderAnimation()
+        }
         // center map to user's location when map appears
         if let userCoordinate = locationManager.location?.coordinate {
             self.mapView.setCenter(userCoordinate, animated: true)
@@ -289,6 +294,7 @@ class MainViewController: UIViewController {
         else {
             canCreateNewtask = false
             getPreviousTask()
+            isLoadingFirebase = false
             createFakeTasks()
             initUserAuth()
         }
@@ -320,7 +326,7 @@ class MainViewController: UIViewController {
                 // TODO fix
                 let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
                 tasks.append(
-                    Task(userId: currentUserId!, taskDescription: "", latitude: self.userLatitude!, longitude: self.userLongitude!, completed: true, timeCreated: Date(), timeUpdated: Date(), taskID: "\(timeStamp)")
+                    Task(userId: currentUserId!, taskDescription: "loading", latitude: self.userLatitude!, longitude: self.userLongitude!, completed: true, timeCreated: Date(), timeUpdated: Date(), taskID: "\(timeStamp)")
                 )
                 carouselView.reloadData()
             }
@@ -727,6 +733,7 @@ class MainViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         // hides navigation bar for home viewcontroller
         self.navigationController?.isNavigationBarHidden = true
+        
     }
     override func viewWillDisappear(_ animated: Bool) {
         // show navigation bar on chat view controller
@@ -886,7 +893,7 @@ class MainViewController: UIViewController {
         let when = DispatchTime.now() + 8
         DispatchQueue.main.asyncAfter(deadline: when){
             // When No Task available
-            self.indicatorView.isHidden = true
+            self.removeFirebaseLoader()
         }
 
         let center = CLLocation(latitude: latitude, longitude: longitude)
@@ -968,8 +975,10 @@ class MainViewController: UIViewController {
         
         // listen for changes for when new tasks are created
         tasksCircleQueryHandle = tasksCircleQuery?.observe(.keyEntered, with: { (key: String!, location: CLLocation!) in
-            self.indicatorView.isHidden = true
             print("Key '\(key)' entered the search area and is at location '\(location)'")
+            
+            //Remove loader
+            self.removeFirebaseLoader()
             
             let taskRef = self.tasksRef?.child(key)
             self.tasksRefHandle = taskRef?.observe(FIRDataEventType.value, with: { (snapshot) in
@@ -1032,6 +1041,7 @@ class MainViewController: UIViewController {
                        
                     }
                     
+                    //Send Task notification
                     self.sendNewTaskNotification()
                     
                     // adds key for task to chat channels array
@@ -1064,17 +1074,17 @@ class MainViewController: UIViewController {
                         newTask.setGradientColors(startColor: nil, endColor: nil)
                     }
                     
-                    
                     self.tasks.append(newTask)
                     print("tasks: \(self.tasks)")
                     print("tasks count: \(self.tasks.count)")
-                    self.carouselView.reloadData()
+                    
+                    self.carouselView.insertItem(at: self.tasks.count-1, animated: true)
                     
                     // scroll to first view only if its on first card
-                    if self.carouselView.currentItemIndex == 0 && self.tasks[self.carouselView.currentItemIndex]?.taskDescription == "" {
-//                        self.newItemSwiped = true
-                        self.carouselView.scrollToItem(at: 1, animated: false)
-                    }
+//                    if self.carouselView.currentItemIndex == 0 && self.tasks[self.carouselView.currentItemIndex]?.taskDescription == "" {
+////                        self.newItemSwiped = true
+//                        self.carouselView.scrollToItem(at: 1, animated: false)
+//                    }
                     
                     // add map pin for new task
                     // add carousel index
@@ -1480,10 +1490,37 @@ class MainViewController: UIViewController {
         locationManager.startMonitoringSignificantLocationChanges()
     }
     
+    func removeFirebaseLoader() {
+        if self.isLoadingFirebase != false {
+            self.isLoadingFirebase = false
+            if (self.userLatitude != nil && self.userLongitude != nil) {
+                // TODO fix
+                let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
+                self.tasks.append(
+                    Task(userId: self.currentUserId!, taskDescription: "", latitude: self.userLatitude!, longitude: self.userLongitude!, completed: true, timeCreated: Date(), timeUpdated: Date(), taskID: "\(timeStamp)")
+                )
+                self.carouselView.insertItem(at: 1, animated: true)
+            }
+            self.tasks.remove(at: 0)
+            self.carouselView.removeItem(at: 0, animated: true)
+            self.carouselView.perform(#selector(self.carouselView.reloadData), with: nil, afterDelay: 0.1)
+        }
+        self.indicatorView.isHidden = true
+    }
+    
+    func startLoderAnimation() {
+        if let animationView = self.view.viewWithTag(self.LOADER_VIEW) {
+            animationView.alpha = 0.3
+            UIView.animate(withDuration: 1, delay: 0, options: [.repeat,.autoreverse], animations: {
+                animationView.alpha = 0.8
+            }, completion: nil)
+        }
+    }
+    
+    
     //get Previous Task saved in user Defaults
     func getPreviousTask()  {
         if (UserDefaults.standard.object(forKey: Constants.PENDING_TASKS) != nil) {
-            print("Yes task Exist");
             //Decode data
             let currentTaskData = UserDefaults.standard.object(forKey: Constants.PENDING_TASKS)
                 if let task = currentTaskData as? Data {
@@ -1515,7 +1552,7 @@ class MainViewController: UIViewController {
                             self.newItemSwiped = true
                             self.currentUserTaskSaved = true
                             self.tasks.append(currentTask)
-                            
+                        
                             //add new annotation to the map for the current user's task
                             let currentUserMapTaskAnnotation = CustomCurrentUserTaskAnnotation(currentCarouselIndex: 0)
                             // set location for the annotation
@@ -1528,8 +1565,16 @@ class MainViewController: UIViewController {
                         //}
                     
                     }
+                    else {
+                        self.currentUserTaskSaved = false
+                        isLoadingFirebase = true
+                    }
                 
             }
+        }
+        else {
+            self.currentUserTaskSaved = false
+            isLoadingFirebase = true
         }
     }
     
@@ -1729,6 +1774,29 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         
         print("index hit: \(index)")
         
+        if index == 0 && isLoadingFirebase == true  {
+            let tempView = UIView(frame: CGRect(x: 0, y: 0, width: 320 * 0.9, height:carousel.frame.size.height-30))
+            tempView.backgroundColor = UIColor.white
+            tempView.tag = self.LOADER_VIEW
+            tempView.layer.shadowColor = UIColor.black.cgColor
+            tempView.layer.shadowOffset = CGSize(width: 0, height: 10)  //Here you control x and y
+            tempView.layer.shadowOpacity = 0.3
+            tempView.layer.shadowRadius = 15.0 //Here your control your blur
+            tempView.layer.masksToBounds =  false
+            tempView.alpha = 0.3
+            // add temp view to shadow view
+            let shadowView = UIView(frame: CGRect(x: 0, y: 0, width: 320 * 0.9, height: (carousel.frame.size.height-30)+20))
+            shadowView.backgroundColor = UIColor.clear
+            shadowView.layer.shadowColor = UIColor.black.cgColor
+            shadowView.layer.shadowOffset = CGSize(width: 0, height: 10)
+            shadowView.layer.shadowOpacity = 0.3
+            shadowView.layer.shadowRadius = 15.0
+            
+            shadowView.addSubview(tempView)
+            
+            return shadowView
+        }
+        
         // width 335
         // 1st card if user didn't swipe for new task
         if index == 0 && !self.newItemSwiped && self.tasks.count > 1 && self.currentUserTaskSaved == false && canCreateNewtask == true {
@@ -1843,21 +1911,12 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                 closeView.setImage(UIImage(named: "close"), for: .normal)
                 closeView.addTarget(self, action: #selector(discardCurrentUserTask(sender:)), for: .touchUpInside)
                 closeView.tag = self.CURRENT_USER_CANCEL_BUTTON
+               
+                closeView.alpha = 0.5
+                closeView.isEnabled = false
                 // check if there are more than 1 card
                 // if there is only 1 card disable the close button
-                if self.tasks.count <= 1 {
-                    
-                    // disable the close view
-                    closeView.alpha = 0.5
-                    closeView.isEnabled = false
-                    
-                } else {
-                    
-                    // enable the close view
-                    closeView.alpha = 1
-                    closeView.isEnabled = true
-                    
-                }
+                
                 
                 tempView.addSubview(closeView)
             }
@@ -2656,18 +2715,9 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
     func discardCurrentUserTask(sender: UIButton) {
         let currentUserTextView = self.view.viewWithTag(self.CURRENT_USER_TEXTVIEW_TAG) as! UITextView
         currentUserTextView.text = ""
-        sender.isEnabled = false
-//        // flip flag for new item swiped
-//        self.newItemSwiped = false
-//
-//        // and scroll to index 1 task card
-//        if (self.carouselView.itemView(at: 1) != nil) {
-//            self.carouselView.scrollToItem(at: 1, animated: false)
-//        }
-//
-//        // reload the first card with animation
-//        self.carouselView.reloadItem(at: 0, animated: true)
         
+        sender.alpha = 0.5
+        sender.isEnabled = false   
     }
     
     // action for chat to go to chat window

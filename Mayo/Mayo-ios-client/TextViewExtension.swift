@@ -34,6 +34,7 @@ extension MainViewController: UITextViewDelegate {
             
             if let post_new_task_button = self.view.viewWithTag(self.POST_NEW_TASK_BUTTON_TAG) as? UIButton {
                 if let cancelButton = self.view.viewWithTag(self.CURRENT_USER_CANCEL_BUTTON) as? UIButton {
+                    cancelButton.alpha = 1
                     cancelButton.isEnabled = true
                 }
                 // set post new task button to enabled
@@ -50,6 +51,7 @@ extension MainViewController: UITextViewDelegate {
             if let post_new_task_button = self.view.viewWithTag(self.POST_NEW_TASK_BUTTON_TAG) as? UIButton {
                 
                 if let cancelButton = self.view.viewWithTag(self.CURRENT_USER_CANCEL_BUTTON) as? UIButton {
+                    cancelButton.alpha = 0.5
                     cancelButton.isEnabled = false
                 }
                 // set post new task button to enabled
