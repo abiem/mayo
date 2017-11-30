@@ -13,7 +13,7 @@ import SCLAlertView
 extension MainViewController: CLLocationManagerDelegate {
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        // if the user moves 10 m
+        // if the user moves 20 m
         self.addCurrentUserLocationToFirebase()
         
         if self.tasks.count == 0 && checkFakeTakViewed() == true {

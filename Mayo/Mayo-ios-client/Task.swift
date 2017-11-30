@@ -101,7 +101,7 @@ class Task: NSObject {
             "completed": self.completed,
             "startColor": self.startColor,
             "endColor": self.endColor,
-            "createdby": self.userId,
+            "createdby": FIRAuth.auth()?.currentUser?.uid ?? self.userId,
             "taskID": self.taskID!,
             "completeType" : self.completeType ?? "" ,
             "helpedBy" : "" ]

@@ -31,10 +31,9 @@ class ChatViewController: JSQMessagesViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        taskRef = FIRDatabase.database().reference().child("tasks").child(channelId!).child("completed")
-        //Chat pods Issue
-        self.topContentAdditionalInset = 0.0
+        taskRef = FIRDatabase.database().reference().child("tasks").child(channelId!)
         
+        self.topContentAdditionalInset = 0.0
         
         // disable swipe to navigate
         self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
@@ -68,25 +67,31 @@ class ChatViewController: JSQMessagesViewController {
         // remove observer for messages
         IQKeyboardManager.sharedManager().enable = true
         messageRef.removeObserver(withHandle: newMessageRefHandle!)
-        taskRef?.removeObserver(withHandle: taskHandler!)
+        taskRef?.child("completed").removeObserver(withHandle: taskHandler!)
         
     }
     
     private func checkColorIndexForCurrentUserIfOwner() {
         // set the color index to 0 if the current channel was created
         // by the current user
-        if isOwner {
-            if FIRAuth.auth()?.currentUser?.uid == channelId {
-                // if the user id and the channel id match
-                // set the current color index to 0
-                self.currentUserColorIndex = 0
-
-                print("current user color index was set")
-            }
-            else if isFakeTask == true {
-                self.currentUserColorIndex = 1
-            }
+        if isFakeTask == true {
+            self.currentUserColorIndex = 1
         }
+        else {
+            taskRef?.child("createdby").observe(.value, with: { (snapshot) -> Void in
+                if let user = snapshot.value as? String {
+                    if user == FIRAuth.auth()?.currentUser?.uid {
+                        // if the user id and the channel id match
+                        // set the current color index to 0
+                        self.currentUserColorIndex = 0
+                        self.isOwner = true
+                        print("current user color index was set")
+                    }
+                }
+            })
+        }
+            
+        
         
     }
     
@@ -377,7 +382,7 @@ class ChatViewController: JSQMessagesViewController {
     }
     
     func checkTaskCompletion() {
-        taskHandler = taskRef?.observe(.value, with: { (snapshot) -> Void in
+        taskHandler = taskRef?.child("completed").observe(.value, with: { (snapshot) -> Void in
              if let isCompleted = snapshot.value as? Bool {
                 if isCompleted ==  true {
                     self.navigationController?.popViewController(animated: true)

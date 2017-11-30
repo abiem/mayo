@@ -362,6 +362,7 @@ class MainViewController: UIViewController {
         self.getCurrentUserLocation()
         if self.locationManager.location != nil {
             self.usersGeoFire?.setLocation( self.locationManager.location, forKey: "\(String(describing: FIRAuth.auth()?.currentUser?.uid))")
+            
         }
         
         //Updated Time
@@ -1077,8 +1078,9 @@ class MainViewController: UIViewController {
                     self.tasks.append(newTask)
                     print("tasks: \(self.tasks)")
                     print("tasks count: \(self.tasks.count)")
+                    self.newItemSwiped = true
                     
-                    self.carouselView.insertItem(at: self.tasks.count-1, animated: true)
+                    self.carouselView.reloadData()
                     
                     // scroll to first view only if its on first card
 //                    if self.carouselView.currentItemIndex == 0 && self.tasks[self.carouselView.currentItemIndex]?.taskDescription == "" {
@@ -1105,7 +1107,6 @@ class MainViewController: UIViewController {
                             self.updateMapAnnotationCardIndexes()
                             
                                 if self.tasks.count == 0 {
-                                    self.currentUserTaskSaved = false
                                     UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
                                     if (self.tasks.count == 0) {
                                         print("current user task created")
@@ -1192,7 +1193,15 @@ class MainViewController: UIViewController {
             self.userLatitude = Constants.DEFAULT_LAT;
             self.userLongitude = Constants.DEFAULT_LNG;
         }
-        
+        if self.tasks.count > 0 {
+            if let currentTask =  self.tasks[0] {
+                if (self.userLatitude != nil && self.userLongitude != nil && currentTask.taskDescription == "") {
+                    currentTask.latitude = self.userLatitude!
+                    currentTask.longitude = self.userLongitude!
+                    self.tasks[0] = currentTask
+                }
+            }
+        }
         print("current lat = \(String(describing: self.userLatitude))")
         print("current lng = \(String(describing: self.userLongitude))")
     }
@@ -1276,7 +1285,7 @@ class MainViewController: UIViewController {
     func observeUserLocationAuth()  {
         notification = NotificationCenter.default.addObserver(forName: .UIApplicationWillEnterForeground, object: nil, queue: .main) {
             [unowned self] notification in
-            
+            self.addCurrentUserLocationToFirebase()
             let authorizationStatus = CLLocationManager.authorizationStatus()
             if (authorizationStatus == .denied || authorizationStatus == .notDetermined) && self.isLocationNotAuthorised  {
                 // User has not authorized access to location information.
@@ -1503,7 +1512,8 @@ class MainViewController: UIViewController {
             }
             self.tasks.remove(at: 0)
             self.carouselView.removeItem(at: 0, animated: true)
-            self.carouselView.perform(#selector(self.carouselView.reloadData), with: nil, afterDelay: 0.1)
+            self.carouselView.reloadItem(at: 0, animated: false)
+            //self.carouselView.perform(#selector(self.carouselView.reloadData), with: nil, afterDelay: 0.1)
         }
         self.indicatorView.isHidden = true
     }
@@ -2184,7 +2194,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                 self.carouselView.isHidden = true
                 
                 // complete the current task
-                self.newItemSwiped = false
+                self.newItemSwiped = true
                 
                 // remove task annotation on mapview
                 self.removeCurrentUserTaskAnnotation()
@@ -2423,6 +2433,11 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             completionView?.alpha = 0
         }) { _ in
             
+            //scroll to first item if there is one
+            if self.carouselView.itemView(at: 1) != nil {
+                self.carouselView.scrollToItem(at: 1, animated: false)
+            }
+            
             let usersToThankCopy = self.usersToThank
             
             //update Complete task Status
@@ -2579,7 +2594,8 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             currentUserTask.longitude = (locationManager.location?.coordinate.longitude)!
             currentUserTask.completed = false
             currentUserTask.taskDescription = currentUserTextView.text
-            
+            //Current Task Created
+            self.currentUserTaskSaved = true
             // save the user's current task
             currentUserTask.save()
             //Local Notification Implemented
@@ -2619,13 +2635,6 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             currentUserMapTaskAnnotation.coordinate = (locationManager.location?.coordinate)!
             self.mapView.addAnnotation(currentUserMapTaskAnnotation)
             
-            // subscribe current user to their own channel when 
-            // task is created
-            if let channelId = currentUserTask.taskID
-            {
-                FIRMessaging.messaging().subscribe(toTopic: "/topics/\(channelId)")
-            }
-            
             // Send Push notification to nearby users.
             sendPushNotificationToNearbyUsers()
             
@@ -2633,10 +2642,12 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             // the same when timer is done
 //          startTimer(SECONDS_IN_HOUR)
             checkTaskTimeLeft()
+            self.carouselView.reloadItem(at: 0, animated: true)
             
         }
-        self.currentUserTaskSaved = true
-        self.carouselView.reloadItem(at: 0, animated: false)
+        
+        self.carouselView.reloadItem(at: 0, animated: true)
+        
     }
     
     func sendPushNotificationToNearbyUsers() {
@@ -2714,10 +2725,16 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
     // action for close button item
     func discardCurrentUserTask(sender: UIButton) {
         let currentUserTextView = self.view.viewWithTag(self.CURRENT_USER_TEXTVIEW_TAG) as! UITextView
-        currentUserTextView.text = ""
+        currentUserTextView.resignFirstResponder()
+        currentUserTextView.text = "What do you need help with?"
+        currentUserTextView.alpha = 0.5
         
         sender.alpha = 0.5
-        sender.isEnabled = false   
+        sender.isEnabled = false
+        if let post_new_task_button = self.view.viewWithTag(self.POST_NEW_TASK_BUTTON_TAG) as? UIButton {
+            post_new_task_button.alpha = 0.5
+            post_new_task_button.isEnabled = false
+        }
     }
     
     // action for chat to go to chat window
