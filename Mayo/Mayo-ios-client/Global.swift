@@ -20,6 +20,8 @@ struct Constants {
     static let THANKS_ANIMATION_DURATION = 5.0
     static let PENDING_TASKS = "PendingTask"
     
+    static let FONT_NAME = "SanFranciscoText-Regular"
+    
     static let STATUS_FOR_THANKED = "Owner marked as done and the people all thanked for"
     static let STATUS_FOR_NOT_HELPED = "Owner marked as done and no one helped"
     static let STATUS_FOR_TIME_EXPIRED = "Expired due to time limit"

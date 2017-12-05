@@ -1785,7 +1785,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         print("index hit: \(index)")
         
         if index == 0 && isLoadingFirebase == true  {
-            let tempView = UIView(frame: CGRect(x: 0, y: 0, width: 320 * 0.9, height:carousel.frame.size.height-30))
+            let tempView = UIView(frame: CGRect(x: 0, y: 0, width: 320 * 0.9, height:carousel.frame.size.height-50))
             tempView.backgroundColor = UIColor.white
             tempView.tag = self.LOADER_VIEW
             tempView.layer.shadowColor = UIColor.black.cgColor
@@ -1795,7 +1795,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             tempView.layer.masksToBounds =  false
             tempView.alpha = 0.3
             // add temp view to shadow view
-            let shadowView = UIView(frame: CGRect(x: 0, y: 0, width: 320 * 0.9, height: (carousel.frame.size.height-30)+20))
+            let shadowView = UIView(frame: CGRect(x: 0, y: 0, width: 320 * 0.9, height: (carousel.frame.size.height-50)+20))
             shadowView.backgroundColor = UIColor.clear
             shadowView.layer.shadowColor = UIColor.black.cgColor
             shadowView.layer.shadowOffset = CGSize(width: 0, height: 10)
@@ -1811,7 +1811,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         // 1st card if user didn't swipe for new task
         if index == 0 && !self.newItemSwiped && self.tasks.count > 1 && self.currentUserTaskSaved == false && canCreateNewtask == true {
             
-            let tempView = UIView(frame: CGRect(x: 0, y: 0, width: 320 * 0.9, height:carousel.frame.size.height-30))
+            let tempView = UIView(frame: CGRect(x: 0, y: 0, width: 320 * 0.9, height:carousel.frame.size.height-50))
             tempView.backgroundColor = UIColor.clear
             
             tempView.layer.shadowColor = UIColor.black.cgColor
@@ -1832,7 +1832,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             // setup temporary view as gradient view
             
             //carousel.frame.size.height-15
-            let tempView = GradientView(frame: CGRect(x: 0, y: 0, width: 320 * 0.9, height:carousel.frame.size.height-30))
+            let tempView = GradientView(frame: CGRect(x: 0, y: 0, width: 320 * 0.9, height:carousel.frame.size.height-50))
             
             
             // get the first task
@@ -1869,7 +1869,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             
             // width 8.5/10
             //setup textView for gradient viwe
-            let textView = UITextView(frame: CGRect(x: 0, y: 0, width: (tempView.bounds.width*0.9), height: (carousel.frame.size.height-30)*3/4))
+            let textView = UITextView(frame: CGRect(x: 0, y: 0, width: (tempView.bounds.width*0.9), height: (carousel.frame.size.height-50)*3/4))
             textView.textColor = UIColor.white
             textView.contentInset = UIEdgeInsets(top: 15, left: 0, bottom: 0, right: 0)
             // turn off auto correction
@@ -1964,7 +1964,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             
             
             // add temp view to shadow view
-            let shadowView = UIView(frame: CGRect(x: 0, y: 0, width: 320 * 0.9, height: (carousel.frame.size.height-30)+20))
+            let shadowView = UIView(frame: CGRect(x: 0, y: 0, width: 320 * 0.9, height: (carousel.frame.size.height-50)+20))
             shadowView.backgroundColor = UIColor.clear
             shadowView.layer.shadowColor = UIColor.black.cgColor
             shadowView.layer.shadowOffset = CGSize(width: 0, height: 10)
@@ -1974,13 +1974,16 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             shadowView.addSubview(tempView)
             
             // add instructions for "Automatically expires in 1hr or if you leave the area" at bottom label
-            let bottomNoticeLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 350, height: 20))
+            let bottomNoticeLabel = UILabel(frame: CGRect(x: 0, y: 10, width: 320 * 0.9, height: 20))
             bottomNoticeLabel.textColor = UIColor.white
             bottomNoticeLabel.text = "Automatically expires in 1hr or if you leave the area"
             bottomNoticeLabel.textAlignment = .center
-            bottomNoticeLabel.font = UIFont.systemFont(ofSize: 11)
+            bottomNoticeLabel.font = UIFont.init(name: Constants.FONT_NAME, size: 13)
+            bottomNoticeLabel.numberOfLines = 1
+            bottomNoticeLabel.adjustsFontSizeToFitWidth = true
+            bottomNoticeLabel.minimumScaleFactor = 0.5
             bottomNoticeLabel.center.x = tempView.center.x
-            bottomNoticeLabel.center.y = tempView.bounds.maxY + 8
+            bottomNoticeLabel.center.y = tempView.bounds.maxY + 12
             shadowView.addSubview(bottomNoticeLabel)
             
             return shadowView
@@ -1990,7 +1993,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         if (index >= (self.tasks.count)) {
             // create invisible card
             print("clear card created")
-            let tempView = UIView(frame: CGRect(x: 0, y: 0, width: 335, height:carousel.frame.size.height-30))
+            let tempView = UIView(frame: CGRect(x: 0, y: 0, width: 335, height:carousel.frame.size.height-50))
             tempView.backgroundColor = UIColor.clear
             tempView.layer.masksToBounds = false
             return tempView
@@ -2002,7 +2005,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             let task = self.tasks[index] as! Task
             
             // setup temporary view as gradient view
-            let tempView = GradientView(frame: CGRect(x: 0, y: 0, width: 320 * 0.9, height:carousel.frame.size.height-30))
+            let tempView = GradientView(frame: CGRect(x: 0, y: 0, width: 320 * 0.9, height:carousel.frame.size.height-50))
             let cardColor = CardColor()
             
             // if task doesn't have a  start color and end color
@@ -2031,7 +2034,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             }
             
             // setup label for gradient view
-            let label = UILabel(frame: CGRect(x: 0, y: 0, width: (tempView.bounds.width*0.9), height: (carousel.frame.size.height-30)*3/4))
+            let label = UILabel(frame: CGRect(x: 0, y: 0, width: (tempView.bounds.width*0.9), height: (carousel.frame.size.height-50)*3/4))
             label.lineBreakMode = NSLineBreakMode.byWordWrapping
             label.numberOfLines = 4
             label.text = task.taskDescription
@@ -2055,7 +2058,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             
             
             // setup clickable button for gradient view
-            let messageButton = UIButton(frame: CGRect(x: 0, y: (carousel.frame.size.height-30)*3/4, width: 150, height: 20))
+            let messageButton = UIButton(frame: CGRect(x: 0, y: (carousel.frame.size.height-50)*3/4, width: 150, height: 20))
             messageButton.center.x = tempView.center.x
             messageButton.setTitle("I can help", for: .normal)
             let messageImage = UIImage(named: "messageImage") as UIImage?
@@ -2072,7 +2075,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             // add temp view to shadow view
             
             
-            let shadowView = UIView(frame: CGRect(x: 0, y: 0, width: Int(320 * 0.9), height: Int((carousel.frame.size.height-30)+20)))
+            let shadowView = UIView(frame: CGRect(x: 0, y: 0, width: Int(320 * 0.9), height: Int((carousel.frame.size.height-50)+20)))
             shadowView.backgroundColor = UIColor.clear
             shadowView.layer.shadowColor = UIColor.black.cgColor
             shadowView.layer.shadowOffset = CGSize(width: 0, height: 10)
@@ -2082,7 +2085,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             shadowView.addSubview(tempView)
             
             // create label to show how long ago it was created
-            let bottomLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 100, height: 30))
+            let bottomLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 100, height: 20))
             // use Moment to get the time ago for task at current index
             let taskTimeCreated = moment((self.tasks[index]?.timeCreated)!)
             print("time ago created \(taskTimeCreated.fromNow())")
@@ -2090,10 +2093,13 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             
             // set label with time ago "x min ago"
             bottomLabel.textAlignment = .center
-            bottomLabel.font = UIFont.systemFont(ofSize: 11)
             bottomLabel.center.x = tempView.center.x
             let tempViewBottom = tempView.bounds.maxY
-            bottomLabel.center.y = tempViewBottom + 8
+            bottomLabel.center.y = tempViewBottom + 12
+            bottomLabel.font = UIFont.init(name: Constants.FONT_NAME, size: 13)
+            bottomLabel.numberOfLines = 1
+            bottomLabel.adjustsFontSizeToFitWidth = true
+            bottomLabel.minimumScaleFactor = 0.5
             bottomLabel.textColor = UIColor.white
             bottomLabel.text = "\(taskTimeCreated.fromNow())"
             

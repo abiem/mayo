@@ -68,7 +68,7 @@ extension MainViewController: UITextViewDelegate {
     
     func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
         
-        let maxtext: Int = 78
+        let maxtext: Int = 81
 
         //If the text is larger than the maxtext, the return is false
 //        if range.length > 0 && text == "" {

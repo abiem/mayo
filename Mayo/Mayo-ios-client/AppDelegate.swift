@@ -41,7 +41,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         
         
         //Set Up Fabric Crashlystics
-        //Fabric.with([Crashlytics.self])
+        Fabric.with([Crashlytics.self])
         
         // setup firebase
         FIRApp.configure()

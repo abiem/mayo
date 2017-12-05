@@ -30,7 +30,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>3.0.5</string>
+	<string>3.0.6</string>
 	<key>Fabric</key>
 	<dict>
 		<key>APIKey</key>
@@ -53,6 +53,10 @@
 	<string>Your location is needed for the app</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Your location is needed for the app</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>SanFranciscoText-Regular</string>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>
