@@ -19,6 +19,7 @@ struct Constants {
     
     static let THANKS_ANIMATION_DURATION = 5.0
     static let PENDING_TASKS = "PendingTask"
+    static let LOCATION = "location"
     
     static let FONT_NAME = "SanFranciscoText-Regular"
     

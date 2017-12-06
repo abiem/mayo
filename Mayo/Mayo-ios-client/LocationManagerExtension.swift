@@ -13,9 +13,11 @@ import SCLAlertView
 extension MainViewController: CLLocationManagerDelegate {
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        // if the user moves 20 m
-        self.addCurrentUserLocationToFirebase()
         
+        // if the user moves 20 m
+        let archived = NSKeyedArchiver.archivedData(withRootObject: locations.first!)
+        UserDefaults.standard.setValue(archived, forKey: Constants.LOCATION)
+        self.addCurrentUserLocationToFirebase()
         if self.tasks.count == 0 && checkFakeTakViewed() == true {
             if (self.userLatitude != nil && self.userLongitude != nil) {
                 // TODO fix

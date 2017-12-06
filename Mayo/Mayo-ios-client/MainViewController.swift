@@ -248,6 +248,7 @@ class MainViewController: UIViewController {
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.distanceFilter = 20
         locationManager .stopMonitoringSignificantLocationChanges()
+        locationManager.pausesLocationUpdatesAutomatically = false
         // allows location manager to update location in the background
         locationManager.allowsBackgroundLocationUpdates = true
         locationManager.startUpdatingLocation()
@@ -289,11 +290,9 @@ class MainViewController: UIViewController {
         if checkFakeTakViewed() == true {
             getPreviousTask()
             initUserAuth()
-            canCreateNewtask = true
         }
         else {
             canCreateNewtask = false
-            getPreviousTask()
             isLoadingFirebase = false
             createFakeTasks()
             initUserAuth()
@@ -330,6 +329,8 @@ class MainViewController: UIViewController {
                 )
                 carouselView.reloadData()
             }
+            self.currentUserTaskSaved = false
+            self.newItemSwiped = true
         }
         
         // if no chat channels
@@ -1078,9 +1079,9 @@ class MainViewController: UIViewController {
                     self.tasks.append(newTask)
                     print("tasks: \(self.tasks)")
                     print("tasks count: \(self.tasks.count)")
-                    self.newItemSwiped = true
-                    
-                    self.carouselView.reloadData()
+//                    self.newItemSwiped = true
+                
+                    self.carouselView.insertItem(at: self.tasks.count-1, animated: true)
                     
                     // scroll to first view only if its on first card
 //                    if self.carouselView.currentItemIndex == 0 && self.tasks[self.carouselView.currentItemIndex]?.taskDescription == "" {
@@ -1190,8 +1191,16 @@ class MainViewController: UIViewController {
             self.userLongitude = locationManager.location?.coordinate.longitude
         }
         else {
-            self.userLatitude = Constants.DEFAULT_LAT;
-            self.userLongitude = Constants.DEFAULT_LNG;
+            let defaults = UserDefaults.standard
+            guard let archived = defaults.object(forKey: Constants.LOCATION) as? Data,
+                let location = NSKeyedUnarchiver.unarchiveObject(with: archived) as? CLLocation else {
+                    self.userLatitude = Constants.DEFAULT_LAT;
+                    self.userLongitude = Constants.DEFAULT_LNG;
+                    return
+            }
+                self.userLatitude = location.coordinate.latitude;
+                self.userLongitude = location.coordinate.longitude;
+            
         }
         if self.tasks.count > 0 {
             if let currentTask =  self.tasks[0] {
@@ -1559,7 +1568,7 @@ class MainViewController: UIViewController {
                         let timeDifference = currentTime.seconds(from: currentTask.timeCreated)
                         print("time difference for task: \(timeDifference)")
                         
-                            self.newItemSwiped = true
+//                            self.newItemSwiped = true
                             self.currentUserTaskSaved = true
                             self.tasks.append(currentTask)
                         
@@ -1828,7 +1837,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         // show the first card
         
         // 1st task if user swiped for new task or there is no other tasks
-        if (index == 0 && self.newItemSwiped) || self.tasks.count <= 1 {
+        if (index == 0 && (self.newItemSwiped || self.currentUserTaskSaved) ) || self.tasks.count <= 1 {
             // setup temporary view as gradient view
             
             //carousel.frame.size.height-15
@@ -1874,7 +1883,8 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             textView.contentInset = UIEdgeInsets(top: 15, left: 0, bottom: 0, right: 0)
             // turn off auto correction
             textView.autocorrectionType = .no
-           
+           textView.showsVerticalScrollIndicator = false
+            textView.showsHorizontalScrollIndicator = false
             
             // if current user has saved task
             // their task description
@@ -2133,12 +2143,6 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         }
         let actionMarkAsComplete = UIAlertAction(title: "Mark quest as done", style: .default) { (action:UIAlertAction) in
             //This is called when the user presses the complete button.
-            
-            // reset current user's task
-            self.currentUserTaskSaved = false
-        
-            //Delete task from database
-             UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
             
             // let users know it was completed
             let currentUserTask = self.tasks[0] as! Task
