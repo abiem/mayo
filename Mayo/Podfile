@@ -8,10 +8,7 @@ target 'Mayo-ios-client' do
   # Pods for Mayo-ios-client
   # messages UI
   pod 'JSQMessagesViewController'
-
-  # pin clustering
-  pod 'FBAnnotationClusteringSwift'
-
+  
   # firebase
   pod 'Firebase'
   pod 'Firebase/Core'

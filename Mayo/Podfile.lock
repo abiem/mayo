@@ -3,7 +3,6 @@ PODS:
   - Crashlytics (3.8.6):
     - Fabric (~> 1.6.3)
   - Fabric (1.6.13)
-  - FBAnnotationClusteringSwift (1.0.1)
   - Firebase (3.17.0):
     - Firebase/Core (= 3.17.0)
   - Firebase/Auth (3.17.0):
@@ -60,7 +59,7 @@ PODS:
   - GTMSessionFetcher/Core (1.1.9)
   - iCarousel (1.8.3)
   - IQKeyboardManagerSwift (5.0.6)
-  - JSQMessagesViewController (7.3.4):
+  - JSQMessagesViewController (7.3.5):
     - JSQSystemSoundPlayer (~> 2.0.1)
   - JSQSystemSoundPlayer (2.0.1)
   - Protobuf (3.3.0)
@@ -72,7 +71,6 @@ DEPENDENCIES:
   - Alamofire (~> 4.4)
   - Crashlytics
   - Fabric
-  - FBAnnotationClusteringSwift
   - Firebase
   - Firebase/Auth
   - Firebase/Core
@@ -100,7 +98,6 @@ SPEC CHECKSUMS:
   Alamofire: dc44b1600b800eb63da6a19039a0083d62a6a62d
   Crashlytics: 95d05f4e4c19a771250c4bd9ce344d996de32bbf
   Fabric: 2fb5676bc811af011a04513451f463dac6803206
-  FBAnnotationClusteringSwift: a1f4c07f5472b13acd69de04c61e68e2d7daaad3
   Firebase: 4b66b5b59c43edac745b87f0c87e42cdd0279c13
   FirebaseAnalytics: e5fe8486efc01bec33f6bf82e2fa9fce4b124052
   FirebaseAuth: cc8a1824170adbd351edb7f994490a3fb5c18be6
@@ -114,13 +111,13 @@ SPEC CHECKSUMS:
   GTMSessionFetcher: 5c046c76a1f859bc9c187e918f18e4fc7bb57b5e
   iCarousel: d782f635afac190c49bb8ee455882284cff8b85f
   IQKeyboardManagerSwift: 02bfbb0dff71c66d0ab77d80d25dfce0c3717735
-  JSQMessagesViewController: 39fed975e3c9f8eba7292071e29eeb541d105e66
+  JSQMessagesViewController: 6587f56aedbcb150a8ba1d968e1ef58b1bc758b7
   JSQSystemSoundPlayer: c5850e77a4363ffd374cd851154b9af93264ed8d
   Protobuf: d582fecf68201eac3d79ed61369ef45734394b9c
   ReachabilitySwift: 6849231cd4e06559f3b9ef4a97a0a0f96d41e09f
   SCLAlertView: 8a14ffc40590c619e183eed2298b854385f30be1
   SwiftMoment: dc6dd27012e267819104cbb03f74ff9192dd0b42
 
-PODFILE CHECKSUM: 2ddd4e2de4d2a155036491e9bbdeb011c14ae09d
+PODFILE CHECKSUM: 647103c2a36a10c1dd1761b249efe2a560ba9931
 
 COCOAPODS: 1.3.1

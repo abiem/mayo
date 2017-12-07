@@ -231,6 +231,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
                         break
                     
                     case Constants.NOTIFICATION_NEARBY_TASK:
+                        self.processNewTaskQuery(userInfo: userInfo)
                         if let channelId = userInfo["taskID"] {
                             //Check task Detail
                             self.ref.child("tasks").child(channelId as! String).observeSingleEvent(of: .value, with: { (snapshot) in
@@ -240,6 +241,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
                                      //Show Alert Task Expired
                                         self.taskExpireAlert()
 
+                                    } else {
+                                        self.processNewTaskQuery(userInfo: userInfo)
                                     }
                                 }
                             })
@@ -258,6 +261,26 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         //completionHandler(UIBackgroundFetchResult.newData)
     }
     
+    func processNewTaskQuery(userInfo: [AnyHashable : Any]) {
+        if let taskID = userInfo["taskID"] {
+            let state = UIApplication.shared.applicationState
+                if state == .active {
+                    let currentViewController = getCurrentViewController()
+                    if (currentViewController is MainViewController) {
+                        (currentViewController as! MainViewController).carouselScroll(taskID as! String)
+                    }
+                    return
+                }
+            let when = DispatchTime.now() + 5 // change 2 to desired number of seconds
+            DispatchQueue.main.asyncAfter(deadline: when) {
+                let currentViewController = self.getCurrentViewController()
+                if (currentViewController is MainViewController) {
+                    (currentViewController as! MainViewController).carouselScroll(taskID as! String)
+                }
+            }
+        }
+    }
+    
     func processMessageNotification(userInfo: [AnyHashable : Any]) {
         
 //        let state = UIApplication.shared.applicationState
@@ -269,6 +292,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         
         //Get Current ViewController.
         let currentViewController = getCurrentViewController()
+        
         if let channelId = userInfo["channelId"] {
                 //Check task Detail
                 self.ref.child("tasks").child(channelId as! String).observeSingleEvent(of: .value, with: { (snapshot) in
@@ -280,7 +304,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
                                 var chatVC: ChatViewController!
                                 var needToPush = false
                                 if (currentViewController is MainViewController) {
-                                    
+                                    (currentViewController as! MainViewController).carouselScroll(channelId as! String)
                                     //Move to ChatViewController.
                                     chatVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "chatViewController") as! ChatViewController
                                     needToPush = true

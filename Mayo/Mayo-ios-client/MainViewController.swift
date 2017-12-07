@@ -1030,7 +1030,8 @@ class MainViewController: UIViewController {
                                         self.removeCarousel(index)
                                         self.removeAnnotationForTask((task?.taskID)!)
                                         self.updateMapAnnotationCardIndexes()
-                                        if self.tasks.count <= 0 {
+                                        if self.tasks.count <= 1 {
+                                            self.newItemSwiped = true
                                             self.carouselView.reloadData()
                                         }
                                     }
@@ -3054,8 +3055,17 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         
         return value
     }
+    
     func numberOfItems(in carousel: iCarousel) -> Int {
         return tasks.count
+    }
+    
+    func carouselScroll(_ pTask:String) {
+        for (index, task) in self.tasks.enumerated() {
+            if pTask == task?.taskID {
+                self.carouselView.scrollToItem(at: index, animated: true)
+            }
+        }
     }
     
 }
