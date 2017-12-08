@@ -25,7 +25,7 @@ target 'Mayo-ios-client' do
   pod 'Crashlytics'
   pod 'SCLAlertView'
   pod 'GeoFire', :git => 'https://github.com/firebase/geofire-objc.git'
- 
+  pod 'JPAlertController'
 
 
 end

@@ -158,6 +158,7 @@ class MainViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        
         //Check for location when user come foreground
         observeUserLocationAuth()
         if isLoadingFirebase {
@@ -492,7 +493,6 @@ class MainViewController: UIViewController {
     }
     
     func showPointsProfileView(_:UIGestureRecognizer) {
-        
         // center the map on current user's location
         if let userCenterCoordinate = locationManager.location?.coordinate {
             self.mapView.setCenter(userCenterCoordinate, animated: true)
