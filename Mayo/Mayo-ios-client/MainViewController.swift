@@ -158,7 +158,7 @@ class MainViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
+
         //Check for location when user come foreground
         observeUserLocationAuth()
         if isLoadingFirebase {
@@ -1011,7 +1011,8 @@ class MainViewController: UIViewController {
                 
                 // only process taskDict if not completed 
                 // and not equal to own uid
-                if !taskDict.isEmpty && taskDict["completed"] as! Bool == false && (taskDict["createdby"] as? String  != FIRAuth.auth()?.currentUser?.uid) {
+                // Remove Complete from here
+                if !taskDict.isEmpty && taskDict["completed"] as! Bool == false  && (taskDict["createdby"] as? String  != FIRAuth.auth()?.currentUser?.uid) {
                     //
                     // send the current user local notification
                     // that there is a new task
@@ -1021,7 +1022,7 @@ class MainViewController: UIViewController {
                     // check task exists
                     for task in self.tasks {
                         // the task is already present in the tasks
-                        if task?.taskID == taskDict["createdby"] as? String || task?.taskID == taskDict["taskID"] as? String{
+                        if task?.taskID == taskDict["createdby"] as? String || task?.taskID == taskDict["taskID"] as? String {
                             //for creator of Task or already existing Task
                             if taskDict["completed"] as! Bool == true {
                                 for (index, task) in self.tasks.enumerated() {
@@ -1050,7 +1051,7 @@ class MainViewController: UIViewController {
                     // adds key for task to chat channels array
                     self.chatChannels.append(taskDict["taskID"] as! String)
                     
-                    let taskCompleted = false
+                    let taskCompleted = taskDict["completed"] as! Bool
                     let taskTimeCreated = dateformatter.convertStringToDate(datestring: taskDict["timeCreated"] as! String)
                     let taskTimeUpdated = dateformatter.convertStringToDate(datestring: taskDict["timeUpdated"] as! String)
                     let taskDescription = taskDict["taskDescription"] as! String
@@ -1197,6 +1198,7 @@ class MainViewController: UIViewController {
                 let location = NSKeyedUnarchiver.unarchiveObject(with: archived) as? CLLocation else {
                     self.userLatitude = Constants.DEFAULT_LAT;
                     self.userLongitude = Constants.DEFAULT_LNG;
+                    self.showLocationAlert()
                     return
             }
                 self.userLatitude = location.coordinate.latitude;
@@ -1862,8 +1864,13 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                 let randomColorGradient = cardColor.generateRandomColor()
                 
                 // save task random colors to task
-                let randomStartColor = randomColorGradient[0]
-                let randomEndColor = randomColorGradient[1]
+                var randomStartColor = randomColorGradient[0]
+                var randomEndColor = randomColorGradient[1]
+                
+                if task.completed == true {
+                    randomStartColor = cardColor.expireCard[0]
+                    randomEndColor = cardColor.expireCard[1]
+                }
                 
                 task.startColor = randomStartColor
                 task.endColor = randomEndColor
@@ -2750,6 +2757,10 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
     
     // action for chat to go to chat window
     func goToChat(sender: UIButton) {
+        if locationManager.location?.coordinate.latitude == nil && locationManager.location?.coordinate.longitude == nil {
+            showLocationAlert()
+            return
+        }
         // if the keyboard is out
         // remove it
         if self.view.frame.origin.y != 0 {

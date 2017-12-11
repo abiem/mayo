@@ -33,12 +33,13 @@ func topController() -> UIViewController? {
     
 }
 
-func setConstraints(_ pNewView: UIView , pParentView: UIView) {
+
+func setToSuperView(_ pNewView: UIView , pParentView: UIView) {
     pNewView.translatesAutoresizingMaskIntoConstraints = false
-    let horizontalConstraint = NSLayoutConstraint(item: pNewView, attribute: NSLayoutAttribute.centerX, relatedBy: NSLayoutRelation.equal, toItem: pParentView, attribute: NSLayoutAttribute.centerX, multiplier: 1, constant: 0)
-    let verticalConstraint = NSLayoutConstraint(item: pNewView, attribute: NSLayoutAttribute.centerY, relatedBy: NSLayoutRelation.equal, toItem: pParentView, attribute: NSLayoutAttribute.centerY, multiplier: 1, constant: 0)
-    let widthConstraint = NSLayoutConstraint(item: pNewView, attribute: NSLayoutAttribute.width, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.notAnAttribute, multiplier: 1, constant: 100)
-    let heightConstraint = NSLayoutConstraint(item: pNewView, attribute: NSLayoutAttribute.height, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.notAnAttribute, multiplier: 1, constant: 100)
+    let horizontalConstraint = NSLayoutConstraint(item: pNewView, attribute: NSLayoutAttribute.top, relatedBy: NSLayoutRelation.equal, toItem: pParentView, attribute: NSLayoutAttribute.top, multiplier: 1.0, constant: 0)
+    let verticalConstraint = NSLayoutConstraint(item: pNewView, attribute: NSLayoutAttribute.bottom, relatedBy: NSLayoutRelation.equal, toItem: pParentView, attribute: NSLayoutAttribute.bottom, multiplier: 1.0, constant: 0)
+    let widthConstraint = NSLayoutConstraint(item: pNewView, attribute: NSLayoutAttribute.right, relatedBy: NSLayoutRelation.equal, toItem: pParentView, attribute: NSLayoutAttribute.right, multiplier: 1.0, constant: 0)
+    let heightConstraint = NSLayoutConstraint(item: pNewView, attribute: NSLayoutAttribute.left, relatedBy: NSLayoutRelation.equal, toItem: pParentView, attribute: NSLayoutAttribute.left, multiplier: 1.0, constant: 0)
     pParentView.addConstraints([horizontalConstraint, verticalConstraint, widthConstraint, heightConstraint])
 }
 

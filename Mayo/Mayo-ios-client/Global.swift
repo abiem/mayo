@@ -14,8 +14,8 @@ struct Constants {
     static let NOTIFICATION_TOPIC_COMPLETED = 2
     static let NOTIFICATION_NEARBY_TASK = 3
     
-    static let DEFAULT_LAT = 47.612441
-    static let DEFAULT_LNG = -122.337463
+    static let DEFAULT_LAT = 0.0 //47.612441
+    static let DEFAULT_LNG = 0.0 //-122.337463
     
     static let THANKS_ANIMATION_DURATION = 5.0
     static let PENDING_TASKS = "PendingTask"
@@ -27,6 +27,9 @@ struct Constants {
     static let STATUS_FOR_NOT_HELPED = "Owner marked as done and no one helped"
     static let STATUS_FOR_TIME_EXPIRED = "Expired due to time limit"
     static let STATUS_FOR_MOVING_OUT = "Expired due to moving out of area"
+    
+    static let sLOCATION_ERROR = "Oh oh!We need your help with location to help us help you. You can enable location for Mayo in Settings"
+    static let sTASK_EXPIRED_ERROR = "The quest you're looking for has completed"
     
     //Static ID
     static let FAKE_USER_ID = "fakeUser"

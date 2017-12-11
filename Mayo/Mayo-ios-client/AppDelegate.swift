@@ -528,15 +528,7 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
     }
     //Task Expire Alert
     func taskExpireAlert()  {
-        SCLAlertView().showTitle(
-            "Sorry", // Title of view
-            subTitle: "Task Expired.", // String of view
-            duration: 0.0, // Duration to show before closing automatically, default: 0.0
-            completeText: "Okay", // Optional button value, default: ""
-            style: .notice, // Styles - see below.
-            colorStyle: 0x508FBC,
-            colorTextButton: 0xFFFFFF
-        )
+        CMAlertController.sharedInstance.showAlert(nil, Constants.sTASK_EXPIRED_ERROR, ["OK"], nil)
     }
     
 }

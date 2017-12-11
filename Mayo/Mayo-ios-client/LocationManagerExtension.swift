@@ -111,23 +111,31 @@ extension MainViewController: CLLocationManagerDelegate {
     }
     
     func showLocationAlert() {
-        let appearance = SCLAlertView.SCLAppearance(
-            showCloseButton: false
-        )
-        let alertView = SCLAlertView(appearance: appearance)
-        alertView.addButton("Settings") {
-            UIApplication.shared.open(URL(string:UIApplicationOpenSettingsURLString)!, options: [:], completionHandler: nil)
+        CMAlertController.sharedInstance.showAlert(nil, Constants.sLOCATION_ERROR, ["Not now", "Settings"]) { (sender) in
+            if let button = sender {
+                if button.tag == 1 {
+                    // for Move to Settings
+                    UIApplication.shared.open(URL(string:UIApplicationOpenSettingsURLString)!, options: [:], completionHandler: nil)
+                }
+            }
         }
-        
-        alertView.showTitle(
-            "Mayo", // Title of view
-            subTitle: "Unable to get location, Please check settings.", // String of view
-            duration: 0.0, // Duration to show before closing automatically, default: 0.0
-            completeText: "", // Optional button value, default: ""
-            style: .error, // Styles - see below.
-            colorStyle: 0x508FBC,
-            colorTextButton: 0xFFFFFF
-        )
+//        let appearance = SCLAlertView.SCLAppearance(
+//            showCloseButton: false
+//        )
+//        let alertView = SCLAlertView(appearance: appearance)
+//        alertView.addButton("Settings") {
+//            UIApplication.shared.open(URL(string:UIApplicationOpenSettingsURLString)!, options: [:], completionHandler: nil)
+//        }
+//
+//        alertView.showTitle(
+//            "Mayo", // Title of view
+//            subTitle: "Unable to get location, Please check settings.", // String of view
+//            duration: 0.0, // Duration to show before closing automatically, default: 0.0
+//            completeText: "", // Optional button value, default: ""
+//            style: .error, // Styles - see below.
+//            colorStyle: 0x508FBC,
+//            colorTextButton: 0xFFFFFF
+//        )
     }
     
 
