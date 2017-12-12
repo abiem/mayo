@@ -17,6 +17,7 @@ import UserNotifications
 import Alamofire
 import AVKit
 import AVFoundation
+import Cluster
 
 class MainViewController: UIViewController {
     
@@ -45,6 +46,7 @@ class MainViewController: UIViewController {
     let LOADER_VIEW = 107
     
     // z index for map annotations
+    let CLUSTER_TASK_ANNOTATION_Z_INDEX = 6.0
     let FOCUS_MAP_TASK_ANNOTATION_Z_INDEX = 5.0
     let STANDARD_MAP_TASK_ANNOTATION_Z_INDEX = 3.0
     
@@ -147,6 +149,10 @@ class MainViewController: UIViewController {
     //Checks
     var isLocationNotAuthorised = false
     var isLoadingFirebase = false
+    //
+    let clusterManager = ClusterManager()
+
+
     
     //indicator
     @IBOutlet weak var indicatorView : UIActivityIndicatorView!
@@ -204,6 +210,12 @@ class MainViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        clusterManager.cellSize = 10
+        clusterManager.maxZoomLevel = 17
+        clusterManager.minCountForClustering = 2
+        clusterManager.clusterPosition = .nearCenter
+        clusterManager.shouldRemoveInvisibleAnnotations = false
         
         // check notification id
         if let refreshedToken = FIRInstanceID.instanceID().token() {
@@ -723,13 +735,20 @@ class MainViewController: UIViewController {
         if carouselIndex == 0 {
             let annotation = CustomFocusTaskMapAnnotation(currentCarouselIndex: carouselIndex, taskUserId: task.userId)
             annotation.coordinate = CLLocationCoordinate2D(latitude: (task.latitude), longitude: (task.longitude))
-            self.mapView.addAnnotation(annotation)
+            annotation.style = .image(#imageLiteral(resourceName: "newNotificaitonIcon"))
+//            self.mapView.addAnnotation(annotation)
+            clusterManager.add(annotation)
+
         }
         else {
             let annotation = CustomTaskMapAnnotation(currentCarouselIndex: carouselIndex, taskUserId: task.userId)
             annotation.coordinate = CLLocationCoordinate2D(latitude: (task.latitude), longitude: (task.longitude))
-            self.mapView.addAnnotation(annotation)
+           annotation.style = .image(#imageLiteral(resourceName: "newNotificaitonIcon"))
+//            self.mapView.addAnnotation(annotation)
+            clusterManager.add(annotation)
         }
+        
+        clusterManager.reload(mapView, visibleMapRect: mapView.visibleMapRect)
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -1012,7 +1031,8 @@ class MainViewController: UIViewController {
                 // only process taskDict if not completed 
                 // and not equal to own uid
                 // Remove Complete from here
-                if !taskDict.isEmpty && taskDict["completed"] as! Bool == false  && (taskDict["createdby"] as? String  != FIRAuth.auth()?.currentUser?.uid) {
+                //Lakshmi
+                if !taskDict.isEmpty  && (taskDict["createdby"] as? String  != FIRAuth.auth()?.currentUser?.uid) {
                     //
                     // send the current user local notification
                     // that there is a new task
@@ -1027,10 +1047,13 @@ class MainViewController: UIViewController {
                             if taskDict["completed"] as! Bool == true {
                                 for (index, task) in self.tasks.enumerated() {
                                     if task?.taskID == taskDict["taskID"] as? String {
-                                        self.tasks.remove(at: index);
-                                        self.removeCarousel(index)
-                                        self.removeAnnotationForTask((task?.taskID)!)
-                                        self.updateMapAnnotationCardIndexes()
+                                            self.tasks[index]?.completed = true
+                                            self.carouselView.reloadItem(at: index, animated: true)
+                                    
+//                                        self.tasks.remove(at: index);
+//                                        self.removeCarousel(index)
+//                                        self.removeAnnotationForTask((task?.taskID)!)
+//                                        self.updateMapAnnotationCardIndexes()
                                         if self.tasks.count <= 1 {
                                             self.newItemSwiped = true
                                             self.carouselView.reloadData()
@@ -1078,19 +1101,18 @@ class MainViewController: UIViewController {
                         newTask.setGradientColors(startColor: nil, endColor: nil)
                     }
                     
-                    self.tasks.append(newTask)
+                    
                     print("tasks: \(self.tasks)")
                     print("tasks count: \(self.tasks.count)")
 //                    self.newItemSwiped = true
-                
-                    self.carouselView.insertItem(at: self.tasks.count-1, animated: true)
-                    
-                    // scroll to first view only if its on first card
-//                    if self.carouselView.currentItemIndex == 0 && self.tasks[self.carouselView.currentItemIndex]?.taskDescription == "" {
-////                        self.newItemSwiped = true
-//                        self.carouselView.scrollToItem(at: 1, animated: false)
-//                    }
-                    
+                    if newTask.completed == true {
+                        self.tasks.append(newTask)
+                    } else {
+                        self.tasks.insert(newTask, at: 1)
+                    }
+                    //self.carouselView.insertItem(at: self.tasks.count-1, animated: true)
+                    //self.carouselView.reloadItem(at: self.tasks.count-1, animated: true)
+                    self.carouselView.reloadData()
                     // add map pin for new task
                     // add carousel index
                     let carouselIndex = self.tasks.count - 1
@@ -1248,8 +1270,6 @@ class MainViewController: UIViewController {
             
             let chatViewController = segue.destination as! ChatViewController
             
-            // setup display name and title of chat view controller
-            chatViewController.title = "Mayo"
             //set sendername to empty string for now
             chatViewController.senderDisplayName = ""
             
@@ -1268,6 +1288,9 @@ class MainViewController: UIViewController {
             // pass the task description for the current task
             let currentTask = self.tasks[channelIndex] as! Task
             
+            // setup display name and title of chat view controller
+            chatViewController.title = currentTask.taskDescription
+            chatViewController.isCompleted = currentTask.completed
             
             if currentTask.taskDescription == ONBOARDING_TASK_2_DESCRIPTION {
                 chatViewController.isFakeTask = true
@@ -1849,28 +1872,20 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             
             // get the first task
             let task = self.tasks[index] as! Task
-            
+            let cardColor = CardColor()
             // if it already has start and end color, use it start and end color for the tempview
             if let taskStartColor = task.startColor, let taskEndColor = task.endColor {
-                
-                tempView.startColor = UIColor.hexStringToUIColor(hex: taskStartColor)
-                tempView.endColor = UIColor.hexStringToUIColor(hex: taskEndColor)
-                
+            
+                    tempView.startColor = UIColor.hexStringToUIColor(hex: taskStartColor)
+                    tempView.endColor = UIColor.hexStringToUIColor(hex: taskEndColor)
                 // if the task doesn't have a start and end color yet
                 // use the start and end color to save it
             } else {
-                
-                let cardColor = CardColor()
                 let randomColorGradient = cardColor.generateRandomColor()
                 
                 // save task random colors to task
-                var randomStartColor = randomColorGradient[0]
-                var randomEndColor = randomColorGradient[1]
-                
-                if task.completed == true {
-                    randomStartColor = cardColor.expireCard[0]
-                    randomEndColor = cardColor.expireCard[1]
-                }
+                let randomStartColor = randomColorGradient[0]
+                let randomEndColor = randomColorGradient[1]
                 
                 task.startColor = randomStartColor
                 task.endColor = randomEndColor
@@ -1891,7 +1906,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             textView.contentInset = UIEdgeInsets(top: 15, left: 0, bottom: 0, right: 0)
             // turn off auto correction
             textView.autocorrectionType = .no
-           textView.showsVerticalScrollIndicator = false
+            textView.showsVerticalScrollIndicator = false
             textView.showsHorizontalScrollIndicator = false
             
             // if current user has saved task
@@ -2047,8 +2062,15 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                 
                 // else
                 // use the colors that are already saved for the task
-                tempView.startColor = UIColor.hexStringToUIColor(hex: task.startColor!)
-                tempView.endColor = UIColor.hexStringToUIColor(hex: task.endColor!)
+                if task.completed == true && task.taskDescription != "" {
+                    tempView.startColor = UIColor.hexStringToUIColor(hex: cardColor.expireCard[0])
+                    tempView.endColor = UIColor.hexStringToUIColor(hex: cardColor.expireCard[1])
+                    tempView.alpha = 0.6
+                } else {
+                    tempView.startColor = UIColor.hexStringToUIColor(hex: task.startColor!)
+                    tempView.endColor = UIColor.hexStringToUIColor(hex: task.endColor!)
+                }
+                
             }
             
             // setup label for gradient view
@@ -2078,7 +2100,9 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             // setup clickable button for gradient view
             let messageButton = UIButton(frame: CGRect(x: 0, y: (carousel.frame.size.height-50)*3/4, width: 150, height: 20))
             messageButton.center.x = tempView.center.x
-            messageButton.setTitle("I can help", for: .normal)
+            if task.completed == false {
+                messageButton.setTitle("I can help", for: .normal)
+            }
             let messageImage = UIImage(named: "messageImage") as UIImage?
             messageButton.setImage(messageImage, for: .normal)
             messageButton.imageView?.contentMode = .scaleAspectFit
@@ -2103,23 +2127,25 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             shadowView.addSubview(tempView)
             
             // create label to show how long ago it was created
-            let bottomLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 100, height: 20))
+            let bottomLabel = UILabel(frame: CGRect(x: 20, y: 0, width: shadowView.frame.size.width-40, height: 20))
             // use Moment to get the time ago for task at current index
             let taskTimeCreated = moment((self.tasks[index]?.timeCreated)!)
-            print("time ago created \(taskTimeCreated.fromNow())")
-            print(self.tasks[index]?.timeCreated)
-            
             // set label with time ago "x min ago"
             bottomLabel.textAlignment = .center
             bottomLabel.center.x = tempView.center.x
             let tempViewBottom = tempView.bounds.maxY
             bottomLabel.center.y = tempViewBottom + 12
-            bottomLabel.font = UIFont.init(name: Constants.FONT_NAME, size: 13)
+            bottomLabel.font = UIFont.init(name: Constants.FONT_NAME, size: 9)
             bottomLabel.numberOfLines = 1
             bottomLabel.adjustsFontSizeToFitWidth = true
             bottomLabel.minimumScaleFactor = 0.5
             bottomLabel.textColor = UIColor.white
-            bottomLabel.text = "\(taskTimeCreated.fromNow())"
+            var textTaskCreatedTime = "\(taskTimeCreated.fromNow())"
+            if task.completed == true {
+                textTaskCreatedTime = "Completed \(textTaskCreatedTime)"
+            }
+                
+            bottomLabel.text = textTaskCreatedTime
             
             // add bottom label to shadow view
             shadowView.addSubview(bottomLabel)
@@ -2993,6 +3019,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                     self.mapView.removeAnnotation(annotation)
                     self.mapView.addAnnotation(annotationClone)
                     
+                    
                 }
                 
                 // check for the annotation for current card
@@ -3010,10 +3037,14 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                         
                         let focusAnnotation = CustomFocusTaskMapAnnotation(currentCarouselIndex: index, taskUserId: taskUserId)
                         focusAnnotation.coordinate = mapTaskAnnotation.coordinate
-                        self.mapView.addAnnotation(focusAnnotation)
-                        
-                        // remove the annotation from the map
-                        self.mapView.removeAnnotation(mapTaskAnnotation)
+                        focusAnnotation.style = .image(#imageLiteral(resourceName: "newNotificaitonIcon"))
+                        self.clusterManager.add(focusAnnotation)
+                        self.clusterManager.remove(mapTaskAnnotation)
+                        self.clusterManager.reload(self.mapView, visibleMapRect: self.mapView.visibleMapRect)
+//                        self.mapView.addAnnotation(focusAnnotation)
+//
+//                        // remove the annotation from the map
+//                        self.mapView.removeAnnotation(mapTaskAnnotation)
                     }
                 }
                 
@@ -3028,10 +3059,14 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                     // add regular task icon
                     let taskAnnoation = CustomTaskMapAnnotation(currentCarouselIndex: index, taskUserId: taskUserId)
                     taskAnnoation.coordinate = customFocusTaskAnnotation.coordinate
-                    self.mapView.addAnnotation(taskAnnoation)
-                    
-                    // remove focus task icon
-                    self.mapView.removeAnnotation(customFocusTaskAnnotation)
+//                    self.mapView.addAnnotation(taskAnnoation)
+//
+//                    // remove focus task icon
+//                    self.mapView.removeAnnotation(customFocusTaskAnnotation)
+                    taskAnnoation.style = .image(#imageLiteral(resourceName: "newNotificaitonIcon"))
+                     self.clusterManager.add(taskAnnoation)
+                    self.clusterManager.remove(customFocusTaskAnnotation)
+                    self.clusterManager.reload(self.mapView, visibleMapRect: self.mapView.visibleMapRect)
                 }
                 
             }

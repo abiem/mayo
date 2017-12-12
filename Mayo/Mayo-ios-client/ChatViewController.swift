@@ -23,7 +23,8 @@ class ChatViewController: JSQMessagesViewController {
     var messages = [Message]()
     var currentUserColorIndex: Int? = nil
     var isParticipated = false;
-    
+    var isCompleted = false;
+    @IBOutlet weak var viewQuestCompleted: UIView!
     
     
     private lazy var messageRef: FIRDatabaseReference = self.channelRef!.child("messages")
@@ -60,15 +61,24 @@ class ChatViewController: JSQMessagesViewController {
         // listen for new messages
         IQKeyboardManager.sharedManager().enable = false
         observeMessages()
-        checkTaskCompletion()
+        if isCompleted == false {
+            checkTaskCompletion()
+        } else {
+            let parentSize = self.view.frame.size
+            viewQuestCompleted.frame = CGRect(x:0, y: parentSize.height-60, width:parentSize.width, height:60)
+            self.inputToolbar.isHidden = true
+            self.view.addSubview(viewQuestCompleted)
+        }
     }
+    
     
     override func viewWillDisappear(_ animated: Bool) {
         // remove observer for messages
         IQKeyboardManager.sharedManager().enable = true
         messageRef.removeObserver(withHandle: newMessageRefHandle!)
-        taskRef?.child("completed").removeObserver(withHandle: taskHandler!)
-        
+        if isCompleted == false {
+            taskRef?.child("completed").removeObserver(withHandle: taskHandler!)
+        }
     }
     
     private func checkColorIndexForCurrentUserIfOwner() {

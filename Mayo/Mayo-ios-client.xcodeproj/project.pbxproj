@@ -122,6 +122,7 @@
 		7B6E3FC51FC6973400919494 /* MKCircleExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B6E3FC41FC6973400919494 /* MKCircleExtension.swift */; };
 		7B6E56D01FD66A9B009C59B6 /* SanFranciscoText-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 7B6E56CF1FD66A9B009C59B6 /* SanFranciscoText-Regular.otf */; };
 		7B7607D21F9DD47A001E2CCA /* Reachbility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B7607D11F9DD479001E2CCA /* Reachbility.swift */; };
+		7BF740971FDFF4EC003CB691 /* BorderedClusterAnnotationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BF740961FDFF4EC003CB691 /* BorderedClusterAnnotationView.swift */; };
 		F80C07961F55D62E00E0F8FB /* PushNotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F80C07951F55D62E00E0F8FB /* PushNotificationManager.swift */; };
 		F80C07981F55D64D00E0F8FB /* Global.swift in Sources */ = {isa = PBXBuildFile; fileRef = F80C07971F55D64D00E0F8FB /* Global.swift */; };
 /* End PBXBuildFile section */
@@ -259,6 +260,7 @@
 		7B6E3FC41FC6973400919494 /* MKCircleExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MKCircleExtension.swift; sourceTree = "<group>"; };
 		7B6E56CF1FD66A9B009C59B6 /* SanFranciscoText-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SanFranciscoText-Regular.otf"; sourceTree = "<group>"; };
 		7B7607D11F9DD479001E2CCA /* Reachbility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reachbility.swift; sourceTree = "<group>"; };
+		7BF740961FDFF4EC003CB691 /* BorderedClusterAnnotationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BorderedClusterAnnotationView.swift; sourceTree = "<group>"; };
 		7DD01FA87B2CDE0C2F4B9481 /* Pods-Mayo-ios-client.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Mayo-ios-client.release.xcconfig"; path = "Pods/Target Support Files/Pods-Mayo-ios-client/Pods-Mayo-ios-client.release.xcconfig"; sourceTree = "<group>"; };
 		F80C07951F55D62E00E0F8FB /* PushNotificationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PushNotificationManager.swift; sourceTree = "<group>"; };
 		F80C07971F55D64D00E0F8FB /* Global.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Global.swift; sourceTree = "<group>"; };
@@ -512,6 +514,7 @@
 				35F43C101EB014D100FCD052 /* CustomFocusUserMapAnnotation.swift */,
 				35B887271ED28FA800E761A2 /* CustomCurrentUserTaskAnnotation.swift */,
 				35B887291ED28FBC00E761A2 /* CustomFocusCurrentUserTaskAnnotation.swift */,
+				7BF740961FDFF4EC003CB691 /* BorderedClusterAnnotationView.swift */,
 			);
 			name = Annotations;
 			sourceTree = "<group>";
@@ -836,11 +839,11 @@
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-Mayo-ios-client/Pods-Mayo-ios-client-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework",
+				"${BUILT_PRODUCTS_DIR}/Cluster/Cluster.framework",
 				"${BUILT_PRODUCTS_DIR}/GTMSessionFetcher/GTMSessionFetcher.framework",
 				"${BUILT_PRODUCTS_DIR}/GeoFire/GeoFire.framework",
 				"${BUILT_PRODUCTS_DIR}/GoogleToolboxForMac/GoogleToolboxForMac.framework",
 				"${BUILT_PRODUCTS_DIR}/IQKeyboardManagerSwift/IQKeyboardManagerSwift.framework",
-				"${BUILT_PRODUCTS_DIR}/JPAlertController/JPAlertController.framework",
 				"${BUILT_PRODUCTS_DIR}/JSQMessagesViewController/JSQMessagesViewController.framework",
 				"${BUILT_PRODUCTS_DIR}/JSQSystemSoundPlayer/JSQSystemSoundPlayer.framework",
 				"${BUILT_PRODUCTS_DIR}/Protobuf/Protobuf.framework",
@@ -852,11 +855,11 @@
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Alamofire.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Cluster.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GTMSessionFetcher.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GeoFire.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleToolboxForMac.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/IQKeyboardManagerSwift.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/JPAlertController.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/JSQMessagesViewController.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/JSQSystemSoundPlayer.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Protobuf.framework",
@@ -882,6 +885,7 @@
 				7B5634421FDA9162001F8A0F /* CMAlertController.swift in Sources */,
 				F80C07961F55D62E00E0F8FB /* PushNotificationManager.swift in Sources */,
 				357A164C1ED74DC400FDF96A /* LocationManagerExtension.swift in Sources */,
+				7BF740971FDFF4EC003CB691 /* BorderedClusterAnnotationView.swift in Sources */,
 				3529A9D11E998377003C815A /* MainViewController.swift in Sources */,
 				35B8872A1ED28FBC00E761A2 /* CustomFocusCurrentUserTaskAnnotation.swift in Sources */,
 				35F6F3061E9B211A00747104 /* CardColors.swift in Sources */,

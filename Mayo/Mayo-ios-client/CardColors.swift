@@ -27,7 +27,7 @@ class CardColor {
         ["508fbc", "5ac7cf"], // dark blue to light blue
         ["e86d5d", "e8c378"] // dark red to light orange
     ]
-    var expireCard = ["D3D3D3", "ffffff"]
+    var expireCard = ["808080", "D0D0D0"]
     private func generateRandomNumber() -> Int {
         // generate random number between 0 and length of color choices
         let randomNumber = Int(arc4random_uniform(UInt32(choices.count)))

@@ -8,6 +8,7 @@
 
 import UIKit
 import MapKit
+import Cluster
 
 extension MainViewController: MKMapViewDelegate {
     
@@ -70,25 +71,6 @@ extension MainViewController: MKMapViewDelegate {
             return annotationView
         }
         
-        if annotation is CustomTaskMapAnnotation {
-            
-            let annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: "customTask")
-            annotationView.image = UIImage(named: "mapTaskIcon")
-            annotationView.layer.zPosition = CGFloat(self.STANDARD_MAP_TASK_ANNOTATION_Z_INDEX)
-            
-            return annotationView
-        }
-        
-        if annotation is CustomFocusTaskMapAnnotation {
-            
-            let annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: "customFocusTask")
-            annotationView.image = UIImage(named: "mapFocusTaskIcon")
-            annotationView.layer.zPosition = CGFloat(self.FOCUS_MAP_TASK_ANNOTATION_Z_INDEX)
-            
-            
-            return annotationView
-        }
-        
         
         if annotation is CustomFocusUserMapAnnotation {
             
@@ -99,8 +81,48 @@ extension MainViewController: MKMapViewDelegate {
         }
         
         
+        if let annotation = annotation as? ClusterAnnotation {
+            guard let style = annotation.style else { return nil }
+            let identifier = "Cluster"
+            var view = mapView.dequeueReusableAnnotationView(withIdentifier: identifier)
+            if let view = view as? BorderedClusterAnnotationView {
+                view.annotation = annotation
+                view.configure(with: style)
+            } else {
+                view = BorderedClusterAnnotationView(annotation: annotation, reuseIdentifier: identifier, style: style, borderColor: .white)
+            }
+            view?.layer.zPosition = CGFloat(self.CLUSTER_TASK_ANNOTATION_Z_INDEX)
+            return view
+            
+        } else  {
+            
+            if annotation is CustomTaskMapAnnotation {
+                
+                let annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: "customTask")
+                annotationView.image = UIImage(named: "mapTaskIcon")
+                annotationView.layer.zPosition = CGFloat(self.STANDARD_MAP_TASK_ANNOTATION_Z_INDEX)
+                
+                return annotationView
+            }
+            
+            if annotation is CustomFocusTaskMapAnnotation {
+                
+                let annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: "customFocusTask")
+                annotationView.image = UIImage(named: "mapFocusTaskIcon")
+                annotationView.layer.zPosition = CGFloat(self.FOCUS_MAP_TASK_ANNOTATION_Z_INDEX)
+                
+                
+                return annotationView
+            }
+            
+        }
+        
         
         return nil
+    }
+    
+    func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+        clusterManager.reload(mapView, visibleMapRect: mapView.visibleMapRect)
     }
     
     func mapView(_ mapView: MKMapView, didAdd views: [MKAnnotationView]) {

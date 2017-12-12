@@ -14,6 +14,9 @@
         <array key="HelveticaNeue.ttc">
             <string>HelveticaNeue</string>
         </array>
+        <array key="SanFranciscoText-Regular.otf">
+            <string>SanFranciscoText-Regular</string>
+        </array>
     </customFonts>
     <scenes>
         <!--Data Source-->
@@ -88,8 +91,30 @@
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <viewLayoutGuide key="safeArea" id="veY-5C-cJG"/>
                     </view>
+                    <connections>
+                        <outlet property="viewQuestCompleted" destination="ZNY-iS-7eL" id="K5p-yB-8fb"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="1dJ-gx-QHC" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <view contentMode="scaleToFill" id="ZNY-iS-7eL">
+                    <rect key="frame" x="0.0" y="0.0" width="375" height="128"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <subviews>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Quest has Completed" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="p9a-jb-Wlw">
+                            <rect key="frame" x="0.0" y="0.0" width="375" height="128"/>
+                            <fontDescription key="fontDescription" name="SanFranciscoText-Regular" family="San Francisco Text" pointSize="17"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                    </subviews>
+                    <color key="backgroundColor" red="0.94501525159999999" green="0.94515103099999997" blue="0.94498568770000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                    <constraints>
+                        <constraint firstItem="0cW-s8-NQt" firstAttribute="trailing" secondItem="p9a-jb-Wlw" secondAttribute="trailing" id="1el-ch-FpU"/>
+                        <constraint firstItem="p9a-jb-Wlw" firstAttribute="top" secondItem="0cW-s8-NQt" secondAttribute="top" id="iQ5-IP-5Aa"/>
+                        <constraint firstItem="0cW-s8-NQt" firstAttribute="bottom" secondItem="p9a-jb-Wlw" secondAttribute="bottom" id="lv6-7K-8JY"/>
+                        <constraint firstItem="p9a-jb-Wlw" firstAttribute="leading" secondItem="0cW-s8-NQt" secondAttribute="leading" id="o25-Oi-eAA"/>
+                    </constraints>
+                    <viewLayoutGuide key="safeArea" id="0cW-s8-NQt"/>
+                </view>
             </objects>
             <point key="canvasLocation" x="1638" y="-65"/>
         </scene>

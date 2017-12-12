@@ -8,8 +8,9 @@
 
 import UIKit
 import MapKit
+import Cluster
 
-class CustomFocusTaskMapAnnotation: MKPointAnnotation {
+class CustomFocusTaskMapAnnotation: Annotation {
     var currentCarouselIndex: Int?
     var taskUserId: String?
     
