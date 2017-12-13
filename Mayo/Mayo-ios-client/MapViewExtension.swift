@@ -120,9 +120,11 @@ extension MainViewController: MKMapViewDelegate {
         
         return nil
     }
+
     
     func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
-        clusterManager.reload(mapView, visibleMapRect: mapView.visibleMapRect)
+        self.clusterManager.reload(mapView, visibleMapRect: mapView.visibleMapRect)
+        
     }
     
     func mapView(_ mapView: MKMapView, didAdd views: [MKAnnotationView]) {
@@ -130,7 +132,12 @@ extension MainViewController: MKMapViewDelegate {
             if view.annotation is MKUserLocation {
                 // send user to front
                 view.layer.zPosition = 2
+                return
             }
+            views.forEach { $0.alpha = 0 }
+            UIView.animate(withDuration: 0.35, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 0, options: [], animations: {
+                views.forEach { $0.alpha = 1 }
+            }, completion: nil)
         }
     }
     
@@ -170,10 +177,27 @@ extension MainViewController: MKMapViewDelegate {
                 if let index = annotation.currentCarouselIndex {
                     self.carouselView.scrollToItem(at: index, animated: true)
                 }
+                
                 // exit delegate method
                 return
             }
         }
+        
+        if let cluster = view.annotation as? ClusterAnnotation {
+            var zoomRect = MKMapRectNull
+            for annotation in cluster.annotations {
+                let annotationPoint = MKMapPointForCoordinate(annotation.coordinate)
+                let pointRect = MKMapRectMake(annotationPoint.x, annotationPoint.y, 0, 0)
+                if MKMapRectIsNull(zoomRect) {
+                    zoomRect = pointRect
+                } else {
+                    zoomRect = MKMapRectUnion(zoomRect, pointRect)
+                }
+            }
+            mapView.setVisibleMapRect(zoomRect, animated: true)
+        }
+        
+        
     }
     func getUserLocationImage(_ time:Int) -> UIImage? {
         if time <= locationIconTime.first.rawValue {

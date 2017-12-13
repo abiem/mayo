@@ -25,13 +25,23 @@ class BorderedClusterAnnotationView: ClusterAnnotationView {
     
     override func configure(with style: ClusterAnnotationStyle) {
         super.configure(with: style)
-        
         switch style {
         case .image:
             layer.borderWidth = 0
         case .color:
-            layer.borderColor = borderColor.cgColor
-            layer.borderWidth = 2
+            self.backgroundColor = .clear
+            self.image = #imageLiteral(resourceName: "cluster")
+            countLabel.font = UIFont.systemFont(ofSize: 18)
+            countLabel.adjustsFontSizeToFitWidth = true
+
+        }
+    }
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        if case .color = style {
+            var frameLabel = self.countLabel.frame
+            frameLabel.size.height = frameLabel.height - 8
+            self.countLabel.frame = frameLabel
         }
     }
 }

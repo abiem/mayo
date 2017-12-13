@@ -46,7 +46,7 @@ class MainViewController: UIViewController {
     let LOADER_VIEW = 107
     
     // z index for map annotations
-    let CLUSTER_TASK_ANNOTATION_Z_INDEX = 6.0
+    let CLUSTER_TASK_ANNOTATION_Z_INDEX = 4.0
     let FOCUS_MAP_TASK_ANNOTATION_Z_INDEX = 5.0
     let STANDARD_MAP_TASK_ANNOTATION_Z_INDEX = 3.0
     
@@ -211,11 +211,12 @@ class MainViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        clusterManager.cellSize = 10
+        clusterManager.cellSize = nil
         clusterManager.maxZoomLevel = 17
         clusterManager.minCountForClustering = 2
-        clusterManager.clusterPosition = .nearCenter
+        clusterManager.clusterPosition = .average
         clusterManager.shouldRemoveInvisibleAnnotations = false
+        
         
         // check notification id
         if let refreshedToken = FIRInstanceID.instanceID().token() {
@@ -322,6 +323,25 @@ class MainViewController: UIViewController {
             return false
         }
         return true
+        
+    }
+    
+    func getFakeTasksCount() -> Int {
+        var count = 1
+        let defaults = UserDefaults.standard
+        let boolForTask1 = defaults.bool(forKey: Constants.ONBOARDING_TASK1_VIEWED_KEY)
+        let boolForTask2 = defaults.bool(forKey: Constants.ONBOARDING_TASK2_VIEWED_KEY)
+        let boolForTask3 = defaults.bool(forKey: Constants.ONBOARDING_TASK3_VIEWED_KEY)
+        if boolForTask1 != true  {
+            count += count
+        }
+        if boolForTask2 != true  {
+            count += count
+        }
+        if boolForTask3 != true  {
+            count += count
+        }
+        return count
         
     }
     
@@ -735,7 +755,7 @@ class MainViewController: UIViewController {
         if carouselIndex == 0 {
             let annotation = CustomFocusTaskMapAnnotation(currentCarouselIndex: carouselIndex, taskUserId: task.userId)
             annotation.coordinate = CLLocationCoordinate2D(latitude: (task.latitude), longitude: (task.longitude))
-            annotation.style = .image(#imageLiteral(resourceName: "newNotificaitonIcon"))
+            annotation.style = .color(#colorLiteral(red: 0, green: 0.5901804566, blue: 0.758269012, alpha: 1), radius: 30)
 //            self.mapView.addAnnotation(annotation)
             clusterManager.add(annotation)
 
@@ -743,7 +763,7 @@ class MainViewController: UIViewController {
         else {
             let annotation = CustomTaskMapAnnotation(currentCarouselIndex: carouselIndex, taskUserId: task.userId)
             annotation.coordinate = CLLocationCoordinate2D(latitude: (task.latitude), longitude: (task.longitude))
-           annotation.style = .image(#imageLiteral(resourceName: "newNotificaitonIcon"))
+           annotation.style = .color(#colorLiteral(red: 0, green: 0.5901804566, blue: 0.758269012, alpha: 1), radius: 30) //.image(#imageLiteral(resourceName: "newNotificaitonIcon"))
 //            self.mapView.addAnnotation(annotation)
             clusterManager.add(annotation)
         }
@@ -1108,7 +1128,7 @@ class MainViewController: UIViewController {
                     if newTask.completed == true {
                         self.tasks.append(newTask)
                     } else {
-                        self.tasks.insert(newTask, at: 1)
+                        self.tasks.insert(newTask, at: self.getFakeTasksCount())
                     }
                     //self.carouselView.insertItem(at: self.tasks.count-1, animated: true)
                     //self.carouselView.reloadItem(at: self.tasks.count-1, animated: true)
@@ -1118,7 +1138,7 @@ class MainViewController: UIViewController {
                     let carouselIndex = self.tasks.count - 1
                     print(carouselIndex)
                     self.addMapPin(task: newTask, carouselIndex: carouselIndex)
-                    
+                    self.clusterManager.reload(self.mapView, visibleMapRect: self.mapView.visibleMapRect)
                     // CHECK update all of the map annotation indexes
                     self.updateMapAnnotationCardIndexes()
                     
@@ -2638,6 +2658,8 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             currentUserTask.longitude = (locationManager.location?.coordinate.longitude)!
             currentUserTask.completed = false
             currentUserTask.taskDescription = currentUserTextView.text
+            currentUserTask.timeCreated = Date()
+            currentUserTask.timeUpdated = Date()
             //Current Task Created
             self.currentUserTaskSaved = true
             // save the user's current task
@@ -2880,6 +2902,8 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                     
                     print("customAnnotation \(customAnnotation.currentCarouselIndex)")
                     self.mapView.removeAnnotation(customAnnotation)
+                    clusterManager.remove(customAnnotation)
+                    clusterManager.reload(self.mapView, visibleMapRect: self.mapView.visibleMapRect)
                     return
                 }
             }
@@ -2891,6 +2915,8 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                     // if its equal to the current index remove it
                     print("customAnnotation \(customAnnotation.currentCarouselIndex)")
                     self.mapView.removeAnnotation(customAnnotation)
+                    clusterManager.remove(customAnnotation)
+                    clusterManager.reload(self.mapView, visibleMapRect: self.mapView.visibleMapRect)
                     return
                 }
             }
@@ -3037,10 +3063,10 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                         
                         let focusAnnotation = CustomFocusTaskMapAnnotation(currentCarouselIndex: index, taskUserId: taskUserId)
                         focusAnnotation.coordinate = mapTaskAnnotation.coordinate
-                        focusAnnotation.style = .image(#imageLiteral(resourceName: "newNotificaitonIcon"))
-                        self.clusterManager.add(focusAnnotation)
+                        focusAnnotation.style = .color(#colorLiteral(red: 0, green: 0.5901804566, blue: 0.758269012, alpha: 1), radius: 30)//.image(#imageLiteral(resourceName: "newNotificaitonIcon"))
                         self.clusterManager.remove(mapTaskAnnotation)
-                        self.clusterManager.reload(self.mapView, visibleMapRect: self.mapView.visibleMapRect)
+                        self.clusterManager.add(focusAnnotation)
+                        
 //                        self.mapView.addAnnotation(focusAnnotation)
 //
 //                        // remove the annotation from the map
@@ -3063,12 +3089,13 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
 //
 //                    // remove focus task icon
 //                    self.mapView.removeAnnotation(customFocusTaskAnnotation)
-                    taskAnnoation.style = .image(#imageLiteral(resourceName: "newNotificaitonIcon"))
-                     self.clusterManager.add(taskAnnoation)
+                    taskAnnoation.style = .color(#colorLiteral(red: 0, green: 0.5901804566, blue: 0.758269012, alpha: 1), radius: 50)//.image(#imageLiteral(resourceName: "newNotificaitonIcon"))
                     self.clusterManager.remove(customFocusTaskAnnotation)
-                    self.clusterManager.reload(self.mapView, visibleMapRect: self.mapView.visibleMapRect)
+                    self.clusterManager.add(taskAnnoation)
+                    
+                    
                 }
-                
+                self.clusterManager.reload(self.mapView, visibleMapRect: self.mapView.visibleMapRect)
             }
             
             let taskIndex = self.carouselView.currentItemIndex
