@@ -14,6 +14,7 @@ extension MainViewController: UITextViewDelegate {
         if textView.alpha == 0.5 {
             textView.text = nil
             textView.alpha = 1
+            taskDescription = nil
         }
     }
     
@@ -26,7 +27,7 @@ extension MainViewController: UITextViewDelegate {
     
     func textViewDidChange(_ textView: UITextView) {
         
-        
+        taskDescription = textView.text
         // change the post button isEnabled
         // if there is text inside the textView
         // also check that it is alpha of 1 so it is not the placeholder

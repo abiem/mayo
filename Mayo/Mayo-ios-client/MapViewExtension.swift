@@ -36,6 +36,15 @@ extension MainViewController: MKMapViewDelegate {
             
             return annotationView
         }
+        if annotation is CustomExpireTask {
+            
+            
+            let annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: "expireAnnotation")
+            // get last updated time
+            annotationView.image = #imageLiteral(resourceName: "expiredTask")
+            annotationView.layer.zPosition = CGFloat(self.STANDARD_MAP_EXPIRE_TASK_ANNOTATION_Z_INDEX)
+            return annotationView
+            }
         
         if annotation is CustomUserMapAnnotation {
             

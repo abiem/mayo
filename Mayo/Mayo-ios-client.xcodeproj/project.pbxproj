@@ -117,6 +117,7 @@
 		35F81DA01EA6E2520066439F /* FUX1.4.png in Resources */ = {isa = PBXBuildFile; fileRef = 35F81D9C1EA6E2520066439F /* FUX1.4.png */; };
 		35F81DA21EA72FE30066439F /* CustomUserMapAnnotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35F81DA11EA72FE30066439F /* CustomUserMapAnnotation.swift */; };
 		72B83B7C561184A96CA6184A /* Pods_Mayo_ios_client.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0FED37B2F877E9F57E8E0C07 /* Pods_Mayo_ios_client.framework */; };
+		7B0F21AD1FE29DCD003F6DAD /* CustomExpireTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B0F21AC1FE29DCD003F6DAD /* CustomExpireTask.swift */; };
 		7B5634421FDA9162001F8A0F /* CMAlertController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B5634411FDA9162001F8A0F /* CMAlertController.swift */; };
 		7B5B045F1FDA9CF200C8E8D1 /* Utility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B5B045E1FDA9CF200C8E8D1 /* Utility.swift */; };
 		7B6E3FC51FC6973400919494 /* MKCircleExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B6E3FC41FC6973400919494 /* MKCircleExtension.swift */; };
@@ -255,6 +256,7 @@
 		35F81D9C1EA6E2520066439F /* FUX1.4.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = FUX1.4.png; sourceTree = "<group>"; };
 		35F81DA11EA72FE30066439F /* CustomUserMapAnnotation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomUserMapAnnotation.swift; sourceTree = "<group>"; };
 		4C2DCF535B9E43BECA946ED2 /* Pods-Mayo-ios-client.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Mayo-ios-client.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Mayo-ios-client/Pods-Mayo-ios-client.debug.xcconfig"; sourceTree = "<group>"; };
+		7B0F21AC1FE29DCD003F6DAD /* CustomExpireTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomExpireTask.swift; sourceTree = "<group>"; };
 		7B5634411FDA9162001F8A0F /* CMAlertController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CMAlertController.swift; sourceTree = "<group>"; };
 		7B5B045E1FDA9CF200C8E8D1 /* Utility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utility.swift; sourceTree = "<group>"; };
 		7B6E3FC41FC6973400919494 /* MKCircleExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MKCircleExtension.swift; sourceTree = "<group>"; };
@@ -515,6 +517,7 @@
 				35B887271ED28FA800E761A2 /* CustomCurrentUserTaskAnnotation.swift */,
 				35B887291ED28FBC00E761A2 /* CustomFocusCurrentUserTaskAnnotation.swift */,
 				7BF740961FDFF4EC003CB691 /* BorderedClusterAnnotationView.swift */,
+				7B0F21AC1FE29DCD003F6DAD /* CustomExpireTask.swift */,
 			);
 			name = Annotations;
 			sourceTree = "<group>";
@@ -907,6 +910,7 @@
 				35D39E4C1EB85BB800DB41FE /* HorizontalGradientView.swift in Sources */,
 				35F6F3041E9B210400747104 /* GradientView.swift in Sources */,
 				3529A9CF1E998377003C815A /* AppDelegate.swift in Sources */,
+				7B0F21AD1FE29DCD003F6DAD /* CustomExpireTask.swift in Sources */,
 				7B5B045F1FDA9CF200C8E8D1 /* Utility.swift in Sources */,
 				35F81D901EA3EE150066439F /* OnboardingNotifcationsViewController.swift in Sources */,
 				3529A9E91E99ED19003C815A /* DateStringFormatterHelper.swift in Sources */,

@@ -46,9 +46,10 @@ class MainViewController: UIViewController {
     let LOADER_VIEW = 107
     
     // z index for map annotations
-    let CLUSTER_TASK_ANNOTATION_Z_INDEX = 4.0
-    let FOCUS_MAP_TASK_ANNOTATION_Z_INDEX = 5.0
+    let CLUSTER_TASK_ANNOTATION_Z_INDEX = 6.0
+    let FOCUS_MAP_TASK_ANNOTATION_Z_INDEX = 4.0
     let STANDARD_MAP_TASK_ANNOTATION_Z_INDEX = 3.0
+    let STANDARD_MAP_EXPIRE_TASK_ANNOTATION_Z_INDEX = 5.0
     
     // constants for onboarding tasks
     let ONBOARDING_TASK_1_DESCRIPTION = "Helping people around you is simple. Swipe the cards or look around the map."
@@ -149,10 +150,12 @@ class MainViewController: UIViewController {
     //Checks
     var isLocationNotAuthorised = false
     var isLoadingFirebase = false
-    //
+    // Cluster
     let clusterManager = ClusterManager()
-
-
+    //
+    var taskDescription : String?
+    // expired task point
+    var expiredAnnotation =  CustomExpireTask()
     
     //indicator
     @IBOutlet weak var indicatorView : UIActivityIndicatorView!
@@ -358,7 +361,7 @@ class MainViewController: UIViewController {
                 // TODO fix
                 let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
                 tasks.append(
-                    Task(userId: currentUserId!, taskDescription: "loading", latitude: self.userLatitude!, longitude: self.userLongitude!, completed: true, timeCreated: Date(), timeUpdated: Date(), taskID: "\(timeStamp)")
+                    Task(userId: currentUserId!, taskDescription: "loading", latitude: self.userLatitude!, longitude: self.userLongitude!, completed: false, timeCreated: Date(), timeUpdated: Date(), taskID: "\(timeStamp)")
                 )
                 carouselView.reloadData()
             }
@@ -1052,7 +1055,8 @@ class MainViewController: UIViewController {
                 // and not equal to own uid
                 // Remove Complete from here
                 //Lakshmi
-                if !taskDict.isEmpty  && (taskDict["createdby"] as? String  != FIRAuth.auth()?.currentUser?.uid) {
+//                && (taskDict["createdby"] as? String  != FIRAuth.auth()?.currentUser?.uid)
+                if !taskDict.isEmpty {
                     //
                     // send the current user local notification
                     // that there is a new task
@@ -1062,7 +1066,8 @@ class MainViewController: UIViewController {
                     // check task exists
                     for task in self.tasks {
                         // the task is already present in the tasks
-                        if task?.taskID == taskDict["createdby"] as? String || task?.taskID == taskDict["taskID"] as? String {
+                        //task?.taskID == taskDict["createdby"] as? String ||
+                        if  task?.taskID == taskDict["taskID"] as? String {
                             //for creator of Task or already existing Task
                             if taskDict["completed"] as! Bool == true {
                                 for (index, task) in self.tasks.enumerated() {
@@ -1129,15 +1134,15 @@ class MainViewController: UIViewController {
                         self.tasks.append(newTask)
                     } else {
                         self.tasks.insert(newTask, at: self.getFakeTasksCount())
+                        let carouselIndex = self.tasks.count - 1
+                        print(carouselIndex)
+                        self.addMapPin(task: newTask, carouselIndex: carouselIndex)
                     }
                     //self.carouselView.insertItem(at: self.tasks.count-1, animated: true)
                     //self.carouselView.reloadItem(at: self.tasks.count-1, animated: true)
                     self.carouselView.reloadData()
                     // add map pin for new task
                     // add carousel index
-                    let carouselIndex = self.tasks.count - 1
-                    print(carouselIndex)
-                    self.addMapPin(task: newTask, carouselIndex: carouselIndex)
                     self.clusterManager.reload(self.mapView, visibleMapRect: self.mapView.visibleMapRect)
                     // CHECK update all of the map annotation indexes
                     self.updateMapAnnotationCardIndexes()
@@ -1160,7 +1165,7 @@ class MainViewController: UIViewController {
                                             // TODO fix
                                             let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
                                             self.tasks.append(
-                                                Task(userId: self.currentUserId!, taskDescription: "", latitude: self.userLatitude!, longitude: self.userLongitude!, completed: true, timeCreated: Date(), timeUpdated: Date(), taskID: "\(timeStamp)")
+                                                Task(userId: self.currentUserId!, taskDescription: "", latitude: self.userLatitude!, longitude: self.userLongitude!, completed: false, timeCreated: Date(), timeUpdated: Date(), taskID: "\(timeStamp)")
                                             )
                                             
                                             self.carouselView.reloadData()
@@ -1391,7 +1396,7 @@ class MainViewController: UIViewController {
     
     // Remove marker for tasks
     func removeAnnotationForTask(_ taskID:String) {
-        for annotation in self.mapView.annotations {
+        for annotation in self.clusterManager.annotations {
             
             if annotation is CustomTaskMapAnnotation {
                 
@@ -1561,7 +1566,7 @@ class MainViewController: UIViewController {
                 // TODO fix
                 let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
                 self.tasks.append(
-                    Task(userId: self.currentUserId!, taskDescription: "", latitude: self.userLatitude!, longitude: self.userLongitude!, completed: true, timeCreated: Date(), timeUpdated: Date(), taskID: "\(timeStamp)")
+                    Task(userId: self.currentUserId!, taskDescription: "", latitude: self.userLatitude!, longitude: self.userLongitude!, completed: false, timeCreated: Date(), timeUpdated: Date(), taskID: "\(timeStamp)")
                 )
                 self.carouselView.insertItem(at: 1, animated: true)
             }
@@ -1781,19 +1786,18 @@ class MainViewController: UIViewController {
             ] as [String : Any];
         
         self.tasksRef?.child(currentUserTask.taskID!).setValue(taskUpdate)
-        
+        self.addMapPin(task: currentUserTask, carouselIndex: 0)
         currentUserTaskSaved = false
         UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
 
         //reload Carousel
-        if self.tasks.count > 0 {
-            self.tasks.remove(at: 0)
-        }
-        if self.tasks.count <= 1  {
+//        if self.tasks.count > 0 {
+//            self.tasks.remove(at: 0)
+//        }
             let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
             let currentUserKey = FIRAuth.auth()?.currentUser?.uid
             self.tasks.insert(Task(userId: currentUserKey!, taskDescription: "", latitude: (self.locationManager.location?.coordinate.latitude) ?? Constants.DEFAULT_LAT , longitude: (self.locationManager.location?.coordinate.longitude) ?? Constants.DEFAULT_LNG , completed: true, taskID: "\(timeStamp)"), at: 0)
-        }
+    
         self.carouselView.reloadData()
         self.carouselView.reloadItem(at: 0, animated: true)
         
@@ -1943,8 +1947,13 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                 textView.isEditable = true
                 
                 // show placeholder
-                textView.text = "What do you need help with?"
-                textView.alpha = 0.5
+                if let prevDescription = taskDescription {
+                    textView.text = prevDescription
+                    textView.alpha = 1
+                } else {
+                    textView.text = "What do you need help with?"
+                    textView.alpha = 0.5
+                }
                 //textView.becomeFirstResponder()
                 
             }
@@ -1974,9 +1983,14 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                 closeView.setImage(UIImage(named: "close"), for: .normal)
                 closeView.addTarget(self, action: #selector(discardCurrentUserTask(sender:)), for: .touchUpInside)
                 closeView.tag = self.CURRENT_USER_CANCEL_BUTTON
-               
+                if taskDescription != nil {
+                closeView.alpha = 1
+                closeView.isEnabled = true
+               } else {
                 closeView.alpha = 0.5
                 closeView.isEnabled = false
+                }
+                
                 // check if there are more than 1 card
                 // if there is only 1 card disable the close button
                 
@@ -2005,10 +2019,17 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                 doneView = UIButton(frame: CGRect(x: (tempView.bounds.width * 3/4 - 20), y: (tempView.bounds.height * 3/4), width: 50, height: 24))
                 doneView?.setTitle("Post", for: .normal)
                 // disable the post button at first
-                doneView?.isEnabled = false
+                if taskDescription != nil {
+                    doneView?.isEnabled = true
+                    doneView?.alpha = 1
+                }
+                else {
+                   doneView?.isEnabled = false
+                    doneView?.alpha = 0.5
+                }
+                
                 doneView?.tag = self.POST_NEW_TASK_BUTTON_TAG
                 //change the opacity to 0.5 for the button at first
-                doneView?.alpha = 0.5
                 doneView?.titleLabel?.font = UIFont.systemFont(ofSize: 24)
                 doneView?.addTarget(self, action: #selector(createTaskForCurrentUser(sender:)), for: .touchUpInside)
                 tempView.addSubview(doneView!)
@@ -2147,7 +2168,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             shadowView.addSubview(tempView)
             
             // create label to show how long ago it was created
-            let bottomLabel = UILabel(frame: CGRect(x: 20, y: 0, width: shadowView.frame.size.width-40, height: 20))
+            let bottomLabel = UILabel(frame: CGRect(x: 20, y: 0, width: shadowView.frame.size.width-40, height: 30))
             // use Moment to get the time ago for task at current index
             let taskTimeCreated = moment((self.tasks[index]?.timeCreated)!)
             // set label with time ago "x min ago"
@@ -2155,7 +2176,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             bottomLabel.center.x = tempView.center.x
             let tempViewBottom = tempView.bounds.maxY
             bottomLabel.center.y = tempViewBottom + 12
-            bottomLabel.font = UIFont.init(name: Constants.FONT_NAME, size: 9)
+            bottomLabel.font = UIFont.init(name: Constants.FONT_NAME, size: 13)
             bottomLabel.numberOfLines = 1
             bottomLabel.adjustsFontSizeToFitWidth = true
             bottomLabel.minimumScaleFactor = 0.5
@@ -2197,137 +2218,139 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         }
         let actionMarkAsComplete = UIAlertAction(title: "Mark quest as done", style: .default) { (action:UIAlertAction) in
             //This is called when the user presses the complete button.
-            
-            // let users know it was completed
-            let currentUserTask = self.tasks[0] as! Task
-            let currentUserKey = FIRAuth.auth()?.currentUser?.uid
-            
-            // get the channel's last messages for each user and then delete
-            // the task, conversation channel, and location
-            self.channelsRef?.child(currentUserTask.taskID!).observeSingleEvent(of: .value, with: { (snapshot) in
-                
-                // Get value for snapshot
-                let value = snapshot.value as? NSDictionary
-                let users = value?["users"] as? NSDictionary ?? [:]
-                let messages = value?["messages"] as? NSDictionary ?? [:]
-                
-                print("conversation channel value: \(value)")
-                print("users \(users)")
-                print("messages \(messages) keys \(messages.allKeys)")
-                //let username = value?["username"] as? String ?? ""
-                let messagesSorted = self.sortMessageArray(messages)
-                var usersMessagesDictionary: [String:Any] = [:]
-                for userKey in users.allKeys{
-                    
-                    if let userKeyString = userKey as? String {
-                        if userKeyString == currentUserKey! {
-                            // if the user key is the same as the current user
-                            // continue to next iteration of loop
-                            continue
-                        }
-                        
-                    // if the current userkey is not the current user
-                    // use it to find the last message for this user
-                    // add the user key and message to usermessages dictionary
-                        for messageKey in messagesSorted {
-                           // let message = messages[messageKey] as? [String: String]
-                            if userKeyString == messageKey["senderId"] as! String {
-                                
-                                // we found last message for this user,
-                                // add data to users messages dictionary
-                                usersMessagesDictionary[userKeyString] = messageKey
-                                break
-                            }
-                        }
-                        
-                    }
-                    
-                }
-                
-                //set textView back to editable
-                let currentUserTextView = self.view.viewWithTag(self.CURRENT_USER_TEXTVIEW_TAG) as! UITextView
-                currentUserTextView.isEditable = true
-                
-                // get start and end color from card
-                let shadowView = self.carouselView.itemView(at: 0) as! UIView
-                let gradientView = shadowView.subviews[0] as! GradientView
-                let startColor = gradientView.startColor
-                let endColor = gradientView.endColor
-                
-                // make carousel view invisible
-                self.carouselView.isHidden = true
-                
-                // complete the current task
-                self.newItemSwiped = true
-                
-                // remove task annotation on mapview
-                self.removeCurrentUserTaskAnnotation()
-                
-                self.carouselView.reloadItem(at: 0, animated: false)
-                
-                // create shadow view for completion view
-                let completionShadowView = self.createCompletionShadowView()
-                
-                // finish present view to select who helped you
-                let completionView = self.createCompletionGradientView(startColor: startColor, endColor: endColor)
-                
-                // add text label to ask who helped the user
-                let completionLabel = self.createCompletionViewLabel(completionView: completionView)
-                
-                // loop through dictionary of users helped messages
-                // maximum of 5 messages
-                var count = 0
-                for (userKey, userMessage) in usersMessagesDictionary {
-                    // loop through the dictionary and create
-                    // a button with message for each of the users up to 5
-                    let message = userMessage as! NSDictionary
-                    if count < 5 {
-                        //create a button view and add it to the completion view
-                        let chatUserMessageButton = self.createMessageToThankUser(messageText: message["text"] as! String , completionView: completionView, tagNumber: count, userId: userKey)
-                        let lineView = UIView(frame: CGRect(x:      0,
-                                                            y:      chatUserMessageButton.frame.size.height-6,
-                                                            width:  chatUserMessageButton.frame.size.width,
-                                                            height: 6.0))
-                        
-                        lineView.backgroundColor = UIColor.hexStringToUIColor(hex: Constants.chatBubbleColors[Int(message["colorIndex"] as! String)!])
-                        chatUserMessageButton.addSubview(lineView)
-
-                        completionView.addSubview(chatUserMessageButton)
-                        // update the count
-                        count+=1
-                    } else {
-                        break
-                    }
-                }
-                
-                
-                
-                // add smiley face button for people who helped
-                let usersHelpedButton = self.createUsersHelpedButton(completionView: completionView)
-                
-                // add frowney face button for no one helped
-                let usersNoHelpButton = self.createUsersNoHelpButton(completionView: completionView)
-                
-                // add subviews to view
-                completionView.addSubview(usersHelpedButton)
-                completionView.addSubview(usersNoHelpButton)
-                completionView.addSubview(completionLabel)
-                
-                // TODO add slide up animation
-                completionShadowView.addSubview(completionView)
-                self.view.addSubview(completionShadowView)
-                
-                
-            }) { (error) in
-                print(error.localizedDescription)
-            }
-            
+            self.createMarkCompleteView()
         }
         alert.addAction(actionMarkAsComplete)
         alert.addAction(actionCancel)
         
         self.present(alert, animated: true, completion:nil)
 
+    }
+    
+    func createMarkCompleteView() {
+        // let users know it was completed
+        let currentUserTask = self.tasks[0] as! Task
+        let currentUserKey = FIRAuth.auth()?.currentUser?.uid
+        
+        // get the channel's last messages for each user and then delete
+        // the task, conversation channel, and location
+        self.channelsRef?.child(currentUserTask.taskID!).observeSingleEvent(of: .value, with: { (snapshot) in
+            
+            // Get value for snapshot
+            let value = snapshot.value as? NSDictionary
+            let users = value?["users"] as? NSDictionary ?? [:]
+            let messages = value?["messages"] as? NSDictionary ?? [:]
+            
+            print("conversation channel value: \(value)")
+            print("users \(users)")
+            print("messages \(messages) keys \(messages.allKeys)")
+            //let username = value?["username"] as? String ?? ""
+            let messagesSorted = self.sortMessageArray(messages)
+            var usersMessagesDictionary: [String:Any] = [:]
+            for userKey in users.allKeys{
+                
+                if let userKeyString = userKey as? String {
+                    if userKeyString == currentUserKey! {
+                        // if the user key is the same as the current user
+                        // continue to next iteration of loop
+                        continue
+                    }
+                    
+                    // if the current userkey is not the current user
+                    // use it to find the last message for this user
+                    // add the user key and message to usermessages dictionary
+                    for messageKey in messagesSorted {
+                        // let message = messages[messageKey] as? [String: String]
+                        if userKeyString == messageKey["senderId"] as! String {
+                            
+                            // we found last message for this user,
+                            // add data to users messages dictionary
+                            usersMessagesDictionary[userKeyString] = messageKey
+                            break
+                        }
+                    }
+                    
+                }
+                
+            }
+            
+            //set textView back to editable
+            let currentUserTextView = self.view.viewWithTag(self.CURRENT_USER_TEXTVIEW_TAG) as! UITextView
+            currentUserTextView.isEditable = true
+            
+            // get start and end color from card
+            let shadowView = self.carouselView.itemView(at: 0) as! UIView
+            let gradientView = shadowView.subviews[0] as! GradientView
+            let startColor = gradientView.startColor
+            let endColor = gradientView.endColor
+            
+            // make carousel view invisible
+            self.carouselView.isHidden = true
+            
+            // complete the current task
+            self.newItemSwiped = true
+            
+            // remove task annotation on mapview
+            self.removeCurrentUserTaskAnnotation()
+            
+            self.carouselView.reloadItem(at: 0, animated: false)
+            
+            // create shadow view for completion view
+            let completionShadowView = self.createCompletionShadowView()
+            
+            // finish present view to select who helped you
+            let completionView = self.createCompletionGradientView(startColor: startColor, endColor: endColor)
+            
+            // add text label to ask who helped the user
+            let completionLabel = self.createCompletionViewLabel(completionView: completionView)
+            
+            // loop through dictionary of users helped messages
+            // maximum of 5 messages
+            var count = 0
+            for (userKey, userMessage) in usersMessagesDictionary {
+                // loop through the dictionary and create
+                // a button with message for each of the users up to 5
+                let message = userMessage as! NSDictionary
+                if count < 5 {
+                    //create a button view and add it to the completion view
+                    let chatUserMessageButton = self.createMessageToThankUser(messageText: message["text"] as! String , completionView: completionView, tagNumber: count, userId: userKey)
+                    let lineView = UIView(frame: CGRect(x:      0,
+                                                        y:      chatUserMessageButton.frame.size.height-6,
+                                                        width:  chatUserMessageButton.frame.size.width,
+                                                        height: 6.0))
+                    
+                    lineView.backgroundColor = UIColor.hexStringToUIColor(hex: Constants.chatBubbleColors[Int(message["colorIndex"] as! String)!])
+                    chatUserMessageButton.addSubview(lineView)
+                    
+                    completionView.addSubview(chatUserMessageButton)
+                    // update the count
+                    count+=1
+                } else {
+                    break
+                }
+            }
+            
+            
+            
+            // add smiley face button for people who helped
+            let usersHelpedButton = self.createUsersHelpedButton(completionView: completionView)
+            
+            // add frowney face button for no one helped
+            let usersNoHelpButton = self.createUsersNoHelpButton(completionView: completionView)
+            
+            // add subviews to view
+            completionView.addSubview(usersHelpedButton)
+            completionView.addSubview(usersNoHelpButton)
+            completionView.addSubview(completionLabel)
+            
+            // TODO add slide up animation
+            completionShadowView.addSubview(completionView)
+            self.view.addSubview(completionShadowView)
+            
+            
+        }) { (error) in
+            print(error.localizedDescription)
+        }
     }
     
     func createCompletionShadowView() -> UIView {
@@ -2641,6 +2664,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         
         // TODO keyboard bug when user hits home button
         // create/update new task item for current user
+        taskDescription = nil
         self.view.endEditing(true)
         
         if locationManager.location?.coordinate.latitude == nil && locationManager.location?.coordinate.longitude == nil {
@@ -2660,6 +2684,8 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             currentUserTask.taskDescription = currentUserTextView.text
             currentUserTask.timeCreated = Date()
             currentUserTask.timeUpdated = Date()
+            // update user task
+            self.tasks[0] = currentUserTask
             //Current Task Created
             self.currentUserTaskSaved = true
             // save the user's current task
@@ -2790,6 +2816,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
     
     // action for close button item
     func discardCurrentUserTask(sender: UIButton) {
+        taskDescription = nil
         let currentUserTextView = self.view.viewWithTag(self.CURRENT_USER_TEXTVIEW_TAG) as! UITextView
         currentUserTextView.resignFirstResponder()
         currentUserTextView.text = "What do you need help with?"
@@ -2894,7 +2921,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         self.carouselView.removeItem(at: cardIndex, animated: true)
        // carouselView.reloadData()
         
-        for annotation in self.mapView.annotations {
+        for annotation in clusterManager.annotations {
             if annotation is CustomFocusTaskMapAnnotation  {
                 let customAnnotation = annotation as! CustomFocusTaskMapAnnotation
                 if customAnnotation.taskUserId == userId {
@@ -3029,6 +3056,19 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                     }
                 }
             }
+            
+            if let currentTask = self.tasks[self.carouselView.currentItemIndex] {
+                if currentTask.completed == true {
+                    let taskCordinates = CLLocationCoordinate2D.init(latitude: currentTask.latitude, longitude: currentTask.longitude)
+                    self.expiredAnnotation.coordinate = taskCordinates
+                    self.mapView.addAnnotation(self.expiredAnnotation)
+
+                } else {
+                    self.mapView.removeAnnotation(self.expiredAnnotation)
+                }
+                
+            }
+            
            
             self.updateMapAnnotationCardIndexes()
             
@@ -3044,8 +3084,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                     let annotationClone = annotation
                     self.mapView.removeAnnotation(annotation)
                     self.mapView.addAnnotation(annotationClone)
-                    
-                    
+
                 }
                 
                 // check for the annotation for current card
