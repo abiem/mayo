@@ -107,6 +107,7 @@ class MainViewController: UIViewController {
     
     var usersRef: FIRDatabaseReference?
     var currentUserHandle: FIRDatabaseHandle?
+    var mCurrentUserTaskActivity : FIRDatabaseHandle?
     
     var taskViewRef: FIRDatabaseReference?
     
@@ -153,7 +154,7 @@ class MainViewController: UIViewController {
     // Cluster
     let clusterManager = ClusterManager()
     //
-    var taskDescription : String?
+    var mTaskDescription : String?
     // expired task point
     var expiredAnnotation =  CustomExpireTask()
     
@@ -198,7 +199,7 @@ class MainViewController: UIViewController {
                 }
                 canCreateNewtask = true
                 let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
-                self.tasks.insert(Task(userId: self.currentUserId!, taskDescription: "", latitude: self.userLatitude!, longitude: self.userLongitude!, completed: true, timeCreated: Date(), timeUpdated: Date(), taskID: "\(timeStamp)"), at: 0)
+                self.tasks.insert(Task(userId: self.currentUserId!, taskDescription: "", latitude: self.userLatitude!, longitude: self.userLongitude!, completed: true, timeCreated: Date(), timeUpdated: Date(), taskID: "\(timeStamp)",recentActivity: false), at: 0)
                 carouselView.reloadData()
                 if tasks.count > 0 {
                     carouselView.scrollToItem(at: 1, animated: false)
@@ -330,19 +331,22 @@ class MainViewController: UIViewController {
     }
     
     func getFakeTasksCount() -> Int {
-        var count = 1
+        var count = 0
+        if checkFakeTakViewed() {
+            count = 1
+        }
         let defaults = UserDefaults.standard
         let boolForTask1 = defaults.bool(forKey: Constants.ONBOARDING_TASK1_VIEWED_KEY)
         let boolForTask2 = defaults.bool(forKey: Constants.ONBOARDING_TASK2_VIEWED_KEY)
         let boolForTask3 = defaults.bool(forKey: Constants.ONBOARDING_TASK3_VIEWED_KEY)
         if boolForTask1 != true  {
-            count += count
+            count += 1
         }
         if boolForTask2 != true  {
-            count += count
+            count += 1
         }
         if boolForTask3 != true  {
-            count += count
+            count += 1
         }
         return count
         
@@ -361,7 +365,7 @@ class MainViewController: UIViewController {
                 // TODO fix
                 let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
                 tasks.append(
-                    Task(userId: currentUserId!, taskDescription: "loading", latitude: self.userLatitude!, longitude: self.userLongitude!, completed: false, timeCreated: Date(), timeUpdated: Date(), taskID: "\(timeStamp)")
+                    Task(userId: currentUserId!, taskDescription: "loading", latitude: self.userLatitude!, longitude: self.userLongitude!, completed: false, timeCreated: Date(), timeUpdated: Date(), taskID: "\(timeStamp)", recentActivity: false)
                 )
                 carouselView.reloadData()
             }
@@ -416,6 +420,7 @@ class MainViewController: UIViewController {
         thanksAnimImageView = UIImageView(frame: CGRect(x: viewFrame.origin.x, y: viewFrame.origin.y, width: viewFrame.size.width, height: viewFrame.size.height))
         flareAnimImageView = UIImageView(frame: CGRect(x: viewFrame.origin.x, y: viewFrame.origin.y, width: viewFrame.size.width, height: viewFrame.size.height))
         flareAnimImageView.image = #imageLiteral(resourceName: "flareImage");
+        flareAnimImageView.transform = CGAffineTransform(scaleX: 1.5, y: 1.5)
         
         thanksAnimImageView.contentMode = .scaleAspectFit
         flareAnimImageView.contentMode = .scaleAspectFill
@@ -622,7 +627,7 @@ class MainViewController: UIViewController {
         // only show the first onboarding task if it hasn't been shown before
         if boolForTask1 != true {
             let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
-            let task1 = Task(userId: "fakeuserid1", taskDescription: self.ONBOARDING_TASK_1_DESCRIPTION, latitude: self.userLatitude! + 0.0003, longitude: self.userLongitude! + 0.0003, completed: false, taskID: "\(timeStamp)")
+            let task1 = Task(userId: "fakeuserid1", taskDescription: self.ONBOARDING_TASK_1_DESCRIPTION, latitude: self.userLatitude! + 0.0003, longitude: self.userLongitude! + 0.0003, completed: false, taskID: "\(timeStamp)", recentActivity: false)
             let randomColorGradient = cardColor.generateRandomColor()
             // save the colors to the task
             task1.setGradientColors(startColor: randomColorGradient[0], endColor: randomColorGradient[1])
@@ -637,7 +642,7 @@ class MainViewController: UIViewController {
         // only show if the second onboarding task if it hasn't been shown before
         if boolForTask2 != true {
             let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
-            let task2 = Task(userId: "fakeuserid2", taskDescription: self.ONBOARDING_TASK_2_DESCRIPTION, latitude: self.userLatitude! + 0.0001, longitude: self.userLongitude! + 0.0001, completed: false, taskID: "\(timeStamp)")
+            let task2 = Task(userId: "fakeuserid2", taskDescription: self.ONBOARDING_TASK_2_DESCRIPTION, latitude: self.userLatitude! + 0.0001, longitude: self.userLongitude! + 0.0001, completed: false, taskID: "\(timeStamp)", recentActivity: false)
             let randomColorGradient = cardColor.generateRandomColor()
             
             // save the colors to the task
@@ -652,7 +657,7 @@ class MainViewController: UIViewController {
         // only show if the third onboarding task if it hasn't been shown before
         if boolForTask3 != true {
             let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
-            let task3 = Task(userId: "fakeuserid3", taskDescription: self.ONBOARDING_TASK_3_DESCRIPTION, latitude: self.userLatitude! + 0.0003, longitude: self.userLongitude! - 0.0003, completed: false, taskID: "\(timeStamp)")
+            let task3 = Task(userId: "fakeuserid3", taskDescription: self.ONBOARDING_TASK_3_DESCRIPTION, latitude: self.userLatitude! + 0.0003, longitude: self.userLongitude! - 0.0003, completed: false, taskID: "\(timeStamp)", recentActivity: false)
             let randomColorGradient = cardColor.generateRandomColor()
             
             // save the colors to the task
@@ -964,9 +969,6 @@ class MainViewController: UIViewController {
                     // remove the task from the tasks array
                     self.tasks.remove(at: index)
                     
-                    // remove chat channel for the task
-                    self.chatChannels.remove(at: index)
-                    
                     // remove that card based on its key
                     UIView.animate(withDuration: 1, animations: {
                         self.carouselView.removeItem(at: index, animated: true)
@@ -1074,10 +1076,10 @@ class MainViewController: UIViewController {
                                     if task?.taskID == taskDict["taskID"] as? String {
                                             self.tasks[index]?.completed = true
                                             self.carouselView.reloadItem(at: index, animated: true)
+                                            self.removeAnnotationForTask((task?.taskID)!)
                                     
 //                                        self.tasks.remove(at: index);
 //                                        self.removeCarousel(index)
-//                                        self.removeAnnotationForTask((task?.taskID)!)
 //                                        self.updateMapAnnotationCardIndexes()
                                         if self.tasks.count <= 1 {
                                             self.newItemSwiped = true
@@ -1105,13 +1107,15 @@ class MainViewController: UIViewController {
                     let taskDescription = taskDict["taskDescription"] as! String
                     
                     let timeStamp = taskDict["taskID"] as! String
+                    let recentActivity = taskDict["recentActivity"] as! Bool
                     
                     var taskStartColor: String? = nil
                     var taskEndColor: String? = nil
 //
 
                     
-                    let newTask = Task(userId: key, taskDescription: taskDescription, latitude: location.coordinate.latitude, longitude: location.coordinate.longitude, completed: taskCompleted, timeCreated: taskTimeCreated, timeUpdated: taskTimeUpdated, taskID: "\(timeStamp)")
+                    let newTask = Task(userId: key, taskDescription: taskDescription, latitude: location.coordinate.latitude, longitude: location.coordinate.longitude, completed: taskCompleted, timeCreated: taskTimeCreated, timeUpdated: taskTimeUpdated, taskID: "\(timeStamp)",recentActivity: recentActivity)
+                    
                     
                     // check if the task already has start and end colors saved
                     if taskDict["startColor"] != nil,  taskDict["endColor"] != nil
@@ -1146,7 +1150,9 @@ class MainViewController: UIViewController {
                     self.clusterManager.reload(self.mapView, visibleMapRect: self.mapView.visibleMapRect)
                     // CHECK update all of the map annotation indexes
                     self.updateMapAnnotationCardIndexes()
-                    
+                    if self.tasks.count == 2 && self.mTaskDescription == nil {
+                        self.carouselView.scrollToItem(at: 1, animated: true)
+                    }
                 }
                 else if  !taskDict.isEmpty && taskDict["completed"] as! Bool == true {
                     for (index, task) in self.tasks.enumerated() {
@@ -1165,7 +1171,7 @@ class MainViewController: UIViewController {
                                             // TODO fix
                                             let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
                                             self.tasks.append(
-                                                Task(userId: self.currentUserId!, taskDescription: "", latitude: self.userLatitude!, longitude: self.userLongitude!, completed: false, timeCreated: Date(), timeUpdated: Date(), taskID: "\(timeStamp)")
+                                                Task(userId: self.currentUserId!, taskDescription: "", latitude: self.userLatitude!, longitude: self.userLongitude!, completed: false, timeCreated: Date(), timeUpdated: Date(), taskID: "\(timeStamp)",recentActivity: false)
                                             )
                                             
                                             self.carouselView.reloadData()
@@ -1346,6 +1352,9 @@ class MainViewController: UIViewController {
         notification = NotificationCenter.default.addObserver(forName: .UIApplicationWillEnterForeground, object: nil, queue: .main) {
             [unowned self] notification in
             self.addCurrentUserLocationToFirebase()
+            if self.carouselView.currentItemIndex == 0 {
+             self.mapView.setUserTrackingMode(.follow, animated: true)
+            }
             let authorizationStatus = CLLocationManager.authorizationStatus()
             if (authorizationStatus == .denied || authorizationStatus == .notDetermined) && self.isLocationNotAuthorised  {
                 // User has not authorized access to location information.
@@ -1405,7 +1414,7 @@ class MainViewController: UIViewController {
                 
                     // check if the task has the same id as the annotation
                     if  taskID == customAnnotation.taskUserId {
-                        self.mapView.removeAnnotation(annotation)
+                        self.clusterManager.remove(annotation)
                         break
                     
                 }
@@ -1418,13 +1427,14 @@ class MainViewController: UIViewController {
 
                     // check if the task has the same id as the annotation
                     if  taskID == customAnnotation.taskUserId {
-                        self.mapView.removeAnnotation(annotation)
+                        self.clusterManager.remove(annotation)
                         break
                 }
   
             }
             
         }
+        self.clusterManager.reload(self.mapView, visibleMapRect: self.mapView.visibleMapRect)
         
     }
     
@@ -1455,8 +1465,14 @@ class MainViewController: UIViewController {
                     self.createLocalNotification(title: "Your help quest expired", body: "🕐 Still need help?", time: Int(0.5))
                     currentUserTask?.completed = true;
                     currentUserTask?.completeType = Constants.STATUS_FOR_TIME_EXPIRED
-                    UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
-                    self.removeTaskAfterComplete(currentUserTask!)
+                    //Remove Card
+                    if currentUserTask!.recentActivity {
+                        self.tasks[0] = currentUserTask
+                        self.createMarkCompleteView()
+                    } else {
+                        UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
+                        self.removeTaskAfterComplete(currentUserTask!)
+                    }
                     
                 }
                 else {
@@ -1523,7 +1539,14 @@ class MainViewController: UIViewController {
                 // create notification that the task is out of time
                 currentUserTask?.completed = true;
                 currentUserTask?.completeType = Constants.STATUS_FOR_TIME_EXPIRED
-                self.removeTaskAfterComplete(currentUserTask!)
+                
+                if currentUserTask!.recentActivity {
+                    self.tasks[0] = currentUserTask
+                    self.createMarkCompleteView()
+                } else {
+                    UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
+                    self.removeTaskAfterComplete(currentUserTask!)
+                }
                 // reset the current user's task
                 // delete the task if it has expired
                 // self.deleteAndResetCurrentUserTask()
@@ -1560,13 +1583,14 @@ class MainViewController: UIViewController {
     }
     
     func removeFirebaseLoader() {
+        
         if self.isLoadingFirebase != false {
             self.isLoadingFirebase = false
             if (self.userLatitude != nil && self.userLongitude != nil) {
                 // TODO fix
                 let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
                 self.tasks.append(
-                    Task(userId: self.currentUserId!, taskDescription: "", latitude: self.userLatitude!, longitude: self.userLongitude!, completed: false, timeCreated: Date(), timeUpdated: Date(), taskID: "\(timeStamp)")
+                    Task(userId: self.currentUserId!, taskDescription: "", latitude: self.userLatitude!, longitude: self.userLongitude!, completed: false, timeCreated: Date(), timeUpdated: Date(), taskID: "\(timeStamp)", recentActivity: false)
                 )
                 self.carouselView.insertItem(at: 1, animated: true)
             }
@@ -1606,8 +1630,9 @@ class MainViewController: UIViewController {
                         let timeCreated = dicTask["timeCreated"] as! Date
                         let timeUpdated = dicTask["timeUpdated"] as! Date
                         let taskID = dicTask["taskID"] as! String
+                        let recentActivity = dicTask["recentActivity"] as! Bool
                         
-                        let currentTask =  Task(userId: userID , taskDescription: taskDescription , latitude: latitude , longitude: longitude, completed: completed, timeCreated: timeCreated , timeUpdated: timeUpdated, taskID: taskID)
+                        let currentTask =  Task(userId: userID , taskDescription: taskDescription , latitude: latitude , longitude: longitude, completed: completed, timeCreated: timeCreated , timeUpdated: timeUpdated, taskID: taskID, recentActivity: recentActivity)
                         currentTask.startColor = startColor
                         currentTask.endColor = endColor
 
@@ -1782,11 +1807,12 @@ class MainViewController: UIViewController {
                           "timeCreated": currentUserTask.timeCreatedString ,
                           "timeUpdated": updateDate,
                           "completeType": currentUserTask.completeType ?? "",
-                          "helpedBy": currentUserTask.helpedBy ?? ""
+                          "helpedBy": currentUserTask.helpedBy ?? "",
+                          "recentActivity": currentUserTask.recentActivity
             ] as [String : Any];
         
         self.tasksRef?.child(currentUserTask.taskID!).setValue(taskUpdate)
-        self.addMapPin(task: currentUserTask, carouselIndex: 0)
+        //self.addMapPin(task: currentUserTask, carouselIndex: 0)
         currentUserTaskSaved = false
         UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
 
@@ -1796,7 +1822,7 @@ class MainViewController: UIViewController {
 //        }
             let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
             let currentUserKey = FIRAuth.auth()?.currentUser?.uid
-            self.tasks.insert(Task(userId: currentUserKey!, taskDescription: "", latitude: (self.locationManager.location?.coordinate.latitude) ?? Constants.DEFAULT_LAT , longitude: (self.locationManager.location?.coordinate.longitude) ?? Constants.DEFAULT_LNG , completed: true, taskID: "\(timeStamp)"), at: 0)
+        self.tasks.insert(Task(userId: currentUserKey!, taskDescription: "", latitude: (self.locationManager.location?.coordinate.latitude) ?? Constants.DEFAULT_LAT , longitude: (self.locationManager.location?.coordinate.longitude) ?? Constants.DEFAULT_LNG , completed: false, taskID: "\(timeStamp)", recentActivity: false), at: 0)
     
         self.carouselView.reloadData()
         self.carouselView.reloadItem(at: 0, animated: true)
@@ -1830,14 +1856,14 @@ class MainViewController: UIViewController {
         })
     }
     
+    func startObservingUserActivity() {
+//        mCurrentUserTaskActivity =
+    }
+    
 }
 
 // MARK: carousel view
 extension MainViewController: iCarouselDelegate, iCarouselDataSource {
-    
-   
-
-    
     
     func carousel(_ carousel: iCarousel, viewForItemAt index: Int, reusing view: UIView?) -> UIView {
         
@@ -1947,7 +1973,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                 textView.isEditable = true
                 
                 // show placeholder
-                if let prevDescription = taskDescription {
+                if let prevDescription = mTaskDescription {
                     textView.text = prevDescription
                     textView.alpha = 1
                 } else {
@@ -1961,8 +1987,9 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             textView.center.x = tempView.center.x
             textView.backgroundColor = UIColor.clear
             textView.textAlignment = .left
-            textView.font = UIFont.systemFont(ofSize: 20)
+            textView.font = UIFont.systemFont(ofSize: 22)
             textView.delegate = self
+            textView.isScrollEnabled = false
             textView.tag = CURRENT_USER_TEXTVIEW_TAG
             tempView.addSubview(textView)
             
@@ -1983,7 +2010,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                 closeView.setImage(UIImage(named: "close"), for: .normal)
                 closeView.addTarget(self, action: #selector(discardCurrentUserTask(sender:)), for: .touchUpInside)
                 closeView.tag = self.CURRENT_USER_CANCEL_BUTTON
-                if taskDescription != nil {
+                if mTaskDescription != nil {
                 closeView.alpha = 1
                 closeView.isEnabled = true
                } else {
@@ -2019,7 +2046,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                 doneView = UIButton(frame: CGRect(x: (tempView.bounds.width * 3/4 - 20), y: (tempView.bounds.height * 3/4), width: 50, height: 24))
                 doneView?.setTitle("Post", for: .normal)
                 // disable the post button at first
-                if taskDescription != nil {
+                if mTaskDescription != nil {
                     doneView?.isEnabled = true
                     doneView?.alpha = 1
                 }
@@ -2469,7 +2496,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
     func deleteAndResetCurrentUserTask() {
         let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
         let currentUserKey = FIRAuth.auth()?.currentUser?.uid
-        self.tasks[0] = Task(userId: currentUserKey!, taskDescription: "", latitude: (self.locationManager.location?.coordinate.latitude)!, longitude: (self.locationManager.location?.coordinate.longitude)!, completed: true, taskID: "\(timeStamp)")
+        self.tasks[0] = Task(userId: currentUserKey!, taskDescription: "", latitude: (self.locationManager.location?.coordinate.latitude)!, longitude: (self.locationManager.location?.coordinate.longitude)!, completed: true, taskID: "\(timeStamp)",recentActivity: false)
         
         // delete the task
         self.tasksRef?.child(userTaskId!).removeValue()
@@ -2664,7 +2691,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         
         // TODO keyboard bug when user hits home button
         // create/update new task item for current user
-        taskDescription = nil
+        mTaskDescription = nil
         self.view.endEditing(true)
         
         if locationManager.location?.coordinate.latitude == nil && locationManager.location?.coordinate.longitude == nil {
@@ -2707,6 +2734,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             dicTask["timeCreated"] = currentUserTask.timeCreated
             dicTask["timeUpdated"] = currentUserTask.timeUpdated
             dicTask["taskID"] = currentUserTask.taskID
+            dicTask["recentActivity"] = currentUserTask.recentActivity
             
             // encode Task for saving
             let data = NSKeyedArchiver.archivedData(withRootObject: dicTask)
@@ -2816,7 +2844,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
     
     // action for close button item
     func discardCurrentUserTask(sender: UIButton) {
-        taskDescription = nil
+        mTaskDescription = nil
         let currentUserTextView = self.view.viewWithTag(self.CURRENT_USER_TEXTVIEW_TAG) as! UITextView
         currentUserTextView.resignFirstResponder()
         currentUserTextView.text = "What do you need help with?"

@@ -49,6 +49,15 @@ class ChatViewController: JSQMessagesViewController {
         
         // turns off attachments button
         self.inputToolbar.contentView.leftBarButtonItem = nil
+        self.inputToolbar.contentView.textView.autocapitalizationType = .sentences
+        self.inputToolbar.contentView.textView.autocorrectionType = .yes
+        self.inputToolbar.contentView.textView.spellCheckingType = .yes
+        
+        if #available(iOS 11.0, *) {
+            self.inputToolbar.contentView.textView.smartQuotesType = .yes
+            self.inputToolbar.contentView.textView.smartDashesType = .yes
+            self.inputToolbar.contentView.textView.smartInsertDeleteType = .yes
+        }
 
         
         // set senderid as current user id
@@ -193,11 +202,7 @@ class ChatViewController: JSQMessagesViewController {
         let dateFormatter = DateStringFormatterHelper()
         let dateCreated = dateFormatter.convertDateToString(date: Date())
         
-         if isOwner && !isFakeTask  {
-            let screamingFaceEmoji = "\u{1F631} " //U+1F631
-            textToSend = screamingFaceEmoji + text!
-            
-        }
+        
         if isFakeTask {
             let defaults = UserDefaults.standard
             defaults.set(true, forKey: "onboardingTask2Viewed")
@@ -206,7 +211,13 @@ class ChatViewController: JSQMessagesViewController {
             receiveFakeMessage()
         }
         else {
-            
+            if isOwner   {
+                let screamingFaceEmoji = "\u{1F631} " //U+1F631
+                textToSend = screamingFaceEmoji + text!
+                
+            } else  {
+                FIRDatabase.database().reference().child("tasks").child(channelId!).child("recentActivity").setValue(true)
+            }
             FIRDatabase.database().reference().child("tasks").child(channelId!).child("timeUpdated").setValue(dateCreated)
             let itemRef = messageRef.childByAutoId()
             let messageItem = [

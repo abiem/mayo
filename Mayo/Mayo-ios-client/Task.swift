@@ -35,12 +35,13 @@ class Task: NSObject {
     var userThanked : String?
     var helpedBy: [String]?
     var taskView: [String]?
+    var recentActivity : Bool = false
     
     
 
     
-    init(userId: String , taskDescription: String, latitude: CLLocationDegrees, longitude: CLLocationDegrees, completed: Bool, timeCreated: Date = Date(), timeUpdated: Date = Date(), taskID : String ) {
-        
+    init(userId: String , taskDescription: String, latitude: CLLocationDegrees, longitude: CLLocationDegrees, completed: Bool, timeCreated: Date = Date(), timeUpdated: Date = Date(), taskID : String, recentActivity : Bool ) {
+        self.recentActivity = recentActivity
         self.userId = userId
         self.taskDescription = taskDescription
         self.latitude = latitude
@@ -104,6 +105,7 @@ class Task: NSObject {
             "createdby": FIRAuth.auth()?.currentUser?.uid ?? self.userId,
             "taskID": self.taskID!,
             "completeType" : self.completeType ?? "" ,
+            "recentActivity" : false,
             "helpedBy" : "" ]
         tasksRef.child(self.taskID!).setValue(taskDictionary) 
         
