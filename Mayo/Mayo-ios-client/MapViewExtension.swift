@@ -208,6 +208,9 @@ extension MainViewController: MKMapViewDelegate {
         
         
     }
+    
+   
+    
     func getUserLocationImage(_ time:Int) -> UIImage? {
         if time <= locationIconTime.first.rawValue {
             return #imageLiteral(resourceName: "greenDot")

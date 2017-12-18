@@ -74,7 +74,7 @@ class ChatViewController: JSQMessagesViewController {
             checkTaskCompletion()
         } else {
             let parentSize = self.view.frame.size
-            viewQuestCompleted.frame = CGRect(x:0, y: parentSize.height-60, width:parentSize.width, height:60)
+            viewQuestCompleted.frame = CGRect(x:0, y: parentSize.height-44, width:parentSize.width, height:44)
             self.inputToolbar.isHidden = true
             self.view.addSubview(viewQuestCompleted)
         }
@@ -290,7 +290,7 @@ class ChatViewController: JSQMessagesViewController {
         // messages being written to the Firebase DB
         newMessageRefHandle = messageQuery.observe(.childAdded, with: { (snapshot) -> Void in
             let messageData = snapshot.value as! Dictionary<String, String>
-            if let id = messageData["senderId"] as String!, let name = messageData["senderName"] as String!, let text = messageData["text"] as String!, text.characters.count > 0, let colorIndexAsInt = Int(messageData["colorIndex"]!) {
+            if let id = messageData["senderId"] as String!, let name = messageData["senderName"] as String!, let text = messageData["text"] as String!, text.count > 0, let colorIndexAsInt = Int(messageData["colorIndex"]!) {
                 self.addMessage(withId: id, name: name, text: text, colorIndex: colorIndexAsInt)
                 self.finishReceivingMessage()
             } else {
@@ -301,7 +301,6 @@ class ChatViewController: JSQMessagesViewController {
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = super.collectionView(collectionView, cellForItemAt: indexPath) as! JSQMessagesCollectionViewCell
-        let message = messages[indexPath.item]
         cell.textView?.textColor = UIColor.white
         return cell
     }

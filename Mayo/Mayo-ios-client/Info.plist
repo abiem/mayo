@@ -50,7 +50,7 @@
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Choose Always to make sure others can always receive your quests and vice versa.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Your location is needed for the app</string>
+	<string>Choose Always to make sure others can always receive your quests and vice versa.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Your location is needed for the app</string>
 	<key>UIAppFonts</key>

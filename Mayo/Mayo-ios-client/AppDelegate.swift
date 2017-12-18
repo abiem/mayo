@@ -311,6 +311,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
                                 }
                                 else if (currentViewController is ChatViewController) {
                                     chatVC = currentViewController as? ChatViewController
+                                    
                                 }
                                 
                                 if chatVC == nil {

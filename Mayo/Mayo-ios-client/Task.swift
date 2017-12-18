@@ -36,13 +36,15 @@ class Task: NSObject {
     var helpedBy: [String]?
     var taskView: [String]?
     var recentActivity : Bool = false
+    var userMovedOutside : Bool = false
     
     
 
     
-    init(userId: String , taskDescription: String, latitude: CLLocationDegrees, longitude: CLLocationDegrees, completed: Bool, timeCreated: Date = Date(), timeUpdated: Date = Date(), taskID : String, recentActivity : Bool ) {
+    init(userId: String , taskDescription: String, latitude: CLLocationDegrees, longitude: CLLocationDegrees, completed: Bool, timeCreated: Date = Date(), timeUpdated: Date = Date(), taskID : String, recentActivity : Bool, userMovedOutside : Bool ) {
+        self.userMovedOutside = userMovedOutside
         self.recentActivity = recentActivity
-        self.userId = userId
+        self.userId = FIRAuth.auth()?.currentUser?.uid ?? userId
         self.taskDescription = taskDescription
         self.latitude = latitude
         self.longitude = longitude
@@ -89,28 +91,37 @@ class Task: NSObject {
         self.endColor = endColor
     }
     
-    
-    func save() {
-        
+    func updateFirebaseTask() {
         // save task to database
         // create new task with user id as identifier
+        // create new date formatter
+        let dateformatter = DateStringFormatterHelper()
+        
+        // convert timeCreated and timeUpdated to string
+        let updateDate = dateformatter.convertDateToString(date: Date())
         
         let taskDictionary: [String: Any] = [
             "taskDescription": self.taskDescription,
             "timeCreated": self.timeCreatedString,
-            "timeUpdated": self.timeUpdatedString,
+            "timeUpdated": updateDate,
             "completed": self.completed,
-            "startColor": self.startColor,
-            "endColor": self.endColor,
+            "startColor": self.startColor ?? "",
+            "endColor": self.endColor ?? "",
             "createdby": FIRAuth.auth()?.currentUser?.uid ?? self.userId,
             "taskID": self.taskID!,
             "completeType" : self.completeType ?? "" ,
-            "recentActivity" : false,
+            "userMovedOutside" : self.userMovedOutside  ,
+            "recentActivity" : self.recentActivity,
             "helpedBy" : "" ]
-        tasksRef.child(self.taskID!).setValue(taskDictionary) 
+        tasksRef.child(self.taskID!).setValue(taskDictionary)
+    }
+    
+    func save() {
+        
+         updateFirebaseTask()
         
         //Update Task at user Profile
-        updateTasksCreated(self.userId)
+        updateTasksCreated((FIRAuth.auth()?.currentUser?.uid)!)
         
         // save task location to database with user id as key
         geoFire?.setLocation(CLLocation(latitude:latitude, longitude: longitude), forKey: "\(self.taskID!)") { (error) in
@@ -124,26 +135,26 @@ class Task: NSObject {
     }
     
     func updateTasksCreated(_ userID : String)  {
-        userRef.child(userID).child("taksCreated").observeSingleEvent(of: .value, with: { (snapshot) in
+        userRef.child(userID).child("taskCreated").observeSingleEvent(of: .value, with: { (snapshot) in
             if let arrTasksdetail = snapshot.value as? [String : Any] {
                 if var tasks = arrTasksdetail["tasks"] as? [String] {
                     if !tasks.contains(self.taskID!) {
                         tasks.append(self.taskID!)
                         let tasksParticipateUpdate =  ["tasks" : tasks, "count":tasks.count] as [String : Any];
                         // update at server
-                        self.userRef.child(userID).child("taksCreated").setValue(tasksParticipateUpdate)
+                        self.userRef.child(userID).child("taskCreated").setValue(tasksParticipateUpdate)
                     }
                 }
                 else {
                     let tasksParticipateUpdate =  ["tasks" : [self.taskID], "count":1] as [String : Any];
                     // update at server
-                    self.userRef.child(userID).child("taksCreated").setValue(tasksParticipateUpdate)
+                    self.userRef.child(userID).child("taskCreated").setValue(tasksParticipateUpdate)
                 }
             }
             else {
                 let tasksParticipateUpdate =  ["tasks" : [self.taskID], "count":1] as [String : Any];
                 // update at server
-                self.userRef.child(userID).child("taksCreated").setValue(tasksParticipateUpdate)
+                self.userRef.child(userID).child("taskCreated").setValue(tasksParticipateUpdate)
             }
         })
     }

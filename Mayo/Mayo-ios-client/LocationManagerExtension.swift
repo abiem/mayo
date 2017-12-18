@@ -23,7 +23,7 @@ extension MainViewController: CLLocationManagerDelegate {
                 // TODO fix
                 let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
                 tasks.append(
-                    Task(userId: currentUserId!, taskDescription: "", latitude: self.userLatitude!, longitude: self.userLongitude!, completed: true, timeCreated: Date(), timeUpdated: Date(), taskID: "\(timeStamp)", recentActivity : false)
+                    Task(userId: currentUserId!, taskDescription: "", latitude: self.userLatitude!, longitude: self.userLongitude!, completed: true, timeCreated: Date(), timeUpdated: Date(), taskID: "\(timeStamp)", recentActivity : false, userMovedOutside: false )
                 )
                 carouselView.reloadData()
             }
@@ -82,15 +82,24 @@ extension MainViewController: CLLocationManagerDelegate {
     
     func userMovedAway()  {
         let currentUserTask = self.tasks[0]!
-        if currentUserTask.taskDescription != "" {
-            currentUserTask.completed = true;
-            currentUserTask.completeType = Constants.STATUS_FOR_MOVING_OUT
-            self.createLocalNotification(title: "You’re out of range so the quest ended :(", body: "Post again if you still need help." , time: Int(0.5))
-            self.removeTaskAfterComplete(currentUserTask)
-            if self.expirationTimer != nil {
-                self.expirationTimer?.invalidate()
-                self.expirationTimer = nil
-            }
+        if currentUserTask.taskDescription != "" && currentUserTask.userMovedOutside == false {
+            checkTaskRecentActivity(currentUserTask , callBack: { (isActivity) in
+                if isActivity {
+                    currentUserTask.userMovedOutside = true
+                    self.tasks[0] = currentUserTask
+                    currentUserTask.updateFirebaseTask()
+                } else {
+                    currentUserTask.completed = true;
+                    currentUserTask.completeType = Constants.STATUS_FOR_MOVING_OUT
+                    self.createLocalNotification(title: "You’re out of range so the quest ended :(", body: "Post again if you still need help." , time: Int(0.5))
+                    self.removeTaskAfterComplete(currentUserTask)
+                    if self.expirationTimer != nil {
+                        self.expirationTimer?.invalidate()
+                        self.expirationTimer = nil
+                    }
+                }
+            })
+            
         }
         
     }
