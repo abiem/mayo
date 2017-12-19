@@ -41,7 +41,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         
         
         //Set Up Fabric Crashlystics
-        //Fabric.with([Crashlytics.self])
+        Fabric.with([Crashlytics.self])
         
         // setup firebase
         FIRApp.configure()
@@ -298,7 +298,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
                 self.ref.child("tasks").child(channelId as! String).observeSingleEvent(of: .value, with: { (snapshot) in
                     if let dicTask = snapshot.value as? [String: Any]{
                         //Check Task Status
-                        if dicTask["completed"] as! Bool == false {
+                        var taskComplete = false
+                        if let taskStatus =  dicTask["completed"] as? Bool  {
+                            taskComplete = taskStatus
+                        }
                             if let task_description = userInfo["task_description"] {
                                 
                                 var chatVC: ChatViewController!
@@ -310,8 +313,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
                                     needToPush = true
                                 }
                                 else if (currentViewController is ChatViewController) {
-                                    chatVC = currentViewController as? ChatViewController
-                                    
+                                    self.getNavigationController()?.popViewController(animated: false)
+                                    chatVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "chatViewController") as! ChatViewController
+                                    needToPush = true
                                 }
                                 
                                 if chatVC == nil {
@@ -319,8 +323,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
                                     needToPush = true
                                 }
                                 
+                                chatVC.title = task_description as? String
                                 chatVC.channelTopic = task_description as? String
                                 chatVC.channelId = channelId as? String
+                                chatVC.isCompleted = taskComplete
                                 
                                 self.ref = FIRDatabase.database().reference()
                                 let channelsRef = self.ref?.child("channels")
@@ -329,9 +335,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
                                     chatVC.channelRef = chatChannelRef
                                     if needToPush == true {
                                         self.getNavigationController()?.pushViewController(chatVC, animated: true)
-                                    }
-                                    else {
-                                        // chatVC.reloadChat()
                                     }
                                     
                                 } else {
@@ -346,7 +349,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
                                         if let chatChannelRef = channelsRef?.child(channelId as! String) {
                                             chatVC.channelRef = chatChannelRef
                                             if needToPush == true {
-                                                self.getNavigationController()?.pushViewController(chatVC, animated: true)
+                                                self.getNavigationController()?.pushViewController(chatVC, animated: false)
                                             }
                                             else {
                                                 // chatVC.reloadChat()
@@ -355,11 +358,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
                                     }
                                 }
                             }
-                        }
-                        else {
-                            //Show Alert Task Expired
+                        if taskComplete {
                             self.taskExpireAlert()
                         }
+
                     }
                     
                 })
@@ -529,7 +531,11 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
     }
     //Task Expire Alert
     func taskExpireAlert()  {
-        CMAlertController.sharedInstance.showAlert(nil, Constants.sTASK_EXPIRED_ERROR, ["OK"], nil)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            CMAlertController.sharedInstance.showAlert(nil, Constants.sTASK_EXPIRED_ERROR, ["OK"], nil)
+        }
+
+        
     }
     
 }

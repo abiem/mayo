@@ -44,7 +44,7 @@ class Task: NSObject {
     init(userId: String , taskDescription: String, latitude: CLLocationDegrees, longitude: CLLocationDegrees, completed: Bool, timeCreated: Date = Date(), timeUpdated: Date = Date(), taskID : String, recentActivity : Bool, userMovedOutside : Bool ) {
         self.userMovedOutside = userMovedOutside
         self.recentActivity = recentActivity
-        self.userId = FIRAuth.auth()?.currentUser?.uid ?? userId
+        self.userId =  userId
         self.taskDescription = taskDescription
         self.latitude = latitude
         self.longitude = longitude

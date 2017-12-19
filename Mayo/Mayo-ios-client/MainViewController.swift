@@ -950,8 +950,8 @@ class MainViewController: UIViewController {
         // 200 meters = .2 for geofire units
         tasksCircleQuery = tasksGeoFire?.query(at: center, withRadius: queryDistance/1000)
         
-        //self.removeCircle()
-        //self.addRadiusCircle(location: center)
+//        self.removeCircle()
+//        self.addRadiusCircle(location: center)
         tasksDeletedCircleQueryHandle = tasksCircleQuery?.observe(.keyExited, with: { (key: String!, location: CLLocation!) in
             
             // when a new task is deleted
@@ -1355,7 +1355,7 @@ class MainViewController: UIViewController {
         self.clusterManager.reload(self.mapView, visibleMapRect: self.mapView.visibleMapRect)
         // CHECK update all of the map annotation indexes
         self.updateMapAnnotationCardIndexes()
-        if self.tasks.count == 2 && self.mTaskDescription == nil {
+        if self.tasks.count == 2 && self.mTaskDescription == nil && currentUserTaskSaved == false {
             self.carouselView.scrollToItem(at: 1, animated: true)
         }
     }
@@ -1483,12 +1483,14 @@ class MainViewController: UIViewController {
                     self.tasks[0] = currentUserTask
                     self.checkTaskRecentActivity(currentUserTask!, callBack: { (activity) in
                         if activity {
-                            self.createMarkCompleteView()
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5 ) {
+                                self.createMarkCompleteView()
+                            }
                         } else {
-                            self.createLocalNotification(title: "Your help quest expired", body: "🕐 Still need help?", time: Int(0.0))
                             UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
                             self.newItemSwiped = true
                             self.removeTaskAfterComplete(currentUserTask!)
+                            self.createLocalNotification(title: "Your help quest expired", body: "🕐 Still need help?", time: Int(0.0))
                         }
                     })
                     
@@ -1565,9 +1567,9 @@ class MainViewController: UIViewController {
                         self.createMarkCompleteView()
                     } else {
                         UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
-                        self.createLocalNotification(title: "Your help quest expired", body: "🕐 Still need help?", time: Int(0.5))
                         self.newItemSwiped = true
                         self.removeTaskAfterComplete(currentUserTask!)
+                        self.createLocalNotification(title: "Your help quest expired", body: "🕐 Still need help?", time: Int(0.5))
                     }
                 })
                 // reset the current user's task
@@ -1807,7 +1809,7 @@ class MainViewController: UIViewController {
     
  // Remove task and Update completeion details at Firebase
     func removeTaskAfterComplete(_ currentUserTask: Task)  {
-    UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["taskExpirationNotification"])
+    
         let taskMessage = currentUserTask.taskDescription
         print("taskMessage \(currentUserTask.taskDescription) \(taskMessage)")
         
@@ -2336,8 +2338,9 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             }
             
             //set textView back to editable
-            let currentUserTextView = self.view.viewWithTag(self.CURRENT_USER_TEXTVIEW_TAG) as! UITextView
-            currentUserTextView.isEditable = true
+            if let currentUserTextView = self.view.viewWithTag(self.CURRENT_USER_TEXTVIEW_TAG) as? UITextView {
+                currentUserTextView.isEditable = true
+            }
             
             // get start and end color from card
             let shadowView = self.carouselView.itemView(at: 0) as! UIView
@@ -2856,7 +2859,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         if let contentBody = body {
             content.body = contentBody
         }
-        var Interval = 0.1
+        var Interval = 0.5
         if title == "Hey! No activity is there from long time" {
             Interval = Double(time)
         }
