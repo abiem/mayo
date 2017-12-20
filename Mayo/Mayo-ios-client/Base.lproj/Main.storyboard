@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="bsp-R6-2N8">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="qsK-Z2-kQk">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -137,6 +137,56 @@
             </objects>
             <point key="canvasLocation" x="-223.19999999999999" y="-65.217391304347828"/>
         </scene>
+        <!--Data Source-->
+        <scene sceneID="0sa-Ja-GDM">
+            <objects>
+                <viewController id="qsK-Z2-kQk" customClass="OnboardingViewController" customModule="Mayo_ios_client" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="FmR-sY-NTX">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="blueBackground" translatesAutoresizingMaskIntoConstraints="NO" id="2Jd-Df-l8Z">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                            </imageView>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="5oo-i9-vOB" customClass="iCarousel">
+                                <rect key="frame" x="0.0" y="435" width="375" height="222"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="222" id="ebb-h8-dfR"/>
+                                </constraints>
+                                <connections>
+                                    <outlet property="dataSource" destination="qsK-Z2-kQk" id="NK7-qm-0RD"/>
+                                    <outlet property="delegate" destination="qsK-Z2-kQk" id="fTV-Xx-0XQ"/>
+                                </connections>
+                            </view>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="pyQ-fx-pNS">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="435"/>
+                            </imageView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="eky-3e-wAy" firstAttribute="bottom" secondItem="2Jd-Df-l8Z" secondAttribute="bottom" id="500-8n-I7e"/>
+                            <constraint firstItem="pyQ-fx-pNS" firstAttribute="top" secondItem="FmR-sY-NTX" secondAttribute="top" id="Jfe-Gs-oxo"/>
+                            <constraint firstItem="eky-3e-wAy" firstAttribute="bottom" secondItem="5oo-i9-vOB" secondAttribute="bottom" constant="10" id="Llr-o9-Zhp"/>
+                            <constraint firstItem="pyQ-fx-pNS" firstAttribute="leading" secondItem="eky-3e-wAy" secondAttribute="leading" id="NSG-i2-wxS"/>
+                            <constraint firstItem="2Jd-Df-l8Z" firstAttribute="top" secondItem="FmR-sY-NTX" secondAttribute="top" id="OBE-DA-E5r"/>
+                            <constraint firstItem="eky-3e-wAy" firstAttribute="trailing" secondItem="2Jd-Df-l8Z" secondAttribute="trailing" id="OHl-5U-vtn"/>
+                            <constraint firstItem="5oo-i9-vOB" firstAttribute="top" secondItem="pyQ-fx-pNS" secondAttribute="bottom" id="SfU-4e-aXn"/>
+                            <constraint firstItem="eky-3e-wAy" firstAttribute="trailing" secondItem="5oo-i9-vOB" secondAttribute="trailing" id="dzb-kd-08k"/>
+                            <constraint firstItem="eky-3e-wAy" firstAttribute="trailing" secondItem="pyQ-fx-pNS" secondAttribute="trailing" id="iEe-9c-TrA"/>
+                            <constraint firstItem="2Jd-Df-l8Z" firstAttribute="leading" secondItem="eky-3e-wAy" secondAttribute="leading" id="ut4-8J-EBO"/>
+                            <constraint firstItem="5oo-i9-vOB" firstAttribute="leading" secondItem="eky-3e-wAy" secondAttribute="leading" id="wnC-Ct-x4h"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="eky-3e-wAy"/>
+                    </view>
+                    <connections>
+                        <outlet property="mCarousel" destination="5oo-i9-vOB" id="FkI-57-KnL"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="lo5-0x-tDm" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="477.60000000000002" y="817.24137931034488"/>
+        </scene>
         <!--Onboarding Video View Controller-->
         <scene sceneID="Vh0-4i-s6C">
             <objects>
@@ -190,4 +240,7 @@
             <point key="canvasLocation" x="3830" y="656"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="blueBackground" width="375" height="667"/>
+    </resources>
 </document>

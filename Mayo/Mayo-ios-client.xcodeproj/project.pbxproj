@@ -118,6 +118,10 @@
 		35F81DA21EA72FE30066439F /* CustomUserMapAnnotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35F81DA11EA72FE30066439F /* CustomUserMapAnnotation.swift */; };
 		72B83B7C561184A96CA6184A /* Pods_Mayo_ios_client.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0FED37B2F877E9F57E8E0C07 /* Pods_Mayo_ios_client.framework */; };
 		7B0F21AD1FE29DCD003F6DAD /* CustomExpireTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B0F21AC1FE29DCD003F6DAD /* CustomExpireTask.swift */; };
+		7B2728F51FEA2E1400C3AB52 /* IBDesignable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B2728F41FEA2E1400C3AB52 /* IBDesignable.swift */; };
+		7B2728F81FEA30E400C3AB52 /* OnboardingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B2728F71FEA30E400C3AB52 /* OnboardingViewController.swift */; };
+		7B2728FB1FEA320400C3AB52 /* IntroCollectionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B2728FA1FEA320400C3AB52 /* IntroCollectionCell.swift */; };
+		7B2728FD1FEA34A200C3AB52 /* OnboardingViewController+iCarousel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B2728FC1FEA34A200C3AB52 /* OnboardingViewController+iCarousel.swift */; };
 		7B5634421FDA9162001F8A0F /* CMAlertController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B5634411FDA9162001F8A0F /* CMAlertController.swift */; };
 		7B5B045F1FDA9CF200C8E8D1 /* Utility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B5B045E1FDA9CF200C8E8D1 /* Utility.swift */; };
 		7B6E3FC51FC6973400919494 /* MKCircleExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B6E3FC41FC6973400919494 /* MKCircleExtension.swift */; };
@@ -257,6 +261,10 @@
 		35F81DA11EA72FE30066439F /* CustomUserMapAnnotation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomUserMapAnnotation.swift; sourceTree = "<group>"; };
 		4C2DCF535B9E43BECA946ED2 /* Pods-Mayo-ios-client.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Mayo-ios-client.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Mayo-ios-client/Pods-Mayo-ios-client.debug.xcconfig"; sourceTree = "<group>"; };
 		7B0F21AC1FE29DCD003F6DAD /* CustomExpireTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomExpireTask.swift; sourceTree = "<group>"; };
+		7B2728F41FEA2E1400C3AB52 /* IBDesignable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IBDesignable.swift; sourceTree = "<group>"; };
+		7B2728F71FEA30E400C3AB52 /* OnboardingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingViewController.swift; sourceTree = "<group>"; };
+		7B2728FA1FEA320400C3AB52 /* IntroCollectionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntroCollectionCell.swift; sourceTree = "<group>"; };
+		7B2728FC1FEA34A200C3AB52 /* OnboardingViewController+iCarousel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "OnboardingViewController+iCarousel.swift"; sourceTree = "<group>"; };
 		7B5634411FDA9162001F8A0F /* CMAlertController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CMAlertController.swift; sourceTree = "<group>"; };
 		7B5B045E1FDA9CF200C8E8D1 /* Utility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utility.swift; sourceTree = "<group>"; };
 		7B6E3FC41FC6973400919494 /* MKCircleExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MKCircleExtension.swift; sourceTree = "<group>"; };
@@ -396,6 +404,7 @@
 		3529A9E71E99E6CF003C815A /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				7B2728F61FEA30AB00C3AB52 /* IntroOnboarding */,
 				357A16471ED74D1F00FDF96A /* Chat */,
 				357A16461ED74D1800FDF96A /* Main */,
 				35F81D931EA3EF0F0066439F /* Onboarding */,
@@ -493,6 +502,7 @@
 				359CA4501ED4AE1900B2C350 /* UIColorExtension.swift */,
 				7B7607D11F9DD479001E2CCA /* Reachbility.swift */,
 				7B6E3FC41FC6973400919494 /* MKCircleExtension.swift */,
+				7B2728F41FEA2E1400C3AB52 /* IBDesignable.swift */,
 			);
 			name = Common;
 			sourceTree = "<group>";
@@ -561,6 +571,24 @@
 				35F81D8F1EA3EE150066439F /* OnboardingNotifcationsViewController.swift */,
 			);
 			name = Onboarding;
+			sourceTree = "<group>";
+		};
+		7B2728F61FEA30AB00C3AB52 /* IntroOnboarding */ = {
+			isa = PBXGroup;
+			children = (
+				7B2728F91FEA31DE00C3AB52 /* Cell */,
+				7B2728F71FEA30E400C3AB52 /* OnboardingViewController.swift */,
+				7B2728FC1FEA34A200C3AB52 /* OnboardingViewController+iCarousel.swift */,
+			);
+			name = IntroOnboarding;
+			sourceTree = "<group>";
+		};
+		7B2728F91FEA31DE00C3AB52 /* Cell */ = {
+			isa = PBXGroup;
+			children = (
+				7B2728FA1FEA320400C3AB52 /* IntroCollectionCell.swift */,
+			);
+			name = Cell;
 			sourceTree = "<group>";
 		};
 		7B6E56D11FD66AC1009C59B6 /* Font */ = {
@@ -894,10 +922,13 @@
 				35F6F3061E9B211A00747104 /* CardColors.swift in Sources */,
 				35F81D831EA3DE3E0066439F /* OnboardingVideoViewController.swift in Sources */,
 				7B7607D21F9DD47A001E2CCA /* Reachbility.swift in Sources */,
+				7B2728FD1FEA34A200C3AB52 /* OnboardingViewController+iCarousel.swift in Sources */,
 				35AA1CCD1EDCD4B200C8B4EF /* Message.swift in Sources */,
 				352BD16E1E9F52E300966CEE /* ChatViewController.swift in Sources */,
 				359CA4511ED4AE1900B2C350 /* UIColorExtension.swift in Sources */,
+				7B2728F51FEA2E1400C3AB52 /* IBDesignable.swift in Sources */,
 				35F81DA21EA72FE30066439F /* CustomUserMapAnnotation.swift in Sources */,
+				7B2728FB1FEA320400C3AB52 /* IntroCollectionCell.swift in Sources */,
 				357A164A1ED74D7C00FDF96A /* UIGestureRecognizerExtension.swift in Sources */,
 				35B887281ED28FA800E761A2 /* CustomCurrentUserTaskAnnotation.swift in Sources */,
 				357A164E1ED74E1A00FDF96A /* MapViewExtension.swift in Sources */,
@@ -914,6 +945,7 @@
 				7B5B045F1FDA9CF200C8E8D1 /* Utility.swift in Sources */,
 				35F81D901EA3EE150066439F /* OnboardingNotifcationsViewController.swift in Sources */,
 				3529A9E91E99ED19003C815A /* DateStringFormatterHelper.swift in Sources */,
+				7B2728F81FEA30E400C3AB52 /* OnboardingViewController.swift in Sources */,
 				35D39E4A1EB8581A00DB41FE /* DiagonalGradientView.swift in Sources */,
 				F80C07981F55D64D00E0F8FB /* Global.swift in Sources */,
 			);

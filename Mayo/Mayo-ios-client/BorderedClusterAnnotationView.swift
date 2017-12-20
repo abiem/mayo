@@ -12,10 +12,10 @@ import MapKit
 
 class BorderedClusterAnnotationView: ClusterAnnotationView {
    
-    let borderColor: UIColor
+    let mborderColor: UIColor
     
     init(annotation: MKPointAnnotation?, reuseIdentifier: String?, style: ClusterAnnotationStyle, borderColor: UIColor) {
-        self.borderColor = borderColor
+        self.mborderColor = borderColor
         super.init(annotation: annotation, reuseIdentifier: reuseIdentifier, style: style)
     }
     

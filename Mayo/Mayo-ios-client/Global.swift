@@ -20,6 +20,8 @@ struct Constants {
     static let THANKS_ANIMATION_DURATION = 5.0
     static let PENDING_TASKS = "PendingTask"
     static let LOCATION = "location"
+    //Identiifier
+    static let INTRO_COLLECTION_VIEW_CELL_IDENTIFIER = "introCell"
     
     static let FONT_NAME = "SanFranciscoText-Regular"
     
@@ -33,6 +35,18 @@ struct Constants {
     
     //Static ID
     static let FAKE_USER_ID = "fakeUser"
+  
+  //Intro Screen
+ static let INTRO_START_COLOR_ARRAY = ["08BBDB","E86D5D","C86DD7","1DAE73"]
+ static let INTRO_END_COLOR_ARRAY = ["D5C2E6","E8C378","FF91A5","C1D96E"]
+ static let INTRO_TITLE_ARRAY = ["We all need a little help sometimes in person.",
+                     "Let’s bring the world closer together & lend a hand to those beside us.",
+                     "Now help us figure out where you are so you can help others & collect Mayo points!",
+                     "We won’t share your location unless the app is open infront of you."]
+  static let INTRO_BUTTON_TITLE_ARRAY = ["Right","Oh yeah!", "Alright!", "OK let’s go!"]
+  static let INTRO_LOCATION_ALERT_TITLE = "TIP: Mayo works best if you choose “Always share location”."
+  static let INTRO_LOCATION_ALERT_SUBTITLE = "We value your privacy and battery life so ‘Always’ simply allows us to periodically locate nearby help quests even if you forget to open the app : )"
+  static let INTRO_LOCATION_ALERT_BUTTON_TITLE = "Got it"
     
     // onboarding constants for standard user defaults.
     static let ONBOARDING_TASK1_VIEWED_KEY = "onboardingTask1Viewed"
