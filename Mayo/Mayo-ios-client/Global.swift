@@ -30,7 +30,7 @@ struct Constants {
     static let STATUS_FOR_TIME_EXPIRED = "Expired due to time limit"
     static let STATUS_FOR_MOVING_OUT = "Expired due to moving out of area"
     
-    static let sLOCATION_ERROR = "Oh oh!We need your help with location to help us help you. You can enable location for Mayo in Settings"
+    static let sLOCATION_ERROR = "Oh oh! We need your help with location to help us help you. You can enable location for Mayo in Settings"
     static let sTASK_EXPIRED_ERROR = "The quest you're looking for has completed"
     
     //Static ID

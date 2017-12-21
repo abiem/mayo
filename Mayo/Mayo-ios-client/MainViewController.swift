@@ -1072,9 +1072,11 @@ class MainViewController: UIViewController {
                             if taskDict["completed"] as! Bool == true {
                                 for (index, task) in self.tasks.enumerated() {
                                     if task?.taskID == taskDict["taskID"] as? String {
-                                            self.tasks[index]?.completed = true
-                                            self.carouselView.reloadItem(at: index, animated: true)
-                                            self.removeAnnotationForTask((task?.taskID)!)
+                                        self.tasks[index]?.completed = true
+                                        self.tasks.append(self.tasks[index])
+                                        self.tasks.remove(at: index)
+                                        self.removeCarousel(index)
+                                        self.removeAnnotationForTask((task?.taskID)!)
 
                                         if self.tasks.count <= 1 {
                                             self.newItemSwiped = true
@@ -1344,8 +1346,7 @@ class MainViewController: UIViewController {
             self.tasks.append(newTask)
         } else {
             self.tasks.insert(newTask, at: self.getFakeTasksCount())
-            let carouselIndex = self.tasks.count - 1
-            print(carouselIndex)
+            let carouselIndex = self.tasks.count
             self.addMapPin(task: newTask, carouselIndex: carouselIndex)
         }
         
@@ -1405,7 +1406,7 @@ class MainViewController: UIViewController {
         },
                                   completion:{ (success) in
                                      self.carouselView.removeItem(at: index, animated: true)
-                                    
+                                    self.carouselView.reloadData()
                                     if self.carouselView.itemView(at: index)?.alpha == 0 {
                                         self.carouselView.itemView(at: index)?.alpha = 1
                                     }
@@ -1485,6 +1486,8 @@ class MainViewController: UIViewController {
                         if activity {
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5 ) {
                                 self.createMarkCompleteView()
+                              self.createLocalNotification(title: "Your help quest expired", body: "Did you get help? Remember to thank them!", time: Int(0.0))
+                              
                             }
                         } else {
                             UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
@@ -1546,7 +1549,6 @@ class MainViewController: UIViewController {
         self.expirationTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(interval), repeats: false) { (Timer) in
             
             // finish deleting task
-            print("timer is up and user's task will be deleted")
             if self.tasks.count == 0 {
                 return
             }
@@ -1565,6 +1567,7 @@ class MainViewController: UIViewController {
                 self.checkTaskRecentActivity(currentUserTask!, callBack: { (activity) in
                     if activity {
                         self.createMarkCompleteView()
+                      self.createLocalNotification(title: "Your help quest expired", body: "Did you get help? Remember to thank them!", time: Int(0.0))
                     } else {
                         UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
                         self.newItemSwiped = true
@@ -1843,23 +1846,26 @@ class MainViewController: UIViewController {
         if tasksExpireObserver != nil {
             self.tasksRef?.child(currentUserTask.taskID!).child("timeUpdated").removeObserver(withHandle: tasksExpireObserver!)
         }
-        
+        //reload Carousel
+        if self.tasks.count > 0 {
+          self.tasks.remove(at: 0)
+        }
         currentUserTask.updateFirebaseTask()
-        //self.addMapPin(task: currentUserTask, carouselIndex: 0)
         currentUserTaskSaved = false
         UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
 
-        //reload Carousel
-//        if self.tasks.count > 0 {
-//            self.tasks.remove(at: 0)
-//        }
-            let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
-            let currentUserKey = FIRAuth.auth()?.currentUser?.uid
-        self.tasks.insert(Task(userId: currentUserKey!, taskDescription: "", latitude: (self.locationManager.location?.coordinate.latitude) ?? Constants.DEFAULT_LAT , longitude: (self.locationManager.location?.coordinate.longitude) ?? Constants.DEFAULT_LNG , completed: false, taskID: "\(timeStamp)", recentActivity: false, userMovedOutside: false), at: 0)
+      
+      
+      let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
+      let currentUserKey = FIRAuth.auth()?.currentUser?.uid
+      
+      
+      self.tasks.insert(Task(userId: currentUserKey!, taskDescription: "", latitude: (self.locationManager.location?.coordinate.latitude) ?? self.userLatitude! , longitude: (self.locationManager.location?.coordinate.longitude) ?? self.userLongitude! , completed: false, taskID: "\(timeStamp)", recentActivity: false, userMovedOutside: false), at: 0)
     
-        self.carouselView.reloadData()
+      self.carouselView.insertItem(at: 0, animated: true)
+//        self.carouselView.reloadData()
         self.carouselView.reloadItem(at: 0, animated: true)
-        
+      
         
     }
 
@@ -1898,9 +1904,9 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
     func carousel(_ carousel: iCarousel, viewForItemAt index: Int, reusing view: UIView?) -> UIView {
         
         print("index hit: \(index)")
-        
+        let viewWidth = 300
         if index == 0 && isLoadingFirebase == true  {
-            let tempView = UIView(frame: CGRect(x: 0, y: 0, width: 320 * 0.9, height:carousel.frame.size.height-50))
+          let tempView = UIView(frame: CGRect(x: 0, y: 0, width: viewWidth, height:Int(carousel.frame.size.height-50)))
             tempView.backgroundColor = UIColor.white
             tempView.tag = self.LOADER_VIEW
             tempView.layer.shadowColor = UIColor.black.cgColor
@@ -1910,7 +1916,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             tempView.layer.masksToBounds =  false
             tempView.alpha = 0.3
             // add temp view to shadow view
-            let shadowView = UIView(frame: CGRect(x: 0, y: 0, width: 320 * 0.9, height: (carousel.frame.size.height-50)+20))
+          let shadowView = UIView(frame: CGRect(x: 0, y: 0, width: viewWidth, height: Int((carousel.frame.size.height-50)+20)))
             shadowView.backgroundColor = UIColor.clear
             shadowView.layer.shadowColor = UIColor.black.cgColor
             shadowView.layer.shadowOffset = CGSize(width: 0, height: 10)
@@ -1926,7 +1932,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         // 1st card if user didn't swipe for new task
         if index == 0 && !self.newItemSwiped && self.tasks.count > 1 && self.currentUserTaskSaved == false && canCreateNewtask == true {
             
-            let tempView = UIView(frame: CGRect(x: 0, y: 0, width: 320 * 0.9, height:carousel.frame.size.height-50))
+          let tempView = UIView(frame: CGRect(x: 0, y: 0, width: viewWidth, height:Int(carousel.frame.size.height-50)))
             tempView.backgroundColor = UIColor.clear
             
             tempView.layer.shadowColor = UIColor.black.cgColor
@@ -1947,7 +1953,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             // setup temporary view as gradient view
             
             //carousel.frame.size.height-15
-            let tempView = GradientView(frame: CGRect(x: 0, y: 0, width: 320 * 0.9, height:carousel.frame.size.height-50))
+          let tempView = GradientView(frame: CGRect(x: 0, y: 0, width: viewWidth, height:Int(carousel.frame.size.height-50)))
             
             
             // get the first task
@@ -2017,7 +2023,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             textView.center.x = tempView.center.x
             textView.backgroundColor = UIColor.clear
             textView.textAlignment = .left
-            textView.font = UIFont.systemFont(ofSize: 22)
+            textView.font = UIFont.systemFont(ofSize: 24)
             textView.delegate = self
             textView.isScrollEnabled = false
             textView.tag = CURRENT_USER_TEXTVIEW_TAG
@@ -2095,7 +2101,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             
             
             // add temp view to shadow view
-            let shadowView = UIView(frame: CGRect(x: 0, y: 0, width: 320 * 0.9, height: (carousel.frame.size.height-50)+20))
+          let shadowView = UIView(frame: CGRect(x: 0, y: 0, width: viewWidth, height: Int((carousel.frame.size.height-50)+20)))
             shadowView.backgroundColor = UIColor.clear
             shadowView.layer.shadowColor = UIColor.black.cgColor
             shadowView.layer.shadowOffset = CGSize(width: 0, height: 10)
@@ -2105,7 +2111,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             shadowView.addSubview(tempView)
             
             // add instructions for "Automatically expires in 1hr or if you leave the area" at bottom label
-            let bottomNoticeLabel = UILabel(frame: CGRect(x: 0, y: 10, width: 320 * 0.9, height: 20))
+            let bottomNoticeLabel = UILabel(frame: CGRect(x: 0, y: 10, width: viewWidth, height: 20))
             bottomNoticeLabel.textColor = UIColor.white
             bottomNoticeLabel.text = "Automatically expires in 1hr or if you leave the area"
             bottomNoticeLabel.textAlignment = .center
@@ -2124,7 +2130,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         if (index >= (self.tasks.count)) {
             // create invisible card
             print("clear card created")
-            let tempView = UIView(frame: CGRect(x: 0, y: 0, width: 335, height:carousel.frame.size.height-50))
+          let tempView = UIView(frame: CGRect(x: 0, y: 0, width: viewWidth, height:Int(carousel.frame.size.height-50)))
             tempView.backgroundColor = UIColor.clear
             tempView.layer.masksToBounds = false
             return tempView
@@ -2136,7 +2142,8 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             let task = self.tasks[index] as! Task
             
             // setup temporary view as gradient view
-            let tempView = GradientView(frame: CGRect(x: 0, y: 0, width: 320 * 0.9, height:carousel.frame.size.height-50))
+          let tempView = GradientView(frame: CGRect(x: 0, y: 0, width: viewWidth, height:Int(carousel.frame.size.height-50)))
+          let placeholderView = UIView(frame: CGRect(x: 0, y: 0, width: viewWidth, height:Int(carousel.frame.size.height-50)))
             let cardColor = CardColor()
             
             // if task doesn't have a  start color and end color
@@ -2184,21 +2191,22 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             //align label to the left side of the card
             label.translatesAutoresizingMaskIntoConstraints = false
             // create constraints
-            let horizontalConstraint = NSLayoutConstraint(item: label, attribute: .leading, relatedBy: NSLayoutRelation.equal, toItem: tempView, attribute: .leading, multiplier: 1, constant: 20)
-            let verticalConstraint = NSLayoutConstraint(item: label, attribute: .top, relatedBy: NSLayoutRelation.equal, toItem: tempView, attribute: .top, multiplier: 1, constant: 20)
+            let horizontalConstraint = NSLayoutConstraint(item: label, attribute: .leading, relatedBy: NSLayoutRelation.equal, toItem: placeholderView, attribute: .leading, multiplier: 1, constant: 20)
+            let verticalConstraint = NSLayoutConstraint(item: label, attribute: .top, relatedBy: NSLayoutRelation.equal, toItem: placeholderView, attribute: .top, multiplier: 1, constant: 20)
             let widthConstraint = NSLayoutConstraint(item: label, attribute: NSLayoutAttribute.width, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.notAnAttribute, multiplier: 1, constant: (tempView.bounds.width*0.9))
             
-            label.font = UIFont.systemFont(ofSize: 20)
+            label.font = UIFont.systemFont(ofSize: 24)
             label.textColor = UIColor.white
-            tempView.addSubview(label)
+            placeholderView.addSubview(label)
             // add edge constraints to the label
-            tempView.addConstraints([horizontalConstraint, verticalConstraint,  widthConstraint])
+            placeholderView.addConstraints([horizontalConstraint, verticalConstraint,  widthConstraint])
             
             
             // setup clickable button for gradient view
             let messageButton = UIButton(frame: CGRect(x: 0, y: (carousel.frame.size.height-50)*3/4, width: 150, height: 20))
             messageButton.center.x = tempView.center.x
             var messageImage : UIImage?
+         
             if task.completed == false {
                 messageButton.setTitle("I can help", for: .normal)
                 messageImage = UIImage(named: "messageImage") as UIImage?
@@ -2212,22 +2220,28 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             messageButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 10)
             messageButton.titleEdgeInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 0)
             messageButton.addTarget(self, action: #selector(goToChat(sender:)), for: .touchUpInside)
-            if task.taskDescription != ONBOARDING_TASK_1_DESCRIPTION && task.taskDescription != ONBOARDING_TASK_3_DESCRIPTION {
-                    tempView.addSubview(messageButton)
-            }
+           messageButton.alpha = 1.0
+          messageButton.tintColor = UIColor.white
+          if task.taskDescription != ONBOARDING_TASK_1_DESCRIPTION && task.taskDescription != ONBOARDING_TASK_3_DESCRIPTION {
+            placeholderView.addSubview(messageButton)
+          }
             
             // add temp view to shadow view
             
             
-            let shadowView = UIView(frame: CGRect(x: 0, y: 0, width: Int(320 * 0.9), height: Int((carousel.frame.size.height-50)+20)))
+            let shadowView = UIView(frame: CGRect(x: 0, y: 0, width: Int(viewWidth), height: Int((carousel.frame.size.height-50)+20)))
             shadowView.backgroundColor = UIColor.clear
             shadowView.layer.shadowColor = UIColor.black.cgColor
-            shadowView.layer.shadowOffset = CGSize(width: 0, height: 10)
+            shadowView.layer.shadowOffset = CGSize(width: 0, height: 20)
             shadowView.layer.shadowOpacity = 0.3
             shadowView.layer.shadowRadius = 15.0
-            
+          shadowView.alpha = 1.0
+          
+          
             shadowView.addSubview(tempView)
-            
+          shadowView.addSubview(placeholderView)
+          
+          
             // create label to show how long ago it was created
             let bottomLabel = UILabel(frame: CGRect(x: 20, y: 0, width: shadowView.frame.size.width-40, height: 30))
             // use Moment to get the time ago for task at current index
@@ -2242,6 +2256,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             bottomLabel.adjustsFontSizeToFitWidth = true
             bottomLabel.minimumScaleFactor = 0.5
             bottomLabel.textColor = UIColor.white
+            bottomLabel.alpha = 1.0
             var textTaskCreatedTime = "\(taskTimeCreated.fromNow())"
             if task.completed == true {
                 textTaskCreatedTime = "Completed \(textTaskCreatedTime)"
@@ -2349,7 +2364,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             let endColor = gradientView.endColor
             
             // make carousel view invisible
-            self.carouselView.isHidden = true
+            self.carouselView.isHidden = false
             
             // complete the current task
             self.newItemSwiped = true
@@ -2492,18 +2507,18 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             messageButtonText += " ..."
         }
         
-        let chatUserMessageButton = UIButton(frame: CGRect(x: 0, y: 0, width: (completionView.bounds.width * 8/10), height: 52))
+        let chatUserMessageButton = UIButton(frame: CGRect(x: 20, y: 0, width: (completionView.bounds.width - 40), height: 52))
         chatUserMessageButton.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         chatUserMessageButton.tag = tagNumber
-        chatUserMessageButton.setTitleColor(UIColor.darkGray, for: .normal)
+        chatUserMessageButton.setTitleColor(UIColor.black, for: .normal)
         chatUserMessageButton.center.y = completionView.bounds.height*3/10 + CGFloat(62 * tagNumber)
-        chatUserMessageButton.center.x = self.view.center.x-20
+//        chatUserMessageButton.center.x = self.view.center.x-20
         chatUserMessageButton.setTitle(messageButtonText, for: .normal)
         chatUserMessageButton.backgroundColor = UIColor.white
         chatUserMessageButton.contentHorizontalAlignment = .left
         chatUserMessageButton.contentEdgeInsets = UIEdgeInsets(top: 10, left: 20, bottom: 10, right: 20)
-        chatUserMessageButton.sizeToFit()
-        chatUserMessageButton.titleLabel?.lineBreakMode = NSLineBreakMode.byWordWrapping
+        chatUserMessageButton.cornerRadius = 4
+        chatUserMessageButton.titleLabel?.lineBreakMode = NSLineBreakMode.byTruncatingMiddle
         chatUserMessageButton.titleLabel?.numberOfLines = 2
         chatUserMessageButton.alpha = 0.5
         
@@ -2598,7 +2613,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
            currentUserTask.helpedBy = Array(usersToThankCopy.keys)
            
             self.removeTaskAfterComplete(currentUserTask)
-            
+            self.carouselView.removeItem(at: 0, animated: true)
             // thank the users that are in the thank users dictionary
             for userId in usersToThankCopy.keys {
                 
@@ -2676,6 +2691,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         var currentUserTask = self.tasks[0] as! Task
         currentUserTask.completed = true;
         currentUserTask.completeType = Constants.STATUS_FOR_NOT_HELPED
+      self.carouselView.removeItem(at: 0, animated: true)
         removeTaskAfterComplete(currentUserTask)
     }
     
@@ -2731,10 +2747,10 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         mTaskDescription = nil
         self.view.endEditing(true)
         
-        if locationManager.location?.coordinate.latitude == nil && locationManager.location?.coordinate.longitude == nil {
-            showLocationAlert()
-            return
-        }
+//        if locationManager.location?.coordinate.latitude == nil && locationManager.location?.coordinate.longitude == nil {
+//            showLocationAlert()
+//            return
+//        }
         
         // get textview
         let currentUserTextView = self.view.viewWithTag(CURRENT_USER_TEXTVIEW_TAG) as! UITextView
@@ -2898,10 +2914,10 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
     
     // action for chat to go to chat window
     func goToChat(sender: UIButton) {
-        if locationManager.location?.coordinate.latitude == nil && locationManager.location?.coordinate.longitude == nil {
-            showLocationAlert()
-            return
-        }
+//        if locationManager.location?.coordinate.latitude == nil && locationManager.location?.coordinate.longitude == nil {
+//            showLocationAlert()
+//            return
+//        }
         // if the keyboard is out
         // remove it
         if self.view.frame.origin.y != 0 {

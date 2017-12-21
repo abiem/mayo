@@ -31,10 +31,10 @@
                                 <rect key="frame" x="-6" y="56" width="381" height="611"/>
                             </mapView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="XoD-Fb-pV5" customClass="iCarousel">
-                                <rect key="frame" x="-6" y="453" width="381" height="214"/>
+                                <rect key="frame" x="-6" y="433" width="381" height="234"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="214" id="J6B-wB-FIi"/>
+                                    <constraint firstAttribute="height" constant="234" id="J6B-wB-FIi"/>
                                 </constraints>
                                 <connections>
                                     <outlet property="dataSource" destination="BYZ-38-t0r" id="7Im-kZ-0t6"/>
@@ -42,7 +42,7 @@
                                 </connections>
                             </view>
                             <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zu9-BV-I7e">
-                                <rect key="frame" x="293" y="411" width="52" height="32"/>
+                                <rect key="frame" x="293" y="391" width="52" height="32"/>
                                 <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="17"/>
                                 <state key="normal" title="Button"/>
                                 <connections>

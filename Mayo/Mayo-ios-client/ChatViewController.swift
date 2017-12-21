@@ -130,7 +130,17 @@ class ChatViewController: JSQMessagesViewController {
         if #available(iOS 11.0, *){
             self.topContentAdditionalInset = -64
         }
-        return true
+      
+      if CLLocationManager.locationServicesEnabled()
+      {
+        let status: CLAuthorizationStatus = CLLocationManager.authorizationStatus()
+        if status == .authorizedAlways || status == .authorizedWhenInUse {
+          return true
+        }
+      
+      }
+      showLocationAlert()
+        return false
     }
     override func didPressSend(_ button: UIButton!, withMessageText text: String!, senderId: String!, senderDisplayName: String!, date: Date!) {
         // check if current user color index is set
@@ -410,5 +420,17 @@ class ChatViewController: JSQMessagesViewController {
             }
         })
     }
+  
+  func showLocationAlert() {
+    CMAlertController.sharedInstance.showAlert(nil, Constants.sLOCATION_ERROR, ["Not now", "Settings"]) { (sender) in
+      if let button = sender {
+        if button.tag == 1 {
+          // for Move to Settings
+          UIApplication.shared.open(URL(string:UIApplicationOpenSettingsURLString)!, options: [:], completionHandler: nil)
+        }
+      }
+    }
+    
+  }
     
 }

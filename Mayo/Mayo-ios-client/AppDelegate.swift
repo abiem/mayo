@@ -97,17 +97,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         let userDefaults = UserDefaults.standard
         let onboardingHasBeenShown = userDefaults.bool(forKey: "onboardingHasBeenShown")
         
-//        if onboardingHasBeenShown {
-//            // if the user has given access to all of the authorizations
-//            // present main
-//            let storyboard = UIStoryboard(name: "Main", bundle: nil)
-//            mainVC = storyboard.instantiateViewController(withIdentifier: "MainViewController") as! MainViewController
-//            let navViewController = UINavigationController(rootViewController: mainVC)
-//            self.window?.rootViewController = navViewController
-//            
-//        } else {
-//            // else present authorization
-//        }
+        if onboardingHasBeenShown {
+            // if the user has given access to all of the authorizations
+            // present main
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            mainVC = storyboard.instantiateViewController(withIdentifier: "MainViewController") as! MainViewController
+            let navViewController = UINavigationController(rootViewController: mainVC)
+            self.window?.rootViewController = navViewController
+            
+        } else {
+            // else present authorization
+        }
         return true
     }
 

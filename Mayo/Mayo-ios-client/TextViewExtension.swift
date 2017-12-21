@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreLocation
 
 extension MainViewController: UITextViewDelegate {
     
@@ -24,6 +25,23 @@ extension MainViewController: UITextViewDelegate {
             textView.alpha = 0.5
         }
     }
+  
+  func textViewShouldBeginEditing(_ textView: UITextView) -> Bool {
+    
+    if CLLocationManager.locationServicesEnabled()
+    {
+      let status: CLAuthorizationStatus = CLLocationManager.authorizationStatus()
+      if status == .authorizedAlways || status == .authorizedWhenInUse {
+       
+        return true
+      }
+      
+    }
+    showLocationAlert()
+    return false
+    
+  }
+  
     
     func textViewDidChange(_ textView: UITextView) {
         

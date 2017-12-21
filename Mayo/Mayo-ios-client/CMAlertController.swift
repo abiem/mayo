@@ -11,9 +11,9 @@
 import UIKit
 
 // Constants to customise Alert
-let sALERT_WIDTH = Int(UIScreen.main.bounds.size.width * 0.8)
+let sALERT_WIDTH = 300 //Int(UIScreen.main.bounds.size.width * 0.8)
 let sALERT_COLOR = #colorLiteral(red: 0, green: 0.7709392309, blue: 0.8868473172, alpha: 1)
-let sALERT_BACKGROUND_COLOR = #colorLiteral(red: 0.6000000238, green: 0.6000000238, blue: 0.6000000238, alpha: 0.3221050942)
+let sALERT_BACKGROUND_COLOR = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 0.3)
 let sALERT_VIEW_BORDER_WIDTH = 2
 let sALERT_VIEW_CORNER_RADIUS = 5
 let sALERT_BUTTON_HEIGHT = 40
@@ -28,6 +28,8 @@ let sALERT_SHADOW_WIDTH = 0
 let sALERT_SHADOW_HEIGHT = 20
 let sALERT_SHADOW_OPACITY = 0.45
 let sALERT_SHADOW_RADIUS = 30
+let sALERT_DIAGONAL_START = "FFFFFF"
+let sALERT_DIAGONAL_END = "EAFCFF"
 let sALERT_TITLE_FONT_NAME  = "HelveticaNeue-Bold"
 /**
  Callback for button Action
@@ -107,9 +109,11 @@ class CMAlertController: NSObject {
             setToSuperView(mAlertBackgroundView, pParentView: parentView)
             mAlertBackgroundView.backgroundColor = sALERT_BACKGROUND_COLOR
             
-            let alertView = UIView()
+            let alertView = DiagonalGradientView()
             mAlertBackgroundView.addSubview(alertView)
-            alertView.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
+//            alertView.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
+          alertView.startColor = UIColor.hexStringToUIColor(hex: sALERT_DIAGONAL_START)
+          alertView.endColor = UIColor.hexStringToUIColor(hex: sALERT_DIAGONAL_END)
             alertView.layer.cornerRadius = 0
           
           //Add Shadow
