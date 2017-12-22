@@ -191,12 +191,14 @@ class MainViewController: UIViewController {
                     if element?.taskDescription == ONBOARDING_TASK_2_DESCRIPTION {
                         UpdatePointsServer(1, (FIRAuth.auth()?.currentUser?.uid)!)
                         self.usersRef?.child((FIRAuth.auth()?.currentUser?.uid)!).child("score").setValue(3)
-                        removeOnboardingFakeTask(carousel: carouselView, cardIndex: index, userId: (element?.userId)!)
+                        removeOnboardingFakeTask(carousel: carouselView, cardIndex: index, userId: (element?.taskID)!)
                         showUserThankedAnimation()
                         self.pointsLabel.text = String(2)
                         
                     }
                 }
+              if self.tasks.count > 0 && self.tasks[0]?.taskDescription != "" {
+                self.newItemSwiped = false
                 canCreateNewtask = true
                 let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
                 self.tasks.insert(Task(userId: self.currentUserId!, taskDescription: "", latitude: self.userLatitude!, longitude: self.userLongitude!, completed: true, timeCreated: Date(), timeUpdated: Date(), taskID: "\(timeStamp)",recentActivity: false, userMovedOutside: false), at: 0)
@@ -204,6 +206,7 @@ class MainViewController: UIViewController {
                 if tasks.count > 0 {
                     carouselView.scrollToItem(at: 1, animated: false)
                 }
+              }
                 
             }
         }
@@ -332,7 +335,7 @@ class MainViewController: UIViewController {
     
     func getFakeTasksCount() -> Int {
         var count = 0
-        if checkFakeTakViewed() {
+        if self.tasks[0]?.taskDescription == "" {
             count = 1
         }
         let defaults = UserDefaults.standard
@@ -759,7 +762,7 @@ class MainViewController: UIViewController {
         // add pin for task
         //let annotation = MKPointAnnotation()
         if carouselIndex == 0 {
-            let annotation = CustomFocusTaskMapAnnotation(currentCarouselIndex: carouselIndex, taskUserId: task.userId)
+          let annotation = CustomFocusTaskMapAnnotation(currentCarouselIndex: carouselIndex, taskUserId: task.taskID!)
             annotation.coordinate = CLLocationCoordinate2D(latitude: (task.latitude), longitude: (task.longitude))
             annotation.style = .color(#colorLiteral(red: 0, green: 0.5901804566, blue: 0.758269012, alpha: 1), radius: 30)
 //            self.mapView.addAnnotation(annotation)
@@ -767,7 +770,7 @@ class MainViewController: UIViewController {
 
         }
         else {
-            let annotation = CustomTaskMapAnnotation(currentCarouselIndex: carouselIndex, taskUserId: task.userId)
+          let annotation = CustomTaskMapAnnotation(currentCarouselIndex: carouselIndex, taskUserId: task.taskID!)
             annotation.coordinate = CLLocationCoordinate2D(latitude: (task.latitude), longitude: (task.longitude))
            annotation.style = .color(#colorLiteral(red: 0, green: 0.5901804566, blue: 0.758269012, alpha: 1), radius: 30) //.image(#imageLiteral(resourceName: "newNotificaitonIcon"))
 //            self.mapView.addAnnotation(annotation)
@@ -1077,6 +1080,7 @@ class MainViewController: UIViewController {
                                         self.tasks.remove(at: index)
                                         self.removeCarousel(index)
                                         self.removeAnnotationForTask((task?.taskID)!)
+                                      
 
                                         if self.tasks.count <= 1 {
                                             self.newItemSwiped = true
@@ -1085,7 +1089,8 @@ class MainViewController: UIViewController {
                                     }
                                 }
                             }
-                            
+                          // update annotation indexes
+                          self.updateMapAnnotationCardIndexes()
                             // return so no duplicates are added
                             return
                         }
@@ -1345,8 +1350,8 @@ class MainViewController: UIViewController {
         if newTask.completed == true {
             self.tasks.append(newTask)
         } else {
-            self.tasks.insert(newTask, at: self.getFakeTasksCount())
-            let carouselIndex = self.tasks.count
+          let carouselIndex = self.getFakeTasksCount()
+            self.tasks.insert(newTask, at: carouselIndex)
             self.addMapPin(task: newTask, carouselIndex: carouselIndex)
         }
         
@@ -1355,10 +1360,11 @@ class MainViewController: UIViewController {
         // add carousel index
         self.clusterManager.reload(self.mapView, visibleMapRect: self.mapView.visibleMapRect)
         // CHECK update all of the map annotation indexes
-        self.updateMapAnnotationCardIndexes()
+      
         if self.tasks.count == 2 && self.mTaskDescription == nil && currentUserTaskSaved == false {
             self.carouselView.scrollToItem(at: 1, animated: true)
         }
+      self.updateMapAnnotationCardIndexes()
     }
     
     func observeUserLocationAuth()  {
@@ -1859,12 +1865,13 @@ class MainViewController: UIViewController {
       let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
       let currentUserKey = FIRAuth.auth()?.currentUser?.uid
       
-      
-      self.tasks.insert(Task(userId: currentUserKey!, taskDescription: "", latitude: (self.locationManager.location?.coordinate.latitude) ?? self.userLatitude! , longitude: (self.locationManager.location?.coordinate.longitude) ?? self.userLongitude! , completed: false, taskID: "\(timeStamp)", recentActivity: false, userMovedOutside: false), at: 0)
+      if self.tasks.count > 0 && self.tasks[0]?.taskDescription != "" {
+        self.tasks.insert(Task(userId: currentUserKey!, taskDescription: "", latitude: (self.locationManager.location?.coordinate.latitude) ?? self.userLatitude! , longitude: (self.locationManager.location?.coordinate.longitude) ?? self.userLongitude! , completed: false, taskID: "\(timeStamp)", recentActivity: false, userMovedOutside: false), at: 0)
+      }
     
-      self.carouselView.insertItem(at: 0, animated: true)
+      //self.carouselView.insertItem(at: 0, animated: true)
 //        self.carouselView.reloadData()
-        self.carouselView.reloadItem(at: 0, animated: true)
+        //self.carouselView.reloadItem(at: 0, animated: true)
       
         
     }
@@ -2981,7 +2988,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             // set onboarding task 1 viewed to true
             defaults.set(true, forKey: Constants.ONBOARDING_TASK1_VIEWED_KEY)
             self.pointsLabel.text = String(1)
-            self.removeOnboardingFakeTask(carousel: carousel, cardIndex: cardIndex, userId: currentTask.userId)
+          self.removeOnboardingFakeTask(carousel: carousel, cardIndex: cardIndex, userId: currentTask.taskID!)
             
         }  else if currentTask.taskDescription == self.ONBOARDING_TASK_3_DESCRIPTION {
             
@@ -2990,7 +2997,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                 self.usersRef?.child(currentUserId!).child("isDemoTaskShown").setValue(true)
                 self.pointsLabel.text = String(3)
                 defaults.set(true, forKey: Constants.ONBOARDING_TASK3_VIEWED_KEY)
-                self.removeOnboardingFakeTask(carousel: carousel, cardIndex: cardIndex, userId: currentTask.userId)
+              self.removeOnboardingFakeTask(carousel: carousel, cardIndex: cardIndex, userId: currentTask.taskID!)
             }
             
         }
@@ -3076,10 +3083,11 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                     
                     // check if the task has the same id as the annotation
                     if let taskUserId = customAnnotation.taskUserId {
-                        if taskUserId == task?.userId {
+                        if taskUserId == task?.taskID {
                         
                             // if they match update the annotation with the correct index
                             customAnnotation.currentCarouselIndex = index
+                          print("index set \(index)")
                             break
                         }
                     }
@@ -3096,7 +3104,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                     
                     // check if the task has the same id as the annotation
                     if let taskUserId = customAnnotation.taskUserId{
-                        if taskUserId == task?.userId {
+                        if taskUserId == task?.taskID {
                             
                             // if they match update the annotation with the correct index
                             customAnnotation.currentCarouselIndex = index
@@ -3126,7 +3134,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         let defaults = UserDefaults.standard
         let boolForTask1 = defaults.bool(forKey: Constants.ONBOARDING_TASK1_VIEWED_KEY)
         
-        let when = DispatchTime.now() + 0.2 // change 2 to desired number of seconds
+        let when = DispatchTime.now() + 0.4 // change 2 to desired number of seconds
         DispatchQueue.main.asyncAfter(deadline: when) {
             if let lastCardIndex = self.lastCardIndex, lastCardIndex != carousel.currentItemIndex, boolForTask1 == false {
                 if let swipedTask:Task = self.tasks[self.lastCardIndex!] {
