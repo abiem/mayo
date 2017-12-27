@@ -14,7 +14,6 @@ import IQKeyboardManagerSwift
 import Fabric
 import Crashlytics
 import GeoFire
-import SCLAlertView
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate {
@@ -49,8 +48,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         NotificationCenter.default.addObserver(self, selector: #selector(tokenRefreshNotification(_:)), name: NSNotification.Name.firInstanceIDTokenRefresh, object: nil)
         
         // For iOS 10 data message (sent via FCM)
-        FIRMessaging.messaging().remoteMessageDelegate = OnboardingNotifcationsViewController()
-        UNUserNotificationCenter.current().delegate = OnboardingNotifcationsViewController()
+        FIRMessaging.messaging().remoteMessageDelegate = self
+        UNUserNotificationCenter.current().delegate = self
 
         
         // log in user annonymously
@@ -104,7 +103,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
             mainVC = storyboard.instantiateViewController(withIdentifier: "MainViewController") as! MainViewController
             let navViewController = UINavigationController(rootViewController: mainVC)
             self.window?.rootViewController = navViewController
-            
+          
         } else {
             // else present authorization
         }
@@ -482,43 +481,62 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
 extension AppDelegate : UNUserNotificationCenterDelegate {
     
     // Receive displayed notifications for iOS 10 devices.
-    func userNotificationCenter(_ center: UNUserNotificationCenter,
-                                willPresent notification: UNNotification,
-                                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        let userInfo = notification.request.content.userInfo
+  // shows notifications when app is in the foreground
+  func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+    
+    
+    let currentViewController = getCurrentViewController()
+    let notificationTitle = notification.request.content.title
+    
+    // TODO: if current view controller is not nil
+    if let viewController = currentViewController {
+      
+      // if the current user is in main view controller
+      // and the user was thanked, show the you were thanked animation
+      if viewController is MainViewController && notificationTitle == "You were thanked!" {
+        let mainViewController = viewController as! MainViewController
+        mainViewController.showUserThankedAnimation()
+      }
+      
+      //if current view controller is in a chat view controller
+      if viewController is ChatViewController {
+        //if the current chat view controller is the same id as the current notification's id
+        // don't show the notification
         
-        // With swizzling disabled you must let Messaging know about the message, for Analytics
-        // Messaging.messaging().appDidReceiveMessage(userInfo)
-        
-        // Print message ID.
-        if let messageID = userInfo[gcmMessageIDKey] {
-            print("Message ID: \(messageID)")
+        // get data from notification for the channel id that the notification was sent from
+        if let channelId = notification.request.content.userInfo["channelId"] {
+          let chatViewController = viewController as! ChatViewController
+          let channelIdString = channelId as! String
+          
+          // if current user is in the same channel as where the notification was sent from
+          if let chatChannelId = chatViewController.channelId {
+            
+            // don't send a message
+            if channelIdString == chatChannelId {
+              return
+            } else {
+              // if current user is in a different channel than where the notification was sent from
+              // send a system notification to the other channel
+              completionHandler([.alert, .badge, .sound])
+              return
+              
+            }
+          }
+          
         }
-        // Print full message.
-        print(userInfo)
-//        if let notification_type = userInfo["notification_type"] {
-//
-//            print("notification_type = \(notification_type)")
-//
-//            switch Int(notification_type as! String)! {
-//
-//            // Process Thanks push notification.
-//            case Constants.NOTIFICATION_WERE_THANKS:
-//
-//                print("Thanks Push Notification Clicked")
-//
-//                if self.mainVC != nil {
-//                    self.mainVC.showUserThankedAnimation()
-//                }
-//                break
-//
-//            default:
-//                break
-//            }
-//        }
-        // Change this to your preferred presentation option
-        completionHandler([ ])
+        
+      }
+      else {
+        
+        // if the user is on the home screen
+        // always show the system notification and bring the user to the correct task based on the notification
+        completionHandler([.alert, .badge, .sound])
+        
+      }
+      
     }
+    
+  }
     
 //    MARK:- location delegates
     //Application is in terminated

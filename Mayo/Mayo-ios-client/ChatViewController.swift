@@ -12,6 +12,7 @@ import JSQMessagesViewController
 import Alamofire
 import IQKeyboardManagerSwift
 
+
 class ChatViewController: JSQMessagesViewController {
     var isFakeTask = false
     var isOwner = false
@@ -24,6 +25,8 @@ class ChatViewController: JSQMessagesViewController {
     var currentUserColorIndex: Int? = nil
     var isParticipated = false;
     var isCompleted = false;
+    var mDeclinedNotification = false
+  
     @IBOutlet weak var viewQuestCompleted: UIView!
     
     
@@ -33,7 +36,7 @@ class ChatViewController: JSQMessagesViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         taskRef = FIRDatabase.database().reference().child("tasks").child(channelId!)
-        
+        checkNotificationPermission()
         self.topContentAdditionalInset = 0.0
         
         // disable swipe to navigate
@@ -211,7 +214,13 @@ class ChatViewController: JSQMessagesViewController {
         var textToSend = text
         let dateFormatter = DateStringFormatterHelper()
         let dateCreated = dateFormatter.convertDateToString(date: Date())
-        
+      
+      //Show Notification Alert
+      DispatchQueue.main.async {
+        self.showNotificationAlert()
+      }
+
+      
         
         if isFakeTask {
             let defaults = UserDefaults.standard
@@ -397,7 +406,7 @@ class ChatViewController: JSQMessagesViewController {
 
     func receiveFakeMessage() {
         
-        let when = DispatchTime.now() + 2 // change 2 to desired number of seconds
+      let when = DispatchTime.now() + 2 // change 2 to desired number of seconds
         DispatchQueue.main.asyncAfter(deadline: when) {
             let id = "Robot"
             let name = ""
@@ -405,9 +414,6 @@ class ChatViewController: JSQMessagesViewController {
             let colorIndexAsInt = 0
             self.addMessage(withId: id, name: name, text: text, colorIndex: colorIndexAsInt)
             self.finishReceivingMessage()
-            DispatchQueue.main.asyncAfter(deadline: when + 4) {
-             self.navigationController?.popViewController(animated: true)
-            }
         }
     }
     
@@ -431,6 +437,37 @@ class ChatViewController: JSQMessagesViewController {
       }
     }
     
+  }
+  
+  func checkNotificationPermission() {
+    checkStatusOfNotification { (status) in
+      if status == .notDetermined {
+        self.mDeclinedNotification = false
+      } else {
+        self.mDeclinedNotification = true
+      }
+    }
+  }
+  
+  func showNotificationAlert() {
+    if mDeclinedNotification == false {
+        self.view.endEditing(true)
+          CMAlertController.sharedInstance.showAlert(nil, Constants.sNOTIFICATION_ERROR, ["Not now", "Sure"]) { (sender) in
+            if let button = sender {
+              if button.tag == 1 {
+                requestForNotification()
+              }
+            }
+            if self.isFakeTask {
+              let when = DispatchTime.now() + 4 // change 2 to desired number of seconds
+              DispatchQueue.main.asyncAfter(deadline: when ) {
+                self.navigationController?.popViewController(animated: true)
+              }
+              
+            }
+            
+          }
+    }
   }
     
 }

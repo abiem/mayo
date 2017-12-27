@@ -88,10 +88,6 @@ class OnboardingLocationsViewController: UIViewController {
     }
     
     func askForLocationAuth() {
-        // get location authorization
-        // display user location
-        print("askForLocationAuth hit")
-        
         if CLLocationManager.locationServicesEnabled() {
             
             // if location services are enables, ask for 

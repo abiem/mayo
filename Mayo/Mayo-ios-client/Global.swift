@@ -16,7 +16,8 @@ struct Constants {
     
     static let DEFAULT_LAT = 0.0 //47.612441
     static let DEFAULT_LNG = 0.0 //-122.337463
-    
+  
+    static let THANKS_RIPPLE_ANIMATION_DURATION = 2.0
     static let THANKS_ANIMATION_DURATION = 5.0
     static let PENDING_TASKS = "PendingTask"
     static let LOCATION = "location"
@@ -31,6 +32,7 @@ struct Constants {
     static let STATUS_FOR_MOVING_OUT = "Expired due to moving out of area"
     
     static let sLOCATION_ERROR = "Oh oh! We need your help with location to help us help you. You can enable location for Mayo in Settings"
+  static let sNOTIFICATION_ERROR = "Thanks for the help! Do you want to be notified when you get a response back?"
     static let sTASK_EXPIRED_ERROR = "The quest you're looking for has completed"
     
     //Static ID

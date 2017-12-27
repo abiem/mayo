@@ -124,6 +124,9 @@
 		7B2728FD1FEA34A200C3AB52 /* OnboardingViewController+iCarousel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B2728FC1FEA34A200C3AB52 /* OnboardingViewController+iCarousel.swift */; };
 		7B5634421FDA9162001F8A0F /* CMAlertController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B5634411FDA9162001F8A0F /* CMAlertController.swift */; };
 		7B5B045F1FDA9CF200C8E8D1 /* Utility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B5B045E1FDA9CF200C8E8D1 /* Utility.swift */; };
+		7B679D2F1FF3839000FB09C3 /* OnboardingViewController+LocationManagerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B679D2E1FF3839000FB09C3 /* OnboardingViewController+LocationManagerDelegate.swift */; };
+		7B679D311FF38B1A00FB09C3 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B679D301FF38B1A00FB09C3 /* NotificationManager.swift */; };
+		7B679D331FF39A8300FB09C3 /* OnboardingViewController + Notification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B679D321FF39A8300FB09C3 /* OnboardingViewController + Notification.swift */; };
 		7B6E3FC51FC6973400919494 /* MKCircleExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B6E3FC41FC6973400919494 /* MKCircleExtension.swift */; };
 		7B6E56D01FD66A9B009C59B6 /* SanFranciscoText-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 7B6E56CF1FD66A9B009C59B6 /* SanFranciscoText-Regular.otf */; };
 		7B7607D21F9DD47A001E2CCA /* Reachbility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B7607D11F9DD479001E2CCA /* Reachbility.swift */; };
@@ -267,6 +270,9 @@
 		7B2728FC1FEA34A200C3AB52 /* OnboardingViewController+iCarousel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "OnboardingViewController+iCarousel.swift"; sourceTree = "<group>"; };
 		7B5634411FDA9162001F8A0F /* CMAlertController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CMAlertController.swift; sourceTree = "<group>"; };
 		7B5B045E1FDA9CF200C8E8D1 /* Utility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utility.swift; sourceTree = "<group>"; };
+		7B679D2E1FF3839000FB09C3 /* OnboardingViewController+LocationManagerDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "OnboardingViewController+LocationManagerDelegate.swift"; sourceTree = "<group>"; };
+		7B679D301FF38B1A00FB09C3 /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
+		7B679D321FF39A8300FB09C3 /* OnboardingViewController + Notification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "OnboardingViewController + Notification.swift"; sourceTree = "<group>"; };
 		7B6E3FC41FC6973400919494 /* MKCircleExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MKCircleExtension.swift; sourceTree = "<group>"; };
 		7B6E56CF1FD66A9B009C59B6 /* SanFranciscoText-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SanFranciscoText-Regular.otf"; sourceTree = "<group>"; };
 		7B7607D11F9DD479001E2CCA /* Reachbility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reachbility.swift; sourceTree = "<group>"; };
@@ -486,6 +492,7 @@
 			children = (
 				7B5634411FDA9162001F8A0F /* CMAlertController.swift */,
 				7B5B045E1FDA9CF200C8E8D1 /* Utility.swift */,
+				7B679D301FF38B1A00FB09C3 /* NotificationManager.swift */,
 				35F6F3031E9B210400747104 /* GradientView.swift */,
 				35D39E4B1EB85BB800DB41FE /* HorizontalGradientView.swift */,
 				35D39E491EB8581A00DB41FE /* DiagonalGradientView.swift */,
@@ -579,6 +586,8 @@
 				7B2728F91FEA31DE00C3AB52 /* Cell */,
 				7B2728F71FEA30E400C3AB52 /* OnboardingViewController.swift */,
 				7B2728FC1FEA34A200C3AB52 /* OnboardingViewController+iCarousel.swift */,
+				7B679D2E1FF3839000FB09C3 /* OnboardingViewController+LocationManagerDelegate.swift */,
+				7B679D321FF39A8300FB09C3 /* OnboardingViewController + Notification.swift */,
 			);
 			name = IntroOnboarding;
 			sourceTree = "<group>";
@@ -916,6 +925,8 @@
 				7B5634421FDA9162001F8A0F /* CMAlertController.swift in Sources */,
 				F80C07961F55D62E00E0F8FB /* PushNotificationManager.swift in Sources */,
 				357A164C1ED74DC400FDF96A /* LocationManagerExtension.swift in Sources */,
+				7B679D2F1FF3839000FB09C3 /* OnboardingViewController+LocationManagerDelegate.swift in Sources */,
+				7B679D311FF38B1A00FB09C3 /* NotificationManager.swift in Sources */,
 				7BF740971FDFF4EC003CB691 /* BorderedClusterAnnotationView.swift in Sources */,
 				3529A9D11E998377003C815A /* MainViewController.swift in Sources */,
 				35B8872A1ED28FBC00E761A2 /* CustomFocusCurrentUserTaskAnnotation.swift in Sources */,
@@ -937,6 +948,7 @@
 				357A16501ED74E5700FDF96A /* TextViewExtension.swift in Sources */,
 				3529A9E31E99936A003C815A /* Task.swift in Sources */,
 				7B6E3FC51FC6973400919494 /* MKCircleExtension.swift in Sources */,
+				7B679D331FF39A8300FB09C3 /* OnboardingViewController + Notification.swift in Sources */,
 				3599D7FF1EAA950D008BEE21 /* CustomTaskMapAnnotation.swift in Sources */,
 				35D39E4C1EB85BB800DB41FE /* HorizontalGradientView.swift in Sources */,
 				35F6F3041E9B210400747104 /* GradientView.swift in Sources */,

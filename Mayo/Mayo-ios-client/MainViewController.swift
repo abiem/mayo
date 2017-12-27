@@ -335,13 +335,13 @@ class MainViewController: UIViewController {
     
     func getFakeTasksCount() -> Int {
         var count = 0
-        if self.tasks[0]?.taskDescription == "" {
-            count = 1
-        }
         let defaults = UserDefaults.standard
         let boolForTask1 = defaults.bool(forKey: Constants.ONBOARDING_TASK1_VIEWED_KEY)
         let boolForTask2 = defaults.bool(forKey: Constants.ONBOARDING_TASK2_VIEWED_KEY)
         let boolForTask3 = defaults.bool(forKey: Constants.ONBOARDING_TASK3_VIEWED_KEY)
+        if boolForTask3 == false && boolForTask1 == true && boolForTask2 == true || (newItemSwiped == true || currentUserTaskSaved == true){
+          count = 1
+        }
         if boolForTask1 != true  {
             count += 1
         }
@@ -1644,7 +1644,17 @@ class MainViewController: UIViewController {
             }, completion: nil)
         }
     }
-    
+  
+  // Show Notification Alert
+  func showNotificationAlert() {
+      CMAlertController.sharedInstance.showAlert(nil, Constants.sNOTIFICATION_ERROR, ["Not now", "Sure"]) { (sender) in
+        if let button = sender {
+          if button.tag == 1 {
+            requestForNotification()
+          }
+        }
+      }
+  }
     
     //get Previous Task saved in user Defaults
     func getPreviousTask()  {
@@ -2753,11 +2763,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         // create/update new task item for current user
         mTaskDescription = nil
         self.view.endEditing(true)
-        
-//        if locationManager.location?.coordinate.latitude == nil && locationManager.location?.coordinate.longitude == nil {
-//            showLocationAlert()
-//            return
-//        }
+        showNotificationAlert()
         
         // get textview
         let currentUserTextView = self.view.viewWithTag(CURRENT_USER_TEXTVIEW_TAG) as! UITextView

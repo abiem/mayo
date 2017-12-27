@@ -35,11 +35,12 @@ extension OnboardingViewController: iCarouselDelegate, iCarouselDataSource  {
     let button = UIButton()
     button.frame = CGRect(x:20, y:tempView.frame.size.height - 60 , width: (carouselSize.width * 0.8) - 40 , height:45)
     button.setTitle(Constants.INTRO_BUTTON_TITLE_ARRAY[index], for: .normal)
+    button.tag = index
     button.layer.cornerRadius = 4
     button.layer.borderWidth = 2
     button.layer.borderColor = UIColor.white.cgColor
     tempView.addSubview(button)
-    
+    button.addTarget(self, action: #selector(self.moveToNextIndex), for: .touchUpInside)
     tempView.startColor = UIColor.hexStringToUIColor(hex: Constants.INTRO_START_COLOR_ARRAY[index])
     tempView.endColor = UIColor.hexStringToUIColor(hex: Constants.INTRO_END_COLOR_ARRAY[index])
     view.addSubview(tempView)
@@ -47,11 +48,31 @@ extension OnboardingViewController: iCarouselDelegate, iCarouselDataSource  {
     return view
   }
   
+  func moveToNextIndex(_ sender: UIButton) {
+    if sender.tag != 3 {
+      if sender.tag == 2 {
+        CMAlertController.sharedInstance.showImageCustomisedAlert(Constants.INTRO_LOCATION_ALERT_TITLE, #imageLiteral(resourceName: "LocationAlertImage"), Constants.INTRO_LOCATION_ALERT_SUBTITLE, [Constants.INTRO_LOCATION_ALERT_BUTTON_TITLE], { (button) in
+            self.mCarousel.scrollToItem(at: sender.tag + 1, animated: true)
+            })
+      } else {
+         mCarousel.scrollToItem(at: sender.tag + 1, animated: true)
+      }
+    } else {
+      askForLocationAuth()
+    }
+  }
+  
   func carouselCurrentItemIndexDidChange(_ carousel: iCarousel) {
-    if carousel.currentItemIndex == 2 {
-    
-        CMAlertController.sharedInstance.showImageCustomisedAlert(Constants.INTRO_LOCATION_ALERT_TITLE, #imageLiteral(resourceName: "LocationAlertImage"), Constants.INTRO_LOCATION_ALERT_SUBTITLE, [Constants.INTRO_LOCATION_ALERT_BUTTON_TITLE], nil)
-      
+    stopAnimationAnimation()
+    mImageView.isHidden = false
+    mBackgroundAnimation.isHidden = false
+    mBackgroundAnimation.transform = CGAffineTransform.identity
+    if carousel.currentItemIndex == 1 {
+        showUserThankedAnimation()
+    } else if carousel.currentItemIndex == 2 {
+      showRippleAnimation(#imageLiteral(resourceName: "centerWhiteDot"), #imageLiteral(resourceName: "ripple"))
+    } else if carousel.currentItemIndex == 3 {
+       showRippleAnimation(nil, #imageLiteral(resourceName: "rippleHorizontalAngle"))
     }
   }
   
