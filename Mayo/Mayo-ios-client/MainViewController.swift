@@ -85,6 +85,9 @@ class MainViewController: UIViewController {
     
     // boolean check for if keyboard is on screen
     var keyboardOnScreen = false
+  
+    //Check Push Notification
+    var mShowNotification = true
     
     // query distance for getting nearby tasks and users in meters
     let queryDistance = 200.0
@@ -117,6 +120,7 @@ class MainViewController: UIViewController {
     var tasksExpireObserver: FIRDatabaseHandle?
     var tasksRefHandle: FIRDatabaseHandle?
     var tasksCircleQuery : GFCircleQuery?
+    var usersCircleQuery : GFCircleQuery?
     var tasksCircleQueryHandle: FirebaseHandle?
     
     var tasksDeletedCircleQueryHandle: FirebaseHandle?
@@ -783,6 +787,7 @@ class MainViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         // hides navigation bar for home viewcontroller
         self.navigationController?.isNavigationBarHidden = true
+      checkNotificationPermission()
         
     }
     override func viewWillDisappear(_ animated: Bool) {
@@ -803,7 +808,7 @@ class MainViewController: UIViewController {
         // Query locations at latitude, longitutde with a radius of queryDistance
         // 200 meters = .2 for geofire units
         let center = CLLocation(latitude: latitude, longitude: longitude)
-        let usersCircleQuery = usersGeoFire?.query(at: center, withRadius: queryDistance/1000)
+         usersCircleQuery = usersGeoFire?.query(at: center, withRadius: queryDistance/1000)
         
        usersEnterCircleQueryHandle = usersCircleQuery?.observe(.keyEntered, with: { (key: String?, location: CLLocation?) in
             print("Key '\(key!)' entered the search are and is at location '\(location!)'")
@@ -859,19 +864,8 @@ class MainViewController: UIViewController {
                         self.mapView.removeAnnotation($0)
                     }
                 }
-                
-                //remove user observers
-                usersCircleQuery?.removeObserver(withFirebaseHandle: self.usersExitCircleQueryHandle!)
-                usersCircleQuery?.removeObserver(withFirebaseHandle: self.usersEnterCircleQueryHandle!)
-                usersCircleQuery?.removeObserver(withFirebaseHandle: self.usersMovedCircleQueryHandle!)
-                self.queryUsersAroundCurrentLocation(latitude: (self.locationManager.location?.coordinate.latitude)!, longitude: (self.locationManager.location?.coordinate.longitude)!)
-
-                //task Moved to new Location
-                self.tasksCircleQuery?.removeObserver(withFirebaseHandle: self.tasksDeletedCircleQueryHandle!)
-                self.tasksCircleQuery?.removeObserver(withFirebaseHandle: self.tasksCircleQueryHandle!)
-                self.queryTasksAroundCurrentLocation(latitude: (self.locationManager.location?.coordinate.latitude)!, longitude: (self.locationManager.location?.coordinate.longitude)!)
-
-
+              
+              self.updateNearBytask()
             }
             
             // remove user in the nearby userlist.
@@ -939,7 +933,6 @@ class MainViewController: UIViewController {
     // get tasks around current location
     func queryTasksAroundCurrentLocation(latitude: CLLocationDegrees, longitude: CLLocationDegrees) {
         self.indicatorView.isHidden = false
-        
         let when = DispatchTime.now() + 8
         DispatchQueue.main.asyncAfter(deadline: when){
             // When No Task available
@@ -1074,7 +1067,7 @@ class MainViewController: UIViewController {
                             //for creator of Task or already existing Task
                             if taskDict["completed"] as! Bool == true {
                                 for (index, task) in self.tasks.enumerated() {
-                                    if task?.taskID == taskDict["taskID"] as? String {
+                                  if task?.taskID == taskDict["taskID"] as? String && task?.completed == false {
                                         self.tasks[index]?.completed = true
                                         self.tasks.append(self.tasks[index])
                                         self.tasks.remove(at: index)
@@ -1368,7 +1361,9 @@ class MainViewController: UIViewController {
     }
     
     func observeUserLocationAuth()  {
-        notification = NotificationCenter.default.addObserver(forName: .UIApplicationWillEnterForeground, object: nil, queue: .main) {
+      checkNotificationPermission()
+//      self.updateNearBytask()
+      notification = NotificationCenter.default.addObserver(forName: .UIApplicationWillEnterForeground, object: nil, queue: .main) {
             [unowned self] notification in
             self.addCurrentUserLocationToFirebase()
             if self.carouselView.currentItemIndex == 0 {
@@ -1380,7 +1375,6 @@ class MainViewController: UIViewController {
                 self.showLocationAlert()
                 return
             }
-            
             // do whatever you want when the app is brought back to the foreground
         }
     }
@@ -1405,16 +1399,15 @@ class MainViewController: UIViewController {
     
     func removeCarousel(_ index: Int)  {
         UIView.transition(with: carouselView!,
-                                  duration: 0.6,
+                                  duration: 0.3,
                                   options: .transitionCrossDissolve,
                                   animations: { () -> Void in
                                     self.carouselView.itemView(at: index)?.alpha = 0;
         },
                                   completion:{ (success) in
                                      self.carouselView.removeItem(at: index, animated: true)
-                                    self.carouselView.reloadData()
-                                    if self.carouselView.itemView(at: index)?.alpha == 0 {
-                                        self.carouselView.itemView(at: index)?.alpha = 1
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                                      self.carouselView.reloadData()
                                     }
                                     
         })
@@ -1647,15 +1640,28 @@ class MainViewController: UIViewController {
   
   // Show Notification Alert
   func showNotificationAlert() {
+    if mShowNotification {
       CMAlertController.sharedInstance.showAlert(nil, Constants.sNOTIFICATION_ERROR, ["Not now", "Sure"]) { (sender) in
         if let button = sender {
           if button.tag == 1 {
+            self.mShowNotification = false
             requestForNotification()
           }
         }
       }
+    }
   }
-    
+  
+  func checkNotificationPermission() {
+    checkStatusOfNotification { (status) in
+      if status == .notDetermined {
+        self.mShowNotification = true
+      } else {
+        self.mShowNotification = false
+      }
+    }
+  }
+  
     //get Previous Task saved in user Defaults
     func getPreviousTask()  {
         if (UserDefaults.standard.object(forKey: Constants.PENDING_TASKS) != nil) {
@@ -1912,7 +1918,32 @@ class MainViewController: UIViewController {
         })
     }
 
+  func removeHistoryTasks() {
+    for (index, task) in self.tasks.enumerated() {
+      // check if the task has the same id as the annotation
+      if task?.completed == true {
+        if index > 0 && index < self.tasks.count {
+          self.tasks.remove(at: index)
+        }
+      }
+    }
+    self.carouselView.reloadData()
+  }
+  
+  func updateNearBytask() {
+    self.removeHistoryTasks()
+    if self.userLatitude == nil && self.userLongitude == nil { return }
+    //remove user observers
+    self.usersCircleQuery?.removeObserver(withFirebaseHandle: self.usersExitCircleQueryHandle!)
+    self.usersCircleQuery?.removeObserver(withFirebaseHandle: self.usersEnterCircleQueryHandle!)
+    self.usersCircleQuery?.removeObserver(withFirebaseHandle: self.usersMovedCircleQueryHandle!)
+    self.queryUsersAroundCurrentLocation(latitude: self.userLatitude!, longitude: self.userLongitude!)
     
+    //task Moved to new Location
+    self.tasksCircleQuery?.removeObserver(withFirebaseHandle: self.tasksDeletedCircleQueryHandle!)
+    self.tasksCircleQuery?.removeObserver(withFirebaseHandle: self.tasksCircleQueryHandle!)
+    self.queryTasksAroundCurrentLocation(latitude: self.userLatitude!, longitude: self.userLongitude!)
+  }
 }
 
 // MARK: carousel view
@@ -2514,26 +2545,23 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
     }
     
     func createMessageToThankUser(messageText: String, completionView: UIView, tagNumber: Int, userId: String) -> UIView {
+      
+      var buttonSize : CGFloat = completionView.bounds.width - 40;
+      let messageWidth = messageText.widthOfString(usingFont: UIFont.systemFont(ofSize: 16)) + 40
+      if messageWidth < buttonSize {
+        buttonSize = messageWidth
+      }
         
-        var messageButtonText = messageText
-        // check if the message text is over 40 characters
-        // if it is, cut it off and add ...
-        if messageText.characters.count > 30 {
-            let index = messageText.index(messageText.startIndex, offsetBy: 30)
-            messageButtonText = messageText.substring(to: index)
-            messageButtonText += " ..."
-        }
-        
-        let chatUserMessageButton = UIButton(frame: CGRect(x: 20, y: 0, width: (completionView.bounds.width - 40), height: 52))
+        let chatUserMessageButton = UIButton(frame: CGRect(x: 20, y: 0, width: buttonSize, height: 52))
         chatUserMessageButton.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         chatUserMessageButton.tag = tagNumber
         chatUserMessageButton.setTitleColor(UIColor.black, for: .normal)
         chatUserMessageButton.center.y = completionView.bounds.height*3/10 + CGFloat(62 * tagNumber)
 //        chatUserMessageButton.center.x = self.view.center.x-20
-        chatUserMessageButton.setTitle(messageButtonText, for: .normal)
+        chatUserMessageButton.setTitle(messageText, for: .normal)
         chatUserMessageButton.backgroundColor = UIColor.white
         chatUserMessageButton.contentHorizontalAlignment = .left
-        chatUserMessageButton.contentEdgeInsets = UIEdgeInsets(top: 10, left: 20, bottom: 10, right: 20)
+        chatUserMessageButton.contentEdgeInsets = UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5)
         chatUserMessageButton.cornerRadius = 4
         chatUserMessageButton.titleLabel?.lineBreakMode = NSLineBreakMode.byTruncatingMiddle
         chatUserMessageButton.titleLabel?.numberOfLines = 2

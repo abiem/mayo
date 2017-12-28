@@ -6,14 +6,10 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13527"/>
-        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <customFonts key="customFonts">
-        <array key="HelveticaNeue.ttc">
-            <string>HelveticaNeue</string>
-        </array>
         <array key="SanFranciscoText-Regular.otf">
             <string>SanFranciscoText-Regular</string>
         </array>
@@ -28,10 +24,10 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" mapType="standard" showsUserLocation="YES" translatesAutoresizingMaskIntoConstraints="NO" id="msr-mv-p4J">
-                                <rect key="frame" x="-6" y="64" width="381" height="603"/>
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                             </mapView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="XoD-Fb-pV5" customClass="iCarousel">
-                                <rect key="frame" x="-6" y="433" width="381" height="234"/>
+                                <rect key="frame" x="0.0" y="433" width="375" height="234"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="234" id="J6B-wB-FIi"/>
@@ -41,31 +37,23 @@
                                     <outlet property="delegate" destination="BYZ-38-t0r" id="NA1-It-sA5"/>
                                 </connections>
                             </view>
-                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zu9-BV-I7e">
-                                <rect key="frame" x="293" y="391" width="52" height="32"/>
-                                <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="17"/>
-                                <state key="normal" title="Button"/>
-                                <connections>
-                                    <action selector="actionMapStartFollow:" destination="BYZ-38-t0r" eventType="touchUpInside" id="0sI-bZ-tzW"/>
-                                </connections>
-                            </button>
                             <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" animating="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="PlW-He-o8Z">
                                 <rect key="frame" x="178" y="323.5" width="20" height="20"/>
                             </activityIndicatorView>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
-                            <constraint firstItem="msr-mv-p4J" firstAttribute="bottom" secondItem="8bC-Xf-vdC" secondAttribute="bottom" id="2yT-Cx-Axy"/>
-                            <constraint firstItem="Pzq-Yw-fyq" firstAttribute="trailing" secondItem="zu9-BV-I7e" secondAttribute="trailing" constant="30" id="BPf-L2-zmC"/>
-                            <constraint firstItem="msr-mv-p4J" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="-22" id="H2x-I6-qsS"/>
+                            <constraint firstItem="msr-mv-p4J" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="Fdp-oz-fAm"/>
                             <constraint firstItem="PlW-He-o8Z" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="IN6-nd-a5O"/>
                             <constraint firstItem="PlW-He-o8Z" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="KU1-Sd-Je5"/>
-                            <constraint firstItem="Pzq-Yw-fyq" firstAttribute="trailing" secondItem="msr-mv-p4J" secondAttribute="trailing" id="ZRj-OZ-dFE"/>
-                            <constraint firstItem="msr-mv-p4J" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="topMargin" id="Zvx-Lz-3p3"/>
-                            <constraint firstItem="XoD-Fb-pV5" firstAttribute="leading" secondItem="msr-mv-p4J" secondAttribute="leading" id="n3L-jy-COS"/>
-                            <constraint firstItem="XoD-Fb-pV5" firstAttribute="top" secondItem="zu9-BV-I7e" secondAttribute="bottom" constant="10" id="pcL-CR-HfJ"/>
+                            <constraint firstAttribute="trailing" secondItem="msr-mv-p4J" secondAttribute="trailing" id="NAS-h7-WHU"/>
+                            <constraint firstAttribute="bottom" secondItem="msr-mv-p4J" secondAttribute="bottom" id="bHR-HE-87a"/>
+                            <constraint firstItem="msr-mv-p4J" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="f6m-Cj-huo"/>
+                            <constraint firstItem="XoD-Fb-pV5" firstAttribute="bottom" secondItem="Pzq-Yw-fyq" secondAttribute="bottom" id="fhD-GS-Kxp"/>
+                            <constraint firstItem="msr-mv-p4J" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="iEi-jM-ZMM"/>
+                            <constraint firstItem="XoD-Fb-pV5" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="mBQ-G8-qAR"/>
+                            <constraint firstItem="XoD-Fb-pV5" firstAttribute="trailing" secondItem="Pzq-Yw-fyq" secondAttribute="trailing" id="v46-UE-nJR"/>
                             <constraint firstItem="XoD-Fb-pV5" firstAttribute="bottom" secondItem="Pzq-Yw-fyq" secondAttribute="bottom" id="va3-cH-7cr"/>
-                            <constraint firstItem="XoD-Fb-pV5" firstAttribute="trailing" secondItem="msr-mv-p4J" secondAttribute="trailing" id="yjq-oP-Syt"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="Pzq-Yw-fyq"/>
                     </view>
@@ -122,10 +110,9 @@
         <!--Navigation Controller-->
         <scene sceneID="CNt-vU-Ynl">
             <objects>
-                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="1KJ-5O-ete" sceneMemberID="viewController">
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" navigationBarHidden="YES" id="1KJ-5O-ete" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="pe0-WR-d0B">
-                        <rect key="frame" x="0.0" y="20" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <nil name="viewControllers"/>

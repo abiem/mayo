@@ -26,7 +26,17 @@ class OnboardingViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
       sequenceOfThanks()
-      checkFakeTaskStatus()
+      if FIRAuth.auth()?.currentUser?.uid == nil {
+        FIRAuth.auth()?.signInAnonymously() { (user, error) in
+          if error != nil {
+            print("an error occured during auth")
+            return
+          }
+          self.checkFakeTaskStatus()
+        }
+      } else {
+       checkFakeTaskStatus()
+      }
       
       mCarousel.type = iCarouselType.linear
       mCarousel.isPagingEnabled = true

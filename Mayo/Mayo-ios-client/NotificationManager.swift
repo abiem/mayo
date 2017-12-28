@@ -51,7 +51,7 @@ func checkNotificationAuth() -> Void {
       // [START register_for_notifications]
       if #available(iOS 10.0, *) {
         // For iOS 10 display notification (sent via APNS)
-        UNUserNotificationCenter.current().delegate = UIApplication.shared as? UNUserNotificationCenterDelegate
+       // UNUserNotificationCenter.current().delegate = UIApplication.shared as? UNUserNotificationCenterDelegate
         let _: UNAuthorizationOptions = [.alert, .badge, .sound]
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound], completionHandler: { (granted, error) in
         })
