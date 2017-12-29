@@ -11,7 +11,7 @@
 import UIKit
 
 // Constants to customise Alert
-let sALERT_WIDTH = 300 //Int(UIScreen.main.bounds.size.width * 0.8)
+let sALERT_WIDTH = 335 //Int(UIScreen.main.bounds.size.width * 0.9)
 let sALERT_COLOR = #colorLiteral(red: 0, green: 0.7709392309, blue: 0.8868473172, alpha: 1)
 let sALERT_BACKGROUND_COLOR = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 0.3)
 let sALERT_VIEW_BORDER_WIDTH = 2
@@ -21,8 +21,8 @@ let sALERT_BUTTON_Y_PADDING = 6
 let sALERT_TITLE_SIZE = 17
 let sALERT_LABEL_HEIGHT = 70
 let sALERT_IMAGE_HEIGHT = 50
-let sALERT_MARGIN_FROM_LEFT = 15
-let sALERT_MARGIN_FROM_TOP = 15
+let sALERT_MARGIN_FROM_LEFT = 20
+let sALERT_MARGIN_FROM_TOP = 20
 let sALERT_LABEL_FONT_SIZE = 17
 let sALERT_SHADOW_WIDTH = 0
 let sALERT_SHADOW_HEIGHT = 20
@@ -30,7 +30,7 @@ let sALERT_SHADOW_OPACITY = 0.45
 let sALERT_SHADOW_RADIUS = 30
 let sALERT_DIAGONAL_START = "FFFFFF"
 let sALERT_DIAGONAL_END = "EAFCFF"
-let sALERT_TITLE_FONT_NAME  = "HelveticaNeue-Bold"
+let sALERT_TITLE_FONT_NAME  = "SanFranciscoText-Regular"
 /**
  Callback for button Action
  @response UIButton optional
@@ -103,7 +103,7 @@ class CMAlertController: NSObject {
      @param pButtonArray Array of buttons titles
      */
   private func createAlertView(_ pTitle: String?,_ pSubImage: UIImage? , _ pSubtitle: String?, _ pButtonArray:[String]) {
-    if let parentView = topController()?.view {
+    if let parentView = UIApplication.shared.keyWindow {
         if !parentView.subviews.contains(mAlertBackgroundView) {
             parentView.addSubview(mAlertBackgroundView)
             setToSuperView(mAlertBackgroundView, pParentView: parentView)
@@ -114,7 +114,7 @@ class CMAlertController: NSObject {
 //            alertView.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
           alertView.startColor = UIColor.hexStringToUIColor(hex: sALERT_DIAGONAL_START)
           alertView.endColor = UIColor.hexStringToUIColor(hex: sALERT_DIAGONAL_END)
-            alertView.layer.cornerRadius = 0
+          alertView.layer.cornerRadius = CGFloat(sALERT_VIEW_CORNER_RADIUS)
           
           //Add Shadow
           alertView.layer.shadowColor = UIColor.black.cgColor
@@ -142,8 +142,8 @@ class CMAlertController: NSObject {
           
             if let title = pSubtitle  {
                 let label = createLabel(title, bottomValue)
-                label.textAlignment = .justified
-              label.font = label.font.withSize(CGFloat(sALERT_LABEL_FONT_SIZE))
+                label.textAlignment = .left
+              label.font = UIFont(name:sALERT_TITLE_FONT_NAME, size: CGFloat(sALERT_LABEL_FONT_SIZE))
               label.sizeToFit()
                 alertView.addSubview(label)
                 bottomValue = label.frame.size.height + label.frame.origin.y + CGFloat(sALERT_MARGIN_FROM_TOP)
@@ -155,7 +155,7 @@ class CMAlertController: NSObject {
                 bottomValue = button.frame.size.height + button.frame.origin.y + CGFloat(sALERT_MARGIN_FROM_TOP)
                 
             }
-            
+            alertView.clipsToBounds = true
             alertView.frame = CGRect(x:0, y:0 , width:Int(sALERT_WIDTH), height:Int(bottomValue))
             alertView.center.x = parentView.center.x
             alertView.center.y = parentView.center.y 

@@ -45,6 +45,12 @@ extension OnboardingViewController: iCarouselDelegate, iCarouselDataSource  {
     tempView.endColor = UIColor.hexStringToUIColor(hex: Constants.INTRO_END_COLOR_ARRAY[index])
     view.addSubview(tempView)
     
+    tempView.backgroundColor = UIColor.clear
+    tempView.layer.shadowColor = UIColor.black.cgColor
+    tempView.layer.shadowOffset = CGSize(width: 0, height: 10)
+    tempView.layer.shadowOpacity = 0.3
+    tempView.layer.shadowRadius = 15.0
+    
     return view
   }
   
@@ -68,12 +74,13 @@ extension OnboardingViewController: iCarouselDelegate, iCarouselDataSource  {
     mBackgroundAnimation.isHidden = false
     mBackgroundAnimation.transform = CGAffineTransform.identity
     if carousel.currentItemIndex == 1 {
-        showUserThankedAnimation()
+      showUserThankedAnimation()
     } else if carousel.currentItemIndex == 2 {
       showRippleAnimation(#imageLiteral(resourceName: "centerWhiteDot"), #imageLiteral(resourceName: "ripple"))
     } else if carousel.currentItemIndex == 3 {
-       showRippleAnimation(nil, #imageLiteral(resourceName: "rippleHorizontalAngle"))
+      showRippleAnimation(nil, #imageLiteral(resourceName: "rippleHorizontalAngle"))
     }
+
   }
   
   func carousel(_ carousel: iCarousel, valueFor option: iCarouselOption, withDefault value: CGFloat) -> CGFloat {

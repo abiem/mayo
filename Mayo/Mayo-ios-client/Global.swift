@@ -19,6 +19,8 @@ struct Constants {
   
     static let THANKS_RIPPLE_ANIMATION_DURATION = 2.0
     static let THANKS_ANIMATION_DURATION = 5.0
+    static let SECOND_PIN_ANIMATION_DURATION = 2.5
+    static let THIRD_PIN_ANIMATION_DURATION = 2.7
     static let PENDING_TASKS = "PendingTask"
     static let LOCATION = "location"
     //Identiifier
@@ -33,6 +35,7 @@ struct Constants {
     
     static let sLOCATION_ERROR = "Oh oh! We need your help with location to help us help you. You can enable location for Mayo in Settings"
   static let sNOTIFICATION_ERROR = "Thanks for the help! Do you want to be notified when you get a response back?"
+  static let sTASK_CREATE_NOTIFICATION_ERROR = "Your quest is ready! Do you want to be notified when others can help?"
     static let sTASK_EXPIRED_ERROR = "The quest you're looking for has completed"
     
     //Static ID

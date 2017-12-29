@@ -406,7 +406,7 @@ class ChatViewController: JSQMessagesViewController {
 
     func receiveFakeMessage() {
         
-      let when = DispatchTime.now() + 2 // change 2 to desired number of seconds
+      let when = DispatchTime.now() // change 2 to desired number of seconds
         DispatchQueue.main.asyncAfter(deadline: when) {
             let id = "Robot"
             let name = ""
@@ -453,6 +453,7 @@ class ChatViewController: JSQMessagesViewController {
     if mDeclinedNotification == false {
         self.view.endEditing(true)
           CMAlertController.sharedInstance.showAlert(nil, Constants.sNOTIFICATION_ERROR, ["Not now", "Sure"]) { (sender) in
+            self.mDeclinedNotification = true
             if let button = sender {
               if button.tag == 1 {
                 requestForNotification()

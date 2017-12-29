@@ -27,10 +27,10 @@
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                             </mapView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="XoD-Fb-pV5" customClass="iCarousel">
-                                <rect key="frame" x="0.0" y="433" width="375" height="234"/>
+                                <rect key="frame" x="0.0" y="403" width="375" height="264"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="234" id="J6B-wB-FIi"/>
+                                    <constraint firstAttribute="height" constant="264" id="J6B-wB-FIi"/>
                                 </constraints>
                                 <connections>
                                     <outlet property="dataSource" destination="BYZ-38-t0r" id="7Im-kZ-0t6"/>
@@ -155,20 +155,20 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="eky-3e-wAy" firstAttribute="bottom" secondItem="2Jd-Df-l8Z" secondAttribute="bottom" id="500-8n-I7e"/>
                             <constraint firstItem="5oo-i9-vOB" firstAttribute="top" secondItem="CLj-aH-hOx" secondAttribute="bottom" id="5y2-9t-uBM"/>
+                            <constraint firstAttribute="bottom" secondItem="2Jd-Df-l8Z" secondAttribute="bottom" id="H4m-af-jAL"/>
                             <constraint firstItem="CLj-aH-hOx" firstAttribute="top" secondItem="FmR-sY-NTX" secondAttribute="top" id="IF3-Nj-1kH"/>
+                            <constraint firstItem="2Jd-Df-l8Z" firstAttribute="top" secondItem="FmR-sY-NTX" secondAttribute="top" id="Ib6-0P-aBv"/>
                             <constraint firstItem="pyQ-fx-pNS" firstAttribute="top" secondItem="FmR-sY-NTX" secondAttribute="top" id="Jfe-Gs-oxo"/>
                             <constraint firstItem="eky-3e-wAy" firstAttribute="bottom" secondItem="5oo-i9-vOB" secondAttribute="bottom" constant="10" id="Llr-o9-Zhp"/>
                             <constraint firstItem="pyQ-fx-pNS" firstAttribute="leading" secondItem="eky-3e-wAy" secondAttribute="leading" id="NSG-i2-wxS"/>
-                            <constraint firstItem="2Jd-Df-l8Z" firstAttribute="top" secondItem="FmR-sY-NTX" secondAttribute="top" id="OBE-DA-E5r"/>
-                            <constraint firstItem="eky-3e-wAy" firstAttribute="trailing" secondItem="2Jd-Df-l8Z" secondAttribute="trailing" id="OHl-5U-vtn"/>
                             <constraint firstItem="5oo-i9-vOB" firstAttribute="top" secondItem="pyQ-fx-pNS" secondAttribute="bottom" id="SfU-4e-aXn"/>
+                            <constraint firstAttribute="trailing" secondItem="2Jd-Df-l8Z" secondAttribute="trailing" id="U2N-ww-Wad"/>
                             <constraint firstItem="CLj-aH-hOx" firstAttribute="trailing" secondItem="eky-3e-wAy" secondAttribute="trailing" id="V3n-Dx-zHX"/>
                             <constraint firstItem="CLj-aH-hOx" firstAttribute="leading" secondItem="eky-3e-wAy" secondAttribute="leading" id="Xt5-za-LT6"/>
                             <constraint firstItem="eky-3e-wAy" firstAttribute="trailing" secondItem="5oo-i9-vOB" secondAttribute="trailing" id="dzb-kd-08k"/>
+                            <constraint firstItem="2Jd-Df-l8Z" firstAttribute="leading" secondItem="FmR-sY-NTX" secondAttribute="leading" id="g5G-Fu-Pft"/>
                             <constraint firstItem="eky-3e-wAy" firstAttribute="trailing" secondItem="pyQ-fx-pNS" secondAttribute="trailing" id="iEe-9c-TrA"/>
-                            <constraint firstItem="2Jd-Df-l8Z" firstAttribute="leading" secondItem="eky-3e-wAy" secondAttribute="leading" id="ut4-8J-EBO"/>
                             <constraint firstItem="5oo-i9-vOB" firstAttribute="leading" secondItem="eky-3e-wAy" secondAttribute="leading" id="wnC-Ct-x4h"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="eky-3e-wAy"/>

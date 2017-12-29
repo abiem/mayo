@@ -172,9 +172,10 @@ class MainViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-
+      
         //Check for location when user come foreground
         observeUserLocationAuth()
+      
         if isLoadingFirebase {
             startLoderAnimation()
         }
@@ -205,7 +206,7 @@ class MainViewController: UIViewController {
                 self.newItemSwiped = false
                 canCreateNewtask = true
                 let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
-                self.tasks.insert(Task(userId: self.currentUserId!, taskDescription: "", latitude: self.userLatitude!, longitude: self.userLongitude!, completed: true, timeCreated: Date(), timeUpdated: Date(), taskID: "\(timeStamp)",recentActivity: false, userMovedOutside: false), at: 0)
+                self.tasks.insert(Task(userId: self.currentUserId!, taskDescription: "", latitude: self.userLatitude!, longitude: self.userLongitude!, completed: false, timeCreated: Date(), timeUpdated: Date(), taskID: "\(timeStamp)",recentActivity: false, userMovedOutside: false), at: 0)
                 carouselView.reloadData()
                 if tasks.count > 0 {
                     carouselView.scrollToItem(at: 1, animated: false)
@@ -322,7 +323,7 @@ class MainViewController: UIViewController {
             createFakeTasks()
             initUserAuth()
         }
-        
+      
     }
     
     func checkFakeTakViewed() -> Bool {
@@ -855,16 +856,6 @@ class MainViewController: UIViewController {
             let userId = key1?.replacingOccurrences(of: "\")", with: "")
             
             if userId == self.currentUserId {
-                // user Moved to another place
-                self.nearbyUsers.removeAll()
-                
-                //remove all users
-                self.mapView.annotations.forEach {
-                    if ($0 is CustomUserMapAnnotation) {
-                        self.mapView.removeAnnotation($0)
-                    }
-                }
-              
               self.updateNearBytask()
             }
             
@@ -1361,10 +1352,10 @@ class MainViewController: UIViewController {
     }
     
     func observeUserLocationAuth()  {
-      checkNotificationPermission()
-//      self.updateNearBytask()
+      
       notification = NotificationCenter.default.addObserver(forName: .UIApplicationWillEnterForeground, object: nil, queue: .main) {
             [unowned self] notification in
+          self.checkNotificationPermission()
             self.addCurrentUserLocationToFirebase()
             if self.carouselView.currentItemIndex == 0 {
              self.mapView.setUserTrackingMode(.follow, animated: true)
@@ -1373,9 +1364,8 @@ class MainViewController: UIViewController {
             if (authorizationStatus == .denied || authorizationStatus == .notDetermined) && self.isLocationNotAuthorised  {
                 // User has not authorized access to location information.
                 self.showLocationAlert()
-                return
             }
-            // do whatever you want when the app is brought back to the foreground
+            self.updateNearBytask()
         }
     }
     
@@ -1641,7 +1631,7 @@ class MainViewController: UIViewController {
   // Show Notification Alert
   func showNotificationAlert() {
     if mShowNotification {
-      CMAlertController.sharedInstance.showAlert(nil, Constants.sNOTIFICATION_ERROR, ["Not now", "Sure"]) { (sender) in
+      CMAlertController.sharedInstance.showAlert(nil, Constants.sTASK_CREATE_NOTIFICATION_ERROR, ["Not now", "Sure"]) { (sender) in
         if let button = sender {
           if button.tag == 1 {
             self.mShowNotification = false
@@ -1868,27 +1858,25 @@ class MainViewController: UIViewController {
         if tasksExpireObserver != nil {
             self.tasksRef?.child(currentUserTask.taskID!).child("timeUpdated").removeObserver(withHandle: tasksExpireObserver!)
         }
-        //reload Carousel
-        if self.tasks.count > 0 {
-          self.tasks.remove(at: 0)
-        }
-        currentUserTask.updateFirebaseTask()
-        currentUserTaskSaved = false
-        UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
-
-      
+      //reload Carousel
+      if self.tasks.count > 0 {
+        self.tasks.remove(at: 0)
+      }
       
       let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
       let currentUserKey = FIRAuth.auth()?.currentUser?.uid
       
       if self.tasks.count > 0 && self.tasks[0]?.taskDescription != "" {
+        self.newItemSwiped = true
         self.tasks.insert(Task(userId: currentUserKey!, taskDescription: "", latitude: (self.locationManager.location?.coordinate.latitude) ?? self.userLatitude! , longitude: (self.locationManager.location?.coordinate.longitude) ?? self.userLongitude! , completed: false, taskID: "\(timeStamp)", recentActivity: false, userMovedOutside: false), at: 0)
       }
-    
-      //self.carouselView.insertItem(at: 0, animated: true)
-//        self.carouselView.reloadData()
-        //self.carouselView.reloadItem(at: 0, animated: true)
+    currentUserTaskSaved = false
+//      self.carouselView.insertItem(at: 0, animated: true)
+        self.carouselView.reloadData()
+//        self.carouselView.reloadItem(at: 0, animated: true)
+      currentUserTask.updateFirebaseTask()
       
+      UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
         
     }
 
@@ -1919,14 +1907,19 @@ class MainViewController: UIViewController {
     }
 
   func removeHistoryTasks() {
-    for (index, task) in self.tasks.enumerated() {
-      // check if the task has the same id as the annotation
-      if task?.completed == true {
-        if index > 0 && index < self.tasks.count {
-          self.tasks.remove(at: index)
-        }
+    
+    // user Moved to another place
+    self.nearbyUsers.removeAll()
+    //remove all users
+    self.mapView.annotations.forEach {
+      if ($0 is CustomUserMapAnnotation) {
+        self.mapView.removeAnnotation($0)
       }
     }
+    self.tasks = self.tasks.filter {
+      return $0?.completed == false
+    }
+    print(self.tasks.count);
     self.carouselView.reloadData()
   }
   
@@ -1952,7 +1945,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
     func carousel(_ carousel: iCarousel, viewForItemAt index: Int, reusing view: UIView?) -> UIView {
         
         print("index hit: \(index)")
-        let viewWidth = 300
+        let viewWidth = 335
         if index == 0 && isLoadingFirebase == true  {
           let tempView = UIView(frame: CGRect(x: 0, y: 0, width: viewWidth, height:Int(carousel.frame.size.height-50)))
             tempView.backgroundColor = UIColor.white
@@ -2441,14 +2434,16 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                 if count < 5 {
                     //create a button view and add it to the completion view
                     let chatUserMessageButton = self.createMessageToThankUser(messageText: message["text"] as! String , completionView: completionView, tagNumber: count, userId: userKey)
-                    let lineView = UIView(frame: CGRect(x:      0,
-                                                        y:      chatUserMessageButton.frame.size.height-6,
-                                                        width:  chatUserMessageButton.frame.size.width,
-                                                        height: 6.0))
+                    let lineView = UIView(frame: CGRect(x:      -3,
+                                                        y:      chatUserMessageButton.frame.size.height-5,
+                                                        width:  chatUserMessageButton.frame.size.width+4,
+                                                        height: 5.0))
                     
                     lineView.backgroundColor = UIColor.hexStringToUIColor(hex: Constants.chatBubbleColors[Int(message["colorIndex"] as! String)!])
+                  chatUserMessageButton.clipsToBounds = true;
                     chatUserMessageButton.addSubview(lineView)
-                    
+
+                  
                     completionView.addSubview(chatUserMessageButton)
                     // update the count
                     count+=1
@@ -2552,7 +2547,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         buttonSize = messageWidth
       }
         
-        let chatUserMessageButton = UIButton(frame: CGRect(x: 20, y: 0, width: buttonSize, height: 52))
+        let chatUserMessageButton = UIButton(frame: CGRect(x: 20, y: 0, width: buttonSize, height: 57))
         chatUserMessageButton.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         chatUserMessageButton.tag = tagNumber
         chatUserMessageButton.setTitleColor(UIColor.black, for: .normal)
@@ -2561,8 +2556,8 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         chatUserMessageButton.setTitle(messageText, for: .normal)
         chatUserMessageButton.backgroundColor = UIColor.white
         chatUserMessageButton.contentHorizontalAlignment = .left
-        chatUserMessageButton.contentEdgeInsets = UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5)
-        chatUserMessageButton.cornerRadius = 4
+        chatUserMessageButton.contentEdgeInsets = UIEdgeInsets(top: 5, left: 5, bottom: 10, right: 5)
+        chatUserMessageButton.cornerRadius = 5
         chatUserMessageButton.titleLabel?.lineBreakMode = NSLineBreakMode.byTruncatingMiddle
         chatUserMessageButton.titleLabel?.numberOfLines = 2
         chatUserMessageButton.alpha = 0.5
@@ -3180,16 +3175,18 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                     }
                 }
             }
-            
+          if self.carouselView.currentItemIndex > 0 && self.carouselView.currentItemIndex < self.tasks.count {
             if let currentTask = self.tasks[self.carouselView.currentItemIndex] {
-                if currentTask.completed == true {
-                    let taskCordinates = CLLocationCoordinate2D.init(latitude: currentTask.latitude, longitude: currentTask.longitude)
-                    self.expiredAnnotation.coordinate = taskCordinates
-                    self.mapView.addAnnotation(self.expiredAnnotation)
-
-                } else {
-                    self.mapView.removeAnnotation(self.expiredAnnotation)
-                }
+              if currentTask.completed == true {
+                let taskCordinates = CLLocationCoordinate2D.init(latitude: currentTask.latitude, longitude: currentTask.longitude)
+                self.expiredAnnotation.coordinate = taskCordinates
+                self.mapView.addAnnotation(self.expiredAnnotation)
+                
+              } else {
+                self.mapView.removeAnnotation(self.expiredAnnotation)
+              }
+            
+          }
                 
             }
             

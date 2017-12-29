@@ -20,12 +20,15 @@ class OnboardingViewController: UIViewController {
   var playingThanksAnim = false
   var locationManager: CLLocationManager!
   let mThanksImageListArray: NSMutableArray = []
+  let mSecondPinImageListArray: NSMutableArray = []
+  let mThirdPinImageListArray: NSMutableArray = []
   //rotation key animation
   let kRotationAnimationKey = "com.mayo.rotationanimationkey"
   
     override func viewDidLoad() {
         super.viewDidLoad()
       sequenceOfThanks()
+
       if FIRAuth.auth()?.currentUser?.uid == nil {
         FIRAuth.auth()?.signInAnonymously() { (user, error) in
           if error != nil {
@@ -114,6 +117,29 @@ class OnboardingViewController: UIViewController {
       }
     }
   }
+  
+  func sequenceOfSecondPin() {
+    DispatchQueue.global(qos: .background).async {
+      for countValue in 1...71
+      {
+        let imageName : String = "fatpin1.00\(countValue).png"
+        let image  = UIImage(named:imageName)
+        self.mSecondPinImageListArray.add(image!)
+      }
+    }
+  }
+  
+  func sequenceOfThirdPin() {
+    DispatchQueue.global(qos: .background).async {
+      for countValue in 1...80
+      {
+        let imageName : String = "fatpin2.00\(countValue).png"
+        let image  = UIImage(named:imageName)
+        self.mThirdPinImageListArray.add(image!)
+      }
+    }
+  }
+  
   //Mark :- Ripple Animation
   func showRippleAnimation(_ pCenterImage:UIImage?,_ pBackgroundImage: UIImage) {
     self.mImageView.contentMode = .center
@@ -132,15 +158,36 @@ class OnboardingViewController: UIViewController {
   
   //Mark :- Thanks Image
   func showUserThankedAnimation() {
-    self.mImageView.contentMode = .scaleAspectFit
-    if playingThanksAnim == true { return }
+    if playingThanksAnim { return }
+    
+     self.mImageView.contentMode = .scaleAspectFit
     flareAnimation(view: self.mBackgroundAnimation, duration: Constants.THANKS_ANIMATION_DURATION)
     self.mImageView.animationImages = self.mThanksImageListArray as? [UIImage]
     self.mImageView.animationDuration = Constants.THANKS_ANIMATION_DURATION
+
     self.mImageView.startAnimating()
     mBackgroundAnimation.startAnimating()
     
     }
+  
+  func showSecondPinAnimation() {
+    self.mImageView.contentMode = .scaleAspectFit
+    self.mBackgroundAnimation.image = nil;
+    self.mImageView.animationImages = self.mSecondPinImageListArray as? [UIImage]
+    self.mImageView.animationDuration = Constants.SECOND_PIN_ANIMATION_DURATION
+    self.mImageView.startAnimating()
+    
+  }
+  
+  func showThirdPinAnimation() {
+    self.mImageView.contentMode = .scaleAspectFit
+    self.mBackgroundAnimation.image = nil;
+    self.mImageView.animationImages = self.mThirdPinImageListArray as? [UIImage]
+    self.mImageView.animationDuration = Constants.THIRD_PIN_ANIMATION_DURATION
+    self.mImageView.startAnimating()
+    
+  }
+  
     
   
   //Start Flare Animation for thanks
