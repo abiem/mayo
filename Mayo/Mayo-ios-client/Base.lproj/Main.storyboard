@@ -61,6 +61,7 @@
                     <connections>
                         <outlet property="carouselView" destination="XoD-Fb-pV5" id="Q6w-it-bPZ"/>
                         <outlet property="indicatorView" destination="PlW-He-o8Z" id="tjD-GE-Kbv"/>
+                        <outlet property="mCarouselHeight" destination="J6B-wB-FIi" id="3Il-IU-3MF"/>
                         <outlet property="mapView" destination="msr-mv-p4J" id="M78-TW-ROU"/>
                         <segue destination="Jg4-hv-oBL" kind="show" identifier="mainToChatVC" id="oYW-4n-a3T"/>
                     </connections>

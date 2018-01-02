@@ -21,7 +21,8 @@ import Cluster
 
 class MainViewController: UIViewController {
     
-    @IBOutlet weak var carouselView: iCarousel!
+  @IBOutlet weak var mCarouselHeight: NSLayoutConstraint!
+  @IBOutlet weak var carouselView: iCarousel!
     @IBOutlet weak var mapView: MKMapView!
     var lastUpdatedTime : Date?
     var pointsLabel: UILabel!
@@ -222,7 +223,9 @@ class MainViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+      let viewHeight  = UIScreen.main.bounds.size.height <= 568 ? 232 : 264
+      mCarouselHeight.constant = CGFloat(viewHeight)
+      
         clusterManager.cellSize = nil
         clusterManager.maxZoomLevel = 17
         clusterManager.minCountForClustering = 2
@@ -1945,7 +1948,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
     func carousel(_ carousel: iCarousel, viewForItemAt index: Int, reusing view: UIView?) -> UIView {
         
         print("index hit: \(index)")
-        let viewWidth = 335
+        let viewWidth  = UIScreen.main.bounds.size.height <= 568 ? 286 : 335 //335
         if index == 0 && isLoadingFirebase == true  {
           let tempView = UIView(frame: CGRect(x: 0, y: 0, width: viewWidth, height:Int(carousel.frame.size.height-50)))
             tempView.backgroundColor = UIColor.white
@@ -2064,7 +2067,8 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             textView.center.x = tempView.center.x
             textView.backgroundColor = UIColor.clear
             textView.textAlignment = .left
-            textView.font = UIFont.systemFont(ofSize: 24)
+          let fontSize  = UIScreen.main.bounds.size.height <= 568 ? 20 : 24
+          textView.font = UIFont.systemFont(ofSize: CGFloat(fontSize))
             textView.delegate = self
             textView.isScrollEnabled = false
             textView.tag = CURRENT_USER_TEXTVIEW_TAG
@@ -2134,7 +2138,8 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
                 
                 doneView?.tag = self.POST_NEW_TASK_BUTTON_TAG
                 //change the opacity to 0.5 for the button at first
-                doneView?.titleLabel?.font = UIFont.systemFont(ofSize: 24)
+              let fontSize  = UIScreen.main.bounds.size.height <= 568 ? 20 : 24
+              doneView?.titleLabel?.font = UIFont.systemFont(ofSize: CGFloat(fontSize))
                 doneView?.addTarget(self, action: #selector(createTaskForCurrentUser(sender:)), for: .touchUpInside)
                 tempView.addSubview(doneView!)
                 
@@ -2235,8 +2240,8 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             let horizontalConstraint = NSLayoutConstraint(item: label, attribute: .leading, relatedBy: NSLayoutRelation.equal, toItem: placeholderView, attribute: .leading, multiplier: 1, constant: 20)
             let verticalConstraint = NSLayoutConstraint(item: label, attribute: .top, relatedBy: NSLayoutRelation.equal, toItem: placeholderView, attribute: .top, multiplier: 1, constant: 20)
             let widthConstraint = NSLayoutConstraint(item: label, attribute: NSLayoutAttribute.width, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.notAnAttribute, multiplier: 1, constant: (tempView.bounds.width*0.9))
-            
-            label.font = UIFont.systemFont(ofSize: 24)
+            let fontSize  = UIScreen.main.bounds.size.height <= 568 ? 20 : 24
+          label.font = UIFont.systemFont(ofSize: CGFloat(fontSize))
             label.textColor = UIColor.white
             placeholderView.addSubview(label)
             // add edge constraints to the label

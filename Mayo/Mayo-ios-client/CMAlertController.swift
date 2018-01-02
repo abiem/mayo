@@ -11,19 +11,19 @@
 import UIKit
 
 // Constants to customise Alert
-let sALERT_WIDTH = 335 //Int(UIScreen.main.bounds.size.width * 0.9)
+let sALERT_WIDTH = UIScreen.main.bounds.size.height <= 568 ? 286 : 335  //Int(UIScreen.main.bounds.size.width * 0.9)
 let sALERT_COLOR = #colorLiteral(red: 0, green: 0.7709392309, blue: 0.8868473172, alpha: 1)
 let sALERT_BACKGROUND_COLOR = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 0.3)
 let sALERT_VIEW_BORDER_WIDTH = 2
 let sALERT_VIEW_CORNER_RADIUS = 5
 let sALERT_BUTTON_HEIGHT = 40
 let sALERT_BUTTON_Y_PADDING = 6
-let sALERT_TITLE_SIZE = 17
+let sALERT_TITLE_SIZE = UIScreen.main.bounds.size.height <= 568 ? 13 : 17
 let sALERT_LABEL_HEIGHT = 70
 let sALERT_IMAGE_HEIGHT = 50
 let sALERT_MARGIN_FROM_LEFT = 20
 let sALERT_MARGIN_FROM_TOP = 20
-let sALERT_LABEL_FONT_SIZE = 17
+let sALERT_LABEL_FONT_SIZE = UIScreen.main.bounds.size.height <= 568 ? 13 : 17
 let sALERT_SHADOW_WIDTH = 0
 let sALERT_SHADOW_HEIGHT = 20
 let sALERT_SHADOW_OPACITY = 0.45

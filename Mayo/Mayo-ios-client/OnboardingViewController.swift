@@ -28,6 +28,8 @@ class OnboardingViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
       sequenceOfThanks()
+      sequenceOfSecondPin()
+      sequenceOfThirdPin()
 
       if FIRAuth.auth()?.currentUser?.uid == nil {
         FIRAuth.auth()?.signInAnonymously() { (user, error) in
@@ -111,10 +113,6 @@ class OnboardingViewController: UIViewController {
         let image  = UIImage(named:imageName)
         self.mThanksImageListArray.add(image!)
       }
-      DispatchQueue.main.async {
-        self.showUserThankedAnimation()
-        
-      }
     }
   }
   
@@ -164,7 +162,7 @@ class OnboardingViewController: UIViewController {
     flareAnimation(view: self.mBackgroundAnimation, duration: Constants.THANKS_ANIMATION_DURATION)
     self.mImageView.animationImages = self.mThanksImageListArray as? [UIImage]
     self.mImageView.animationDuration = Constants.THANKS_ANIMATION_DURATION
-
+    self.mImageView.animationRepeatCount = 1
     self.mImageView.startAnimating()
     mBackgroundAnimation.startAnimating()
     
@@ -175,6 +173,7 @@ class OnboardingViewController: UIViewController {
     self.mBackgroundAnimation.image = nil;
     self.mImageView.animationImages = self.mSecondPinImageListArray as? [UIImage]
     self.mImageView.animationDuration = Constants.SECOND_PIN_ANIMATION_DURATION
+    self.mImageView.animationRepeatCount = 0
     self.mImageView.startAnimating()
     
   }
@@ -184,6 +183,7 @@ class OnboardingViewController: UIViewController {
     self.mBackgroundAnimation.image = nil;
     self.mImageView.animationImages = self.mThirdPinImageListArray as? [UIImage]
     self.mImageView.animationDuration = Constants.THIRD_PIN_ANIMATION_DURATION
+    self.mImageView.animationRepeatCount = 0
     self.mImageView.startAnimating()
     
   }
@@ -206,6 +206,7 @@ class OnboardingViewController: UIViewController {
   func stopAnimationAnimation() {
     mBackgroundAnimation.layer.removeAllAnimations()
     mImageView.stopAnimating()
+    self.mImageView.animationImages = nil
     mImageView.image = nil
     mBackgroundAnimation.image = nil
     playingThanksAnim = false

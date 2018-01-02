@@ -18,14 +18,19 @@ extension OnboardingViewController: iCarouselDelegate, iCarouselDataSource  {
   
   func carousel(_ carousel: iCarousel, viewForItemAt index: Int, reusing view: UIView?) -> UIView {
     let view = UIView()
+    let viewHeight  = UIScreen.main.bounds.size.height <= 568 ? 180 : 212
+    let viewWidth  = UIScreen.main.bounds.size.height <= 568 ? 265 : 335
     let carouselSize = mCarousel.frame.size
-    view.frame = CGRect(x:0, y:0, width: carouselSize.width * 0.8 , height:carouselSize.height-20)
-     let tempView = GradientView(frame: CGRect(x: 10, y: 10, width: carouselSize.width * 0.8 , height:carouselSize.height-20))
+    view.frame = CGRect(x:0, y:0, width: viewWidth , height:viewHeight)
+     let tempView = GradientView(frame: CGRect(x: 10, y: 10, width: viewWidth , height:viewHeight))
     
     // Create Lable
     let label = UILabel()
-    label.frame = CGRect(x:20, y:10, width: (carouselSize.width * 0.8) - 40, height:50)
+    label.frame = CGRect(x:20, y:10, width: tempView.frame.size.width - 40, height:50)
     label.text = Constants.INTRO_TITLE_ARRAY[index]
+    let fontSize  = UIScreen.main.bounds.size.height <= 568 ? 20 : 24
+    label.font = UIFont.systemFont(ofSize: CGFloat(fontSize))
+    label.textAlignment = .left
     label.numberOfLines = 0
     label.textColor = .white
     label.sizeToFit()
@@ -33,7 +38,7 @@ extension OnboardingViewController: iCarouselDelegate, iCarouselDataSource  {
     
     //Create Button
     let button = UIButton()
-    button.frame = CGRect(x:20, y:tempView.frame.size.height - 60 , width: (carouselSize.width * 0.8) - 40 , height:45)
+    button.frame = CGRect(x:20, y:tempView.frame.size.height - 60 , width: tempView.frame.size.width - 40 , height:45)
     button.setTitle(Constants.INTRO_BUTTON_TITLE_ARRAY[index], for: .normal)
     button.tag = index
     button.layer.cornerRadius = 4
@@ -45,11 +50,11 @@ extension OnboardingViewController: iCarouselDelegate, iCarouselDataSource  {
     tempView.endColor = UIColor.hexStringToUIColor(hex: Constants.INTRO_END_COLOR_ARRAY[index])
     view.addSubview(tempView)
     
-    tempView.backgroundColor = UIColor.clear
-    tempView.layer.shadowColor = UIColor.black.cgColor
-    tempView.layer.shadowOffset = CGSize(width: 0, height: 10)
-    tempView.layer.shadowOpacity = 0.3
-    tempView.layer.shadowRadius = 15.0
+    view.backgroundColor = UIColor.clear
+    view.layer.shadowColor = UIColor.black.cgColor
+    view.layer.shadowOffset = CGSize(width: 0, height: 10)
+    view.layer.shadowOpacity = 0.3
+    view.layer.shadowRadius = 15.0
     
     return view
   }
@@ -76,9 +81,11 @@ extension OnboardingViewController: iCarouselDelegate, iCarouselDataSource  {
     if carousel.currentItemIndex == 1 {
       showUserThankedAnimation()
     } else if carousel.currentItemIndex == 2 {
-      showRippleAnimation(#imageLiteral(resourceName: "centerWhiteDot"), #imageLiteral(resourceName: "ripple"))
+//      showRippleAnimation(#imageLiteral(resourceName: "centerWhiteDot"), #imageLiteral(resourceName: "ripple"))
+      showSecondPinAnimation()
     } else if carousel.currentItemIndex == 3 {
-      showRippleAnimation(nil, #imageLiteral(resourceName: "rippleHorizontalAngle"))
+//      showRippleAnimation(nil, #imageLiteral(resourceName: "rippleHorizontalAngle"))
+      showThirdPinAnimation()
     }
 
   }

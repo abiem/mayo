@@ -9,5 +9,7 @@
 #ifndef Mayo_ios_client_Bridging_Header_h
 #define Mayo_ios_client_Bridging_Header_h
 
-#import "OnboardingViewController.h"
+//#import "GLView.h"
+//#import "GLTexture.h"
+//#import "GLProgram.h"
 #endif /* Mayo_ios_client_Bridging_Header_h */
