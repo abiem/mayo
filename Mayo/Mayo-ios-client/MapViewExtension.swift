@@ -103,8 +103,7 @@ extension MainViewController: MKMapViewDelegate {
             view?.layer.zPosition = CGFloat(self.CLUSTER_TASK_ANNOTATION_Z_INDEX)
             return view
             
-        } else  {
-            
+        }
             if annotation is CustomTaskMapAnnotation {
                 
                 let annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: "customTask")
@@ -122,7 +121,7 @@ extension MainViewController: MKMapViewDelegate {
                 
                 
                 return annotationView
-            }
+            
             
         }
         

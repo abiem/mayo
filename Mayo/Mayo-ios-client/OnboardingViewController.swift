@@ -7,15 +7,17 @@
 //
 
 import UIKit
+import CoreLocation
+import QuartzCore
 import iCarousel
 import Firebase
-import CoreLocation
+import FLAnimatedImage
 
 class OnboardingViewController: UIViewController {
   //Outlets
   @IBOutlet weak var mBackgroundAnimation: UIImageView!
   @IBOutlet weak var mCarousel: iCarousel!
-  @IBOutlet weak var mImageView: UIImageView!
+  @IBOutlet weak var mImageView: FLAnimatedImageView!
   // Instance
   var playingThanksAnim = false
   var locationManager: CLLocationManager!
@@ -25,11 +27,14 @@ class OnboardingViewController: UIViewController {
   //rotation key animation
   let kRotationAnimationKey = "com.mayo.rotationanimationkey"
   
+  //CAlayerAnimation
+  let animation = CAKeyframeAnimation()
+  
     override func viewDidLoad() {
         super.viewDidLoad()
-      sequenceOfThanks()
-      sequenceOfSecondPin()
-      sequenceOfThirdPin()
+      //sequenceOfThanks()
+      //sequenceOfSecondPin()
+      //sequenceOfThirdPin()
 
       if FIRAuth.auth()?.currentUser?.uid == nil {
         FIRAuth.auth()?.signInAnonymously() { (user, error) in
@@ -110,7 +115,7 @@ class OnboardingViewController: UIViewController {
       for countValue in 1...51
       {
         let imageName : String = "fux00\(countValue).png"
-        let image  = UIImage(named:imageName)
+        let image  = UIImage(named:imageName)?.cgImage
         self.mThanksImageListArray.add(image!)
       }
     }
@@ -121,7 +126,7 @@ class OnboardingViewController: UIViewController {
       for countValue in 1...71
       {
         let imageName : String = "fatpin1.00\(countValue).png"
-        let image  = UIImage(named:imageName)
+        let image  = UIImage(named:imageName)?.cgImage
         self.mSecondPinImageListArray.add(image!)
       }
     }
@@ -132,7 +137,7 @@ class OnboardingViewController: UIViewController {
       for countValue in 1...80
       {
         let imageName : String = "fatpin2.00\(countValue).png"
-        let image  = UIImage(named:imageName)
+        let image  = UIImage(named:imageName)?.cgImage
         self.mThirdPinImageListArray.add(image!)
       }
     }
@@ -160,31 +165,89 @@ class OnboardingViewController: UIViewController {
     
      self.mImageView.contentMode = .scaleAspectFit
     flareAnimation(view: self.mBackgroundAnimation, duration: Constants.THANKS_ANIMATION_DURATION)
-    self.mImageView.animationImages = self.mThanksImageListArray as? [UIImage]
-    self.mImageView.animationDuration = Constants.THANKS_ANIMATION_DURATION
-    self.mImageView.animationRepeatCount = 1
-    self.mImageView.startAnimating()
-    mBackgroundAnimation.startAnimating()
+    
+    let path = Bundle.main.path(forResource: "thanks", ofType: "gif")
+    do {
+      let data = try Data(contentsOf: URL.init(fileURLWithPath: path!))
+      let image = FLAnimatedImage(animatedGIFData: data)
+      mImageView.animatedImage = image
+      
+    } catch {
+      print("Something went Wrong")
+    }
+    
+//    animation.keyPath = "contents" // = CAKeyframeAnimation.init(keyPath: "contents")
+//    animation.calculationMode = kCAAnimationLinear;
+//    animation.duration = Double(self.mThanksImageListArray.count)/5.0  // 24 frames per second
+//    animation.values = self.mThanksImageListArray as? [CGImage];
+//    animation.repeatCount = 1;
+//    animation.isRemovedOnCompletion = false
+//    animation.fillMode = kCAFillModeBoth;
+//    self.mImageView.layer.add(animation, forKey: "animation")
+    
+//    self.mImageView.animationImages = self.mThanksImageListArray as? [UIImage]
+//    self.mImageView.animationDuration = Constants.THANKS_ANIMATION_DURATION
+//    self.mImageView.animationRepeatCount = 1
+//    self.mImageView.startAnimating()
+//    mBackgroundAnimation.startAnimating()
     
     }
   
   func showSecondPinAnimation() {
-    self.mImageView.contentMode = .scaleAspectFit
-    self.mBackgroundAnimation.image = nil;
-    self.mImageView.animationImages = self.mSecondPinImageListArray as? [UIImage]
-    self.mImageView.animationDuration = Constants.SECOND_PIN_ANIMATION_DURATION
-    self.mImageView.animationRepeatCount = 0
-    self.mImageView.startAnimating()
+    
+    let path = Bundle.main.path(forResource: "secondpin", ofType: "gif")
+    do {
+      let data = try Data(contentsOf: URL.init(fileURLWithPath: path!))
+      mImageView.animatedImage = FLAnimatedImage(animatedGIFData: data)
+    } catch {
+      print("Something went Wrong")
+    }
+   
+//    animation.keyPath = "contents"
+//    animation.calculationMode = kCAAnimationLinear;
+//    animation.duration = Double(self.mSecondPinImageListArray.count)/Constants.SECOND_PIN_ANIMATION_DURATION  // 24 frames per second
+//    animation.values = self.mSecondPinImageListArray as? [CGImage];
+//    animation.repeatCount = Float.infinity;
+//    animation.isRemovedOnCompletion = false
+//    animation.fillMode = kCAFillModeForwards;
+//    self.mImageView.layer.add(animation, forKey: "animation")
+
+    
+    
+    
+//    self.mImageView.contentMode = .scaleAspectFit
+//    self.mBackgroundAnimation.image = nil;
+//    self.mImageView.animationImages = self.mSecondPinImageListArray as? [UIImage]
+//    self.mImageView.animationDuration = Constants.SECOND_PIN_ANIMATION_DURATION
+//    self.mImageView.animationRepeatCount = 0
+//    self.mImageView.startAnimating()
     
   }
   
   func showThirdPinAnimation() {
-    self.mImageView.contentMode = .scaleAspectFit
-    self.mBackgroundAnimation.image = nil;
-    self.mImageView.animationImages = self.mThirdPinImageListArray as? [UIImage]
-    self.mImageView.animationDuration = Constants.THIRD_PIN_ANIMATION_DURATION
-    self.mImageView.animationRepeatCount = 0
-    self.mImageView.startAnimating()
+    let path = Bundle.main.path(forResource: "Thirdpin", ofType: "gif")
+    do {
+      let data = try Data(contentsOf: URL.init(fileURLWithPath: path!))
+      mImageView.animatedImage = FLAnimatedImage(animatedGIFData: data)
+      
+    } catch {
+      print("Something went Wrong")
+    }
+    
+//    self.mImageView.contentMode = .scaleAspectFit
+//    self.mBackgroundAnimation.image = nil;
+//    animation.keyPath = "contents"
+//    animation.calculationMode = kCAAnimationLinear;
+//    animation.duration = Double(self.mThirdPinImageListArray.count) / Constants.THIRD_PIN_ANIMATION_DURATION  // 24 frames per second
+//    animation.values = self.mThirdPinImageListArray as? [CGImage];
+//    animation.repeatCount = Float.infinity;
+//    animation.isRemovedOnCompletion = false
+//    animation.fillMode = kCAFillModeForwards;
+//    self.mImageView.layer.add(animation, forKey: "animation")
+//    self.mImageView.animationImages = self.mThirdPinImageListArray as? [UIImage]
+//    self.mImageView.animationDuration = Constants.THIRD_PIN_ANIMATION_DURATION
+//    self.mImageView.animationRepeatCount = 0
+//    self.mImageView.startAnimating()
     
   }
   
@@ -204,11 +267,10 @@ class OnboardingViewController: UIViewController {
   }
   
   func stopAnimationAnimation() {
-    mBackgroundAnimation.layer.removeAllAnimations()
-    mImageView.stopAnimating()
-    self.mImageView.animationImages = nil
-    mImageView.image = nil
+    mImageView.animatedImage = nil
+    mBackgroundAnimation.layer.removeAnimation(forKey: kRotationAnimationKey)
     mBackgroundAnimation.image = nil
+    self.mImageView.animationImages = nil
     playingThanksAnim = false
   }
   

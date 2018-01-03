@@ -82,9 +82,11 @@ extension OnboardingViewController: iCarouselDelegate, iCarouselDataSource  {
       showUserThankedAnimation()
     } else if carousel.currentItemIndex == 2 {
 //      showRippleAnimation(#imageLiteral(resourceName: "centerWhiteDot"), #imageLiteral(resourceName: "ripple"))
+      mThanksImageListArray.removeAllObjects()
       showSecondPinAnimation()
     } else if carousel.currentItemIndex == 3 {
 //      showRippleAnimation(nil, #imageLiteral(resourceName: "rippleHorizontalAngle"))
+      mSecondPinImageListArray.removeAllObjects()
       showThirdPinAnimation()
     }
 

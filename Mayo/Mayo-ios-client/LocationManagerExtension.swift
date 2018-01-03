@@ -8,7 +8,7 @@
 
 import UIKit
 import CoreLocation
-import SCLAlertView
+
 
 extension MainViewController: CLLocationManagerDelegate {
     

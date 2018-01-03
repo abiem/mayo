@@ -19,8 +19,8 @@ struct Constants {
   
     static let THANKS_RIPPLE_ANIMATION_DURATION = 2.0
     static let THANKS_ANIMATION_DURATION = 5.0
-    static let SECOND_PIN_ANIMATION_DURATION = 2.5
-    static let THIRD_PIN_ANIMATION_DURATION = 2.7
+    static let SECOND_PIN_ANIMATION_DURATION = 18.0
+    static let THIRD_PIN_ANIMATION_DURATION = 22.0
     static let PENDING_TASKS = "PendingTask"
     static let LOCATION = "location"
     //Identiifier
