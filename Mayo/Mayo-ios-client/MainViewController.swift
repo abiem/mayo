@@ -165,6 +165,7 @@ class MainViewController: UIViewController {
   
   //indicator
   @IBOutlet weak var indicatorView : UIActivityIndicatorView!
+  var mTaskScore = 0
   
   deinit {
     // get rid of observers when denit
@@ -196,25 +197,14 @@ class MainViewController: UIViewController {
       for (index, element) in tasks.enumerated() {
         if element?.taskDescription == ONBOARDING_TASK_2_DESCRIPTION {
           UpdatePointsServer(1, (FIRAuth.auth()?.currentUser?.uid)!)
-          self.usersRef?.child((FIRAuth.auth()?.currentUser?.uid)!).child("score").setValue(3)
+          mTaskScore = mTaskScore + 1
+          self.usersRef?.child((FIRAuth.auth()?.currentUser?.uid)!).child("score").setValue(mTaskScore)
           removeOnboardingFakeTask(carousel: carouselView, cardIndex: index, userId: (element?.taskID)!)
           showUserThankedAnimation()
           self.pointsLabel.text = String(2)
           
         }
       }
-      //              if self.tasks.count > 0 && self.tasks[0]?.taskDescription != "" {
-      //                self.newItemSwiped = false
-      //                canCreateNewtask = true
-      //                let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
-      //                self.tasks.insert(Task(userId: self.currentUserId!, taskDescription: "", latitude: self.userLatitude!, longitude: self.userLongitude!, completed: false, timeCreated: Date(), timeUpdated: Date(), taskID: "\(timeStamp)",recentActivity: false, userMovedOutside: false), at: 0)
-      //                carouselView.reloadData()
-      //                if tasks.count > 0 {
-      //                    carouselView.scrollToItem(at: 1, animated: false)
-      //                }
-      //              }
-      //
-      //            }
     }
     
   }
@@ -227,8 +217,8 @@ class MainViewController: UIViewController {
     mCarouselHeight.constant = CGFloat(viewHeight)
     
     clusterManager.cellSize = nil
-    clusterManager.maxZoomLevel = 17
-    clusterManager.minCountForClustering = 2
+    clusterManager.maxZoomLevel = 12
+    clusterManager.minCountForClustering = 4
     clusterManager.clusterPosition = .average
     clusterManager.shouldRemoveInvisibleAnnotations = false
     
@@ -1413,7 +1403,7 @@ class MainViewController: UIViewController {
   
   // Remove marker for tasks
   func removeAnnotationForTask(_ taskID:String) {
-    for annotation in self.clusterManager.annotations {
+    for annotation in self.mapView.annotations {
       
       if annotation is CustomTaskMapAnnotation {
         
@@ -1436,6 +1426,7 @@ class MainViewController: UIViewController {
         // check if the task has the same id as the annotation
         if  taskID == customAnnotation.taskUserId {
           self.clusterManager.remove(annotation)
+          self.mapView.removeAnnotation(annotation)
           break
         }
         
@@ -3029,7 +3020,9 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
       
       // set onboarding task 1 viewed to true
       defaults.set(true, forKey: Constants.ONBOARDING_TASK1_VIEWED_KEY)
-      self.pointsLabel.text = String(1)
+      UpdatePointsServer(1, (FIRAuth.auth()?.currentUser?.uid)!)
+      mTaskScore = mTaskScore + 1
+      self.usersRef?.child((FIRAuth.auth()?.currentUser?.uid)!).child("score").setValue(mTaskScore)
       self.removeOnboardingFakeTask(carousel: carousel, cardIndex: cardIndex, userId: "101")
       
     }  else if currentTask.taskDescription == self.ONBOARDING_TASK_3_DESCRIPTION {
@@ -3037,7 +3030,9 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
       // set onboarding task 3 viewed to true
       //            if defaults.bool(forKey: Constants.ONBOARDING_TASK2_VIEWED_KEY) == true {
       self.usersRef?.child(currentUserId!).child("isDemoTaskShown").setValue(true)
-      self.pointsLabel.text = String(3)
+      UpdatePointsServer(1, (FIRAuth.auth()?.currentUser?.uid)!)
+      mTaskScore = mTaskScore + 1
+      self.usersRef?.child((FIRAuth.auth()?.currentUser?.uid)!).child("score").setValue(mTaskScore)
       defaults.set(true, forKey: Constants.ONBOARDING_TASK3_VIEWED_KEY)
       self.removeOnboardingFakeTask(carousel: carousel, cardIndex: cardIndex, userId: "103")
       //            }
@@ -3051,36 +3046,40 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
     self.tasks.remove(at: cardIndex)
     self.carouselView.removeItem(at: cardIndex, animated: true)
     // carouselView.reloadData()
-    
-    for annotation in self.mapView.annotations {
-      if annotation is CustomFocusTaskMapAnnotation  {
-        let customAnnotation = annotation as! CustomFocusTaskMapAnnotation
-        if customAnnotation.taskUserId == userId {
-          // if its equal to the current index remove it
-          
-          print("customAnnotation \(customAnnotation.currentCarouselIndex)")
-          self.mapView.removeAnnotation(customAnnotation)
-          clusterManager.remove(customAnnotation)
-          clusterManager.reload(self.mapView, visibleMapRect: self.mapView.visibleMapRect)
-          
-        }
-      }
+    print("Deleted Id \(userId)")
+    let when = DispatchTime.now()  // change 2 to desired number of seconds
+    DispatchQueue.main.asyncAfter(deadline: when) {
       
-      if annotation is CustomTaskMapAnnotation  {
-        let customAnnotation = annotation as! CustomTaskMapAnnotation
+      for annotation in self.mapView.annotations {
         
-        if customAnnotation.taskUserId == userId {
-          // if its equal to the current index remove it
-          print("customAnnotation \(customAnnotation.currentCarouselIndex)")
-          self.mapView.removeAnnotation(customAnnotation)
-          clusterManager.remove(customAnnotation)
-          clusterManager.reload(self.mapView, visibleMapRect: self.mapView.visibleMapRect)
-          
+        if annotation is CustomFocusTaskMapAnnotation  {
+          let customAnnotation = annotation as! CustomFocusTaskMapAnnotation
+          print("customAnnotation \(String(describing: customAnnotation.currentCarouselIndex))")
+          if customAnnotation.taskUserId == userId {
+            // if its equal to the current index remove it
+            print("Deleted Id \(userId)")
+            self.clusterManager.remove(customAnnotation)
+            self.mapView.removeAnnotation(customAnnotation)
+              self.clusterManager.reload(self.mapView, visibleMapRect: self.mapView.visibleMapRect)
+          }
         }
+        
+        if annotation is CustomTaskMapAnnotation  {
+          let customAnnotation = annotation as! CustomTaskMapAnnotation
+          print("customAnnotation \(String(describing: customAnnotation.currentCarouselIndex))")
+          if customAnnotation.taskUserId == userId {
+            // if its equal to the current index remove it
+            print("Deleted Id \(userId)")
+            self.clusterManager.remove(customAnnotation)
+            self.mapView.removeAnnotation(customAnnotation)
+              self.clusterManager.reload(self.mapView, visibleMapRect: self.mapView.visibleMapRect)
+          }
+        }
+        self.clusterManager.reload(self.mapView, visibleMapRect: self.mapView.visibleMapRect)
       }
+      // update the rest of the annotations
+      self.updateMapAnnotationCardIndexes()
     }
-    // update the rest of the annotations
-    self.updateMapAnnotationCardIndexes()
   }
   
   /// function to test map annotations error
@@ -3176,7 +3175,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
     let defaults = UserDefaults.standard
     let boolForTask1 = defaults.bool(forKey: Constants.ONBOARDING_TASK1_VIEWED_KEY)
     
-    let when = DispatchTime.now() + 0.6  // change 2 to desired number of seconds
+    let when = DispatchTime.now() + 0.4  // change 2 to desired number of seconds
     DispatchQueue.main.asyncAfter(deadline: when) {
       if let lastCardIndex = self.lastCardIndex, lastCardIndex != carousel.currentItemIndex, boolForTask1 == false {
         if let swipedTask:Task = self.tasks[self.lastCardIndex!] {
@@ -3263,13 +3262,13 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
           taskAnnoation.coordinate = customFocusTaskAnnotation.coordinate
           //
           //                    // remove focus task icon
+          self.clusterManager.remove(customFocusTaskAnnotation)
           self.mapView.removeAnnotation(customFocusTaskAnnotation)
           taskAnnoation.style = .color(#colorLiteral(red: 0, green: 0.5901804566, blue: 0.758269012, alpha: 1), radius: 30)
           self.clusterManager.add(taskAnnoation)
           
-          
+         self.clusterManager.reload(self.mapView, visibleMapRect: self.mapView.visibleMapRect)
         }
-        self.clusterManager.reload(self.mapView, visibleMapRect: self.mapView.visibleMapRect)
       }
       
       let taskIndex = self.carouselView.currentItemIndex

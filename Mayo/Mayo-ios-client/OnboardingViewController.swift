@@ -32,9 +32,7 @@ class OnboardingViewController: UIViewController {
   
     override func viewDidLoad() {
         super.viewDidLoad()
-      //sequenceOfThanks()
-      //sequenceOfSecondPin()
-      //sequenceOfThirdPin()
+
 
       if FIRAuth.auth()?.currentUser?.uid == nil {
         FIRAuth.auth()?.signInAnonymously() { (user, error) in
@@ -67,9 +65,9 @@ class OnboardingViewController: UIViewController {
       if let isIntroTasksDone = snapshot.value as? Bool {
         if isIntroTasksDone == true {
           let defaults = UserDefaults.standard
-          defaults.set(false, forKey: Constants.ONBOARDING_TASK1_VIEWED_KEY)
-          defaults.set(false, forKey: Constants.ONBOARDING_TASK2_VIEWED_KEY)
-          defaults.set(false, forKey: Constants.ONBOARDING_TASK3_VIEWED_KEY)
+          defaults.set(true, forKey: Constants.ONBOARDING_TASK1_VIEWED_KEY)
+          defaults.set(true, forKey: Constants.ONBOARDING_TASK2_VIEWED_KEY)
+          defaults.set(true, forKey: Constants.ONBOARDING_TASK3_VIEWED_KEY)
         }
       }
     })
@@ -175,21 +173,7 @@ class OnboardingViewController: UIViewController {
     } catch {
       print("Something went Wrong")
     }
-    
-//    animation.keyPath = "contents" // = CAKeyframeAnimation.init(keyPath: "contents")
-//    animation.calculationMode = kCAAnimationLinear;
-//    animation.duration = Double(self.mThanksImageListArray.count)/5.0  // 24 frames per second
-//    animation.values = self.mThanksImageListArray as? [CGImage];
-//    animation.repeatCount = 1;
-//    animation.isRemovedOnCompletion = false
-//    animation.fillMode = kCAFillModeBoth;
-//    self.mImageView.layer.add(animation, forKey: "animation")
-    
-//    self.mImageView.animationImages = self.mThanksImageListArray as? [UIImage]
-//    self.mImageView.animationDuration = Constants.THANKS_ANIMATION_DURATION
-//    self.mImageView.animationRepeatCount = 1
-//    self.mImageView.startAnimating()
-//    mBackgroundAnimation.startAnimating()
+
     
     }
   
@@ -202,25 +186,7 @@ class OnboardingViewController: UIViewController {
     } catch {
       print("Something went Wrong")
     }
-   
-//    animation.keyPath = "contents"
-//    animation.calculationMode = kCAAnimationLinear;
-//    animation.duration = Double(self.mSecondPinImageListArray.count)/Constants.SECOND_PIN_ANIMATION_DURATION  // 24 frames per second
-//    animation.values = self.mSecondPinImageListArray as? [CGImage];
-//    animation.repeatCount = Float.infinity;
-//    animation.isRemovedOnCompletion = false
-//    animation.fillMode = kCAFillModeForwards;
-//    self.mImageView.layer.add(animation, forKey: "animation")
 
-    
-    
-    
-//    self.mImageView.contentMode = .scaleAspectFit
-//    self.mBackgroundAnimation.image = nil;
-//    self.mImageView.animationImages = self.mSecondPinImageListArray as? [UIImage]
-//    self.mImageView.animationDuration = Constants.SECOND_PIN_ANIMATION_DURATION
-//    self.mImageView.animationRepeatCount = 0
-//    self.mImageView.startAnimating()
     
   }
   
@@ -233,21 +199,7 @@ class OnboardingViewController: UIViewController {
     } catch {
       print("Something went Wrong")
     }
-    
-//    self.mImageView.contentMode = .scaleAspectFit
-//    self.mBackgroundAnimation.image = nil;
-//    animation.keyPath = "contents"
-//    animation.calculationMode = kCAAnimationLinear;
-//    animation.duration = Double(self.mThirdPinImageListArray.count) / Constants.THIRD_PIN_ANIMATION_DURATION  // 24 frames per second
-//    animation.values = self.mThirdPinImageListArray as? [CGImage];
-//    animation.repeatCount = Float.infinity;
-//    animation.isRemovedOnCompletion = false
-//    animation.fillMode = kCAFillModeForwards;
-//    self.mImageView.layer.add(animation, forKey: "animation")
-//    self.mImageView.animationImages = self.mThirdPinImageListArray as? [UIImage]
-//    self.mImageView.animationDuration = Constants.THIRD_PIN_ANIMATION_DURATION
-//    self.mImageView.animationRepeatCount = 0
-//    self.mImageView.startAnimating()
+
     
   }
   
