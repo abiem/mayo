@@ -22,7 +22,7 @@ extension OnboardingViewController: iCarouselDelegate, iCarouselDataSource  {
     let viewWidth  = UIScreen.main.bounds.size.height <= 568 ? 265 : 335
     let carouselSize = mCarousel.frame.size
     view.frame = CGRect(x:0, y:0, width: viewWidth , height:viewHeight)
-     let tempView = GradientView(frame: CGRect(x: 10, y: 10, width: viewWidth , height:viewHeight))
+     let tempView = GradientView(frame: CGRect(x: 0, y: 10, width: viewWidth , height:viewHeight))
     
     // Create Lable
     let label = UILabel()

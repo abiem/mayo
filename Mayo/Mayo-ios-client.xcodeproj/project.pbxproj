@@ -270,6 +270,7 @@
 		7B211A401FF644B80012D0F1 /* fatpin2.0078.png in Resources */ = {isa = PBXBuildFile; fileRef = 7B2119F01FF644B70012D0F1 /* fatpin2.0078.png */; };
 		7B211A411FF644B80012D0F1 /* fatpin2.0079.png in Resources */ = {isa = PBXBuildFile; fileRef = 7B2119F11FF644B70012D0F1 /* fatpin2.0079.png */; };
 		7B211A421FF644B80012D0F1 /* fatpin2.0080.png in Resources */ = {isa = PBXBuildFile; fileRef = 7B2119F21FF644B70012D0F1 /* fatpin2.0080.png */; };
+		7B26027B2005EE2900EBB480 /* thanks-no-no.gif in Resources */ = {isa = PBXBuildFile; fileRef = 7B26027A2005EE2800EBB480 /* thanks-no-no.gif */; };
 		7B2728F51FEA2E1400C3AB52 /* IBDesignable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B2728F41FEA2E1400C3AB52 /* IBDesignable.swift */; };
 		7B2728F81FEA30E400C3AB52 /* OnboardingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B2728F71FEA30E400C3AB52 /* OnboardingViewController.swift */; };
 		7B2728FB1FEA320400C3AB52 /* IntroCollectionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B2728FA1FEA320400C3AB52 /* IntroCollectionCell.swift */; };
@@ -282,6 +283,7 @@
 		7B6E3FC51FC6973400919494 /* MKCircleExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B6E3FC41FC6973400919494 /* MKCircleExtension.swift */; };
 		7B6E56D01FD66A9B009C59B6 /* SanFranciscoText-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 7B6E56CF1FD66A9B009C59B6 /* SanFranciscoText-Regular.otf */; };
 		7B7607D21F9DD47A001E2CCA /* Reachbility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B7607D11F9DD479001E2CCA /* Reachbility.swift */; };
+		7B8B62BE20063D9F009197D2 /* MainViewController+TaskDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B8B62BD20063D9F009197D2 /* MainViewController+TaskDelegate.swift */; };
 		7BBD997E1FFDFFD800417C9D /* thanks-no.gif in Resources */ = {isa = PBXBuildFile; fileRef = 7BBD997D1FFDFFD700417C9D /* thanks-no.gif */; };
 		7BBD99821FFE009A00417C9D /* thanks.gif in Resources */ = {isa = PBXBuildFile; fileRef = 7BBD99811FFE009A00417C9D /* thanks.gif */; };
 		7BCC4CBB1FF4BD1300222405 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BCC4CBA1FF4BD1300222405 /* StringExtension.swift */; };
@@ -574,6 +576,7 @@
 		7B2119F01FF644B70012D0F1 /* fatpin2.0078.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fatpin2.0078.png; sourceTree = "<group>"; };
 		7B2119F11FF644B70012D0F1 /* fatpin2.0079.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fatpin2.0079.png; sourceTree = "<group>"; };
 		7B2119F21FF644B70012D0F1 /* fatpin2.0080.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fatpin2.0080.png; sourceTree = "<group>"; };
+		7B26027A2005EE2800EBB480 /* thanks-no-no.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "thanks-no-no.gif"; sourceTree = "<group>"; };
 		7B2728F41FEA2E1400C3AB52 /* IBDesignable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IBDesignable.swift; sourceTree = "<group>"; };
 		7B2728F71FEA30E400C3AB52 /* OnboardingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingViewController.swift; sourceTree = "<group>"; };
 		7B2728FA1FEA320400C3AB52 /* IntroCollectionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntroCollectionCell.swift; sourceTree = "<group>"; };
@@ -587,6 +590,7 @@
 		7B6E3FC41FC6973400919494 /* MKCircleExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MKCircleExtension.swift; sourceTree = "<group>"; };
 		7B6E56CF1FD66A9B009C59B6 /* SanFranciscoText-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SanFranciscoText-Regular.otf"; sourceTree = "<group>"; };
 		7B7607D11F9DD479001E2CCA /* Reachbility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reachbility.swift; sourceTree = "<group>"; };
+		7B8B62BD20063D9F009197D2 /* MainViewController+TaskDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MainViewController+TaskDelegate.swift"; sourceTree = "<group>"; };
 		7BBD997D1FFDFFD700417C9D /* thanks-no.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "thanks-no.gif"; sourceTree = "<group>"; };
 		7BBD99811FFE009A00417C9D /* thanks.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = thanks.gif; sourceTree = "<group>"; };
 		7BCC4CBA1FF4BD1300222405 /* StringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
@@ -788,6 +792,7 @@
 				357A164B1ED74DC400FDF96A /* LocationManagerExtension.swift */,
 				357A164D1ED74E1A00FDF96A /* MapViewExtension.swift */,
 				357A164F1ED74E5700FDF96A /* TextViewExtension.swift */,
+				7B8B62BD20063D9F009197D2 /* MainViewController+TaskDelegate.swift */,
 			);
 			name = extensions;
 			sourceTree = "<group>";
@@ -875,6 +880,7 @@
 		35F81D8E1EA3EDF10066439F /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				7B26027A2005EE2800EBB480 /* thanks-no-no.gif */,
 				7BBD997D1FFDFFD700417C9D /* thanks-no.gif */,
 				7BBD99811FFE009A00417C9D /* thanks.gif */,
 				7BE950CA1FFCBE4700819DCB /* thanks-Bac.gif */,
@@ -1432,6 +1438,7 @@
 				350CFFCA1EE601B400E49713 /* fux0038.png in Resources */,
 				355780F21EE5FBA0006EE70F /* AppIcon50x50@2x.png in Resources */,
 				350CFFD71EE601B400E49713 /* fux0051.png in Resources */,
+				7B26027B2005EE2900EBB480 /* thanks-no-no.gif in Resources */,
 				7B2119961FF644660012D0F1 /* fatpin1.0060.png in Resources */,
 				7B211A0D1FF644B80012D0F1 /* fatpin2.0027.png in Resources */,
 				350CFFC41EE601B400E49713 /* fux0032.png in Resources */,
@@ -1593,6 +1600,7 @@
 				7B7607D21F9DD47A001E2CCA /* Reachbility.swift in Sources */,
 				7B2728FD1FEA34A200C3AB52 /* OnboardingViewController+iCarousel.swift in Sources */,
 				35AA1CCD1EDCD4B200C8B4EF /* Message.swift in Sources */,
+				7B8B62BE20063D9F009197D2 /* MainViewController+TaskDelegate.swift in Sources */,
 				352BD16E1E9F52E300966CEE /* ChatViewController.swift in Sources */,
 				359CA4511ED4AE1900B2C350 /* UIColorExtension.swift in Sources */,
 				7B2728F51FEA2E1400C3AB52 /* IBDesignable.swift in Sources */,

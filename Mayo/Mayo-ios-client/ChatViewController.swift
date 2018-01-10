@@ -77,7 +77,8 @@ class ChatViewController: JSQMessagesViewController {
             checkTaskCompletion()
         } else {
             let parentSize = self.view.frame.size
-            viewQuestCompleted.frame = CGRect(x:0, y: parentSize.height-44, width:parentSize.width, height:44)
+          //44
+            viewQuestCompleted.frame = CGRect(x:0, y: parentSize.height - (parentSize.height  * 0.1022), width:parentSize.width, height: parentSize.height  * 0.1022)
             self.inputToolbar.isHidden = true
             self.view.addSubview(viewQuestCompleted)
         }

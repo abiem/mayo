@@ -47,6 +47,7 @@ class MainViewController: UIViewController {
   let LOADER_VIEW = 107
   
   // z index for map annotations
+  let ANNOTATION_TOP_INDEX = 7.0
   let CLUSTER_TASK_ANNOTATION_Z_INDEX = 6.0
   let FOCUS_MAP_TASK_ANNOTATION_Z_INDEX = 4.0
   let STANDARD_MAP_TASK_ANNOTATION_Z_INDEX = 3.0
@@ -1871,7 +1872,29 @@ class MainViewController: UIViewController {
     //      self.carouselView.insertItem(at: 0, animated: true)
     self.carouselView.reloadData()
     //        self.carouselView.reloadItem(at: 0, animated: true)
-    currentUserTask.updateFirebaseTask()
+//    currentUserTask.updateFirebaseTask()
+    // Update task as Complete
+    // create new date formatter
+    let dateformatter = DateStringFormatterHelper()
+    
+    // convert timeCreated and timeUpdated to string
+    let updateDate = dateformatter.convertDateToString(date: Date())
+    
+    let taskUpdate = ["completed": currentUserTask.completed ,
+                      "createdby": currentUserTask.userId ,
+                      "endColor": currentUserTask.endColor ?? "",
+                      "startColor": currentUserTask.startColor ?? "",
+                      "taskDescription": currentUserTask.taskDescription ,
+                      "taskID": currentUserTask.taskID ?? "",
+                      "timeCreated": currentUserTask.timeCreatedString ,
+                      "timeUpdated": updateDate,
+                      "completeType": currentUserTask.completeType ?? "",
+                      "helpedBy": currentUserTask.helpedBy ?? "",
+                      "userMovedOutside" : currentUserTask.userMovedOutside  ,
+                      "recentActivity" : currentUserTask.recentActivity
+      ] as [String : Any];
+    
+    self.tasksRef?.child(currentUserTask.taskID!).setValue(taskUpdate)
     
     UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
     
@@ -2196,7 +2219,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         // save the colors to the task
         task.setGradientColors(startColor: randomColorGradient[0], endColor: randomColorGradient[1])
         if task.taskDescription != "" {
-          task.save()
+          task.save(self)
         }
         
         
@@ -2804,30 +2827,13 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
       //Current Task Created
       self.currentUserTaskSaved = true
       // save the user's current task
-      currentUserTask.save()
+      currentUserTask.save(self)
       //Local Notification Implemented
       
       
       //Start monitoring Distance
       self.setUpGeofenceForTask(currentUserTask.latitude, currentUserTask.longitude)
-      //Saving of Task
-      var dicTask = Dictionary<String, Any>()
-      dicTask["userId"] = currentUserTask.userId
-      dicTask["taskDescription"] = currentUserTask.taskDescription
-      dicTask["latitude"] = currentUserTask.latitude
-      dicTask["startColor"] = currentUserTask.startColor
-      dicTask["endColor"] = currentUserTask.endColor
-      dicTask["longitude"] = currentUserTask.longitude
-      dicTask["completed"] = currentUserTask.completed
-      dicTask["timeCreated"] = currentUserTask.timeCreated
-      dicTask["timeUpdated"] = currentUserTask.timeUpdated
-      dicTask["taskID"] = currentUserTask.taskID
-      dicTask["recentActivity"] = currentUserTask.recentActivity
-      dicTask["userMovedOutside"] = currentUserTask.userMovedOutside
       
-      // encode Task for saving
-      let data = NSKeyedArchiver.archivedData(withRootObject: dicTask)
-      UserDefaults.standard.set(data, forKey: Constants.PENDING_TASKS)
       
       // TODO create users list for current user's conversation channel
       // and update the users list by appending the current user's id to the list
@@ -2912,7 +2918,8 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
     }
     var Interval = 0.5
     if title == "Hey! No activity is there from long time" {
-      Interval = Double(time)
+      return
+//      Interval = Double(time)
     }
     else {
       removeCurrentUserTaskAnnotation()
@@ -3192,7 +3199,10 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
           if currentTask.completed == true {
             let taskCordinates = CLLocationCoordinate2D.init(latitude: currentTask.latitude, longitude: currentTask.longitude)
             self.expiredAnnotation.coordinate = taskCordinates
+            let annotationView = self.mapView.view(for: self.expiredAnnotation)
             self.mapView.addAnnotation(self.expiredAnnotation)
+//            annotationView?.layer.zPosition = CGFloat(self.ANNOTATION_TOP_INDEX)
+            annotationView?.superview?.bringSubview(toFront: annotationView!)
             
           } else {
             self.mapView.removeAnnotation(self.expiredAnnotation)
@@ -3210,13 +3220,14 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
       for annotation in annotations {
         
         // check if the annotation is a custom current user task annotation
-        if annotation is CustomCurrentUserTaskAnnotation{
+        if annotation is CustomCurrentUserTaskAnnotation  {
           // remove and add it back on
           
           // reload annotation
           let annotationClone = annotation
           self.mapView.removeAnnotation(annotation)
           self.mapView.addAnnotation(annotationClone)
+          
           
         }
         
@@ -3241,11 +3252,8 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             self.clusterManager.remove(mapTaskAnnotation)
             self.mapView.removeAnnotation(mapTaskAnnotation)
 //            self.clusterManager.add(focusAnnotation)
-            
-                                    self.mapView.addAnnotation(focusAnnotation)
-            //
-            //                        // remove the annotation from the map
-            
+              self.mapView.addAnnotation(focusAnnotation)
+            self.mapView.selectAnnotation(focusAnnotation, animated: false)
           }
         }
         
@@ -3265,12 +3273,13 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
           self.clusterManager.remove(customFocusTaskAnnotation)
           self.mapView.removeAnnotation(customFocusTaskAnnotation)
           taskAnnoation.style = .color(#colorLiteral(red: 0, green: 0.5901804566, blue: 0.758269012, alpha: 1), radius: 30)
+//          let annotationView = self.mapView.view(for: taskAnnoation)
+//          annotationView?.layer.zPosition = CGFloat(self.STANDARD_MAP_TASK_ANNOTATION_Z_INDEX)
           self.clusterManager.add(taskAnnoation)
-          
          self.clusterManager.reload(self.mapView, visibleMapRect: self.mapView.visibleMapRect)
         }
       }
-      
+    
       let taskIndex = self.carouselView.currentItemIndex
       
       if taskIndex >= 0 && taskIndex < self.tasks.count {

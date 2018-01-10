@@ -52,6 +52,7 @@ class OnboardingViewController: UIViewController {
       mCarousel.bounces = true
       mCarousel.bounceDistance = 0.2
       mCarousel.scrollSpeed = 1.0
+      
     }
 
     override func didReceiveMemoryWarning() {

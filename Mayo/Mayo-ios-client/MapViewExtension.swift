@@ -27,11 +27,11 @@ extension MainViewController: MKMapViewDelegate {
             // show focus annotation
             if self.carouselView.currentItemIndex == 0 {
                 annotationView.image = UIImage(named: "currentUserMapFocusTaskIcon")
-                annotationView.layer.zPosition = CGFloat(self.FOCUS_MAP_TASK_ANNOTATION_Z_INDEX)
+                annotationView.layer.zPosition = 7
             } else {
                 // else show standard current user annotation
                 annotationView.image = UIImage(named: "currentUserMapTaskIcon")
-                annotationView.layer.zPosition = CGFloat(self.STANDARD_MAP_TASK_ANNOTATION_Z_INDEX)
+                annotationView.layer.zPosition = 0
             }
             
             return annotationView
@@ -117,7 +117,7 @@ extension MainViewController: MKMapViewDelegate {
                 
                 let annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: "customFocusTask")
                 annotationView.image = UIImage(named: "mapFocusTaskIcon")
-                annotationView.layer.zPosition = CGFloat(self.FOCUS_MAP_TASK_ANNOTATION_Z_INDEX)
+                annotationView.layer.zPosition = CGFloat(self.ANNOTATION_TOP_INDEX)
                 
                 
                 return annotationView

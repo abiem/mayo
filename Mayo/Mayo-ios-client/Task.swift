@@ -10,10 +10,13 @@ import UIKit
 import Firebase
 import GeoFire
 
+protocol taskDelegate : class {
+   func taskUpdateFailed(_ error : Error?)
+}
+
+
 class Task: NSObject {
-   
-    
-    
+  weak var delegate : taskDelegate?
     var userId: String
     var latitude: CLLocationDegrees
     var longitude: CLLocationDegrees
@@ -114,10 +117,16 @@ class Task: NSObject {
             "recentActivity" : self.recentActivity,
             "helpedBy" : "" ]
         tasksRef.child(self.taskID!).setValue(taskDictionary)
+      tasksRef.child(self.taskID!).setValue(taskDictionary) { (error, ref) in
+          if let mTaskDelegate = self.delegate   {
+            mTaskDelegate.taskUpdateFailed(error)
+          }
+        
+      }
     }
     
-    func save() {
-        
+  func save(_ pDelegate:UIViewController) {
+    delegate = pDelegate as? taskDelegate
          updateFirebaseTask()
         
         //Update Task at user Profile
