@@ -152,7 +152,7 @@ extension MainViewController: MKMapViewDelegate {
     // runs when an annotation is tapped on
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
         print("annoation selected")
-        view.layer.zPosition = 2
+        view.layer.zPosition = 12
         if view.annotation is CustomUserMapAnnotation {
             // if its a custom user annotation
             // move center of map to the user
@@ -170,7 +170,7 @@ extension MainViewController: MKMapViewDelegate {
                 self.mapView.setCenter(annotation.coordinate, animated: true)
                 
                 if let index = annotation.currentCarouselIndex {
-                    self.carouselView.scrollToItem(at: index, animated: true)
+                    self.carouselView.scrollToItem(at: index, animated: false)
                 }
                 // exit delegate method
                 return

@@ -285,7 +285,7 @@ class MainViewController: UIViewController {
     carouselView.isPagingEnabled = true
     carouselView.bounces = true
     carouselView.bounceDistance = 0.2
-    carouselView.scrollSpeed = 1.0
+    carouselView.scrollSpeed = 1.5
     
     // add gesture swipe to carousel
     // check if current card is a onboarding task by check the description by adding gesture recognizer
@@ -308,6 +308,7 @@ class MainViewController: UIViewController {
     let pointsShadowGradientView = createPointsView()
     self.view.addSubview(pointsShadowGradientView)
     if checkFakeTakViewed() == true {
+      self.newItemSwiped = true
       getPreviousTask()
       initUserAuth()
       self.newItemSwiped = true
@@ -1054,7 +1055,7 @@ class MainViewController: UIViewController {
               //for creator of Task or already existing Task
               if taskDict["completed"] as! Bool == true {
                 for (index, task) in self.tasks.enumerated() {
-                  if task?.taskID == taskDict["taskID"] as? String && task?.completed == false {
+                  if task?.taskID == taskDict["taskID"] as? String && task?.completed == false && self.currentUserId != taskDict["createdby"] as? String {
                     self.tasks[index]?.completed = true
                     self.tasks.append(self.tasks[index])
                     self.tasks.remove(at: index)
@@ -1328,6 +1329,9 @@ class MainViewController: UIViewController {
     print("tasks count: \(self.tasks.count)")
     
     if newTask.completed == true {
+      if newTask.taskID == "536134620803" {
+        print("Found\(newTask)");
+      }
       self.tasks.append(newTask)
     } else {
       let carouselIndex = self.getFakeTasksCount()
@@ -2218,9 +2222,9 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
         
         // save the colors to the task
         task.setGradientColors(startColor: randomColorGradient[0], endColor: randomColorGradient[1])
-        if task.taskDescription != "" {
-          task.save(self)
-        }
+//        if task.taskDescription != "" {
+//          task.save(self)
+//        }
         
         
         // set the color gradient colors for the card
@@ -2419,12 +2423,23 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
       if let currentUserTextView = self.view.viewWithTag(self.CURRENT_USER_TEXTVIEW_TAG) as? UITextView {
         currentUserTextView.isEditable = true
       }
+      var startColor : UIColor?
+      var endColor : UIColor?
       
-      // get start and end color from card
-      let shadowView = self.carouselView.itemView(at: 0) as! UIView
-      let gradientView = shadowView.subviews[0] as! GradientView
-      let startColor = gradientView.startColor
-      let endColor = gradientView.endColor
+      let state = UIApplication.shared.applicationState
+      if state == .background {
+        startColor = UIColor.hexStringToUIColor(hex: currentUserTask.startColor!)
+        endColor = UIColor.hexStringToUIColor(hex: currentUserTask.endColor!)
+      }
+      else if state == .active {
+        // get start and end color from card
+        let shadowView = self.carouselView.itemView(at: 0) as! UIView
+        let gradientView = shadowView.subviews[0] as! GradientView
+        startColor = gradientView.startColor
+        endColor = gradientView.endColor
+      }
+
+      
       
       // make carousel view invisible
       self.carouselView.isHidden = false
@@ -2441,7 +2456,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
       let completionShadowView = self.createCompletionShadowView()
       
       // finish present view to select who helped you
-      let completionView = self.createCompletionGradientView(startColor: startColor, endColor: endColor)
+      let completionView = self.createCompletionGradientView(startColor: startColor!, endColor: endColor!)
       
       // add text label to ask who helped the user
       let completionLabel = self.createCompletionViewLabel(completionView: completionView)
@@ -3182,7 +3197,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
     let defaults = UserDefaults.standard
     let boolForTask1 = defaults.bool(forKey: Constants.ONBOARDING_TASK1_VIEWED_KEY)
     
-    let when = DispatchTime.now() + 0.4  // change 2 to desired number of seconds
+    let when = DispatchTime.now() + 0.2  // change 2 to desired number of seconds
     DispatchQueue.main.asyncAfter(deadline: when) {
       if let lastCardIndex = self.lastCardIndex, lastCardIndex != carousel.currentItemIndex, boolForTask1 == false {
         if let swipedTask:Task = self.tasks[self.lastCardIndex!] {
@@ -3199,10 +3214,9 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
           if currentTask.completed == true {
             let taskCordinates = CLLocationCoordinate2D.init(latitude: currentTask.latitude, longitude: currentTask.longitude)
             self.expiredAnnotation.coordinate = taskCordinates
-            let annotationView = self.mapView.view(for: self.expiredAnnotation)
             self.mapView.addAnnotation(self.expiredAnnotation)
-//            annotationView?.layer.zPosition = CGFloat(self.ANNOTATION_TOP_INDEX)
-            annotationView?.superview?.bringSubview(toFront: annotationView!)
+            
+            self.mapView.selectAnnotation(self.expiredAnnotation, animated: false)
             
           } else {
             self.mapView.removeAnnotation(self.expiredAnnotation)
@@ -3227,16 +3241,18 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
           let annotationClone = annotation
           self.mapView.removeAnnotation(annotation)
           self.mapView.addAnnotation(annotationClone)
-          
+          if self.carouselView.currentItemIndex == 0 {
+            self.mapView.selectAnnotation(annotationClone, animated: false)
+          }
           
         }
-        
+        let currentTask = self.tasks[self.carouselView.currentItemIndex]
         // check for the annotation for current card
         if annotation is CustomTaskMapAnnotation  {
           let mapTaskAnnotation = annotation as! CustomTaskMapAnnotation
           print(self.carouselView.currentItemIndex);
           print(mapTaskAnnotation.currentCarouselIndex);
-          if mapTaskAnnotation.currentCarouselIndex == self.carouselView.currentItemIndex {
+          if mapTaskAnnotation.taskUserId == currentTask?.taskID {
             // once the right annotation is found
             
             // add the annotation with a different class
@@ -3250,9 +3266,9 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             focusAnnotation.coordinate = mapTaskAnnotation.coordinate
             focusAnnotation.style = .color(#colorLiteral(red: 0, green: 0.5901804566, blue: 0.758269012, alpha: 1), radius: 30)//.image(#imageLiteral(resourceName: "newNotificaitonIcon"))
             self.clusterManager.remove(mapTaskAnnotation)
+            self.mapView.addAnnotation(focusAnnotation)
             self.mapView.removeAnnotation(mapTaskAnnotation)
 //            self.clusterManager.add(focusAnnotation)
-              self.mapView.addAnnotation(focusAnnotation)
             self.mapView.selectAnnotation(focusAnnotation, animated: false)
           }
         }
@@ -3270,12 +3286,11 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
           taskAnnoation.coordinate = customFocusTaskAnnotation.coordinate
           //
           //                    // remove focus task icon
-          self.clusterManager.remove(customFocusTaskAnnotation)
-          self.mapView.removeAnnotation(customFocusTaskAnnotation)
           taskAnnoation.style = .color(#colorLiteral(red: 0, green: 0.5901804566, blue: 0.758269012, alpha: 1), radius: 30)
-//          let annotationView = self.mapView.view(for: taskAnnoation)
-//          annotationView?.layer.zPosition = CGFloat(self.STANDARD_MAP_TASK_ANNOTATION_Z_INDEX)
           self.clusterManager.add(taskAnnoation)
+          self.mapView.removeAnnotation(customFocusTaskAnnotation)
+          
+//          self.clusterManager.remove(customFocusTaskAnnotation)
          self.clusterManager.reload(self.mapView, visibleMapRect: self.mapView.visibleMapRect)
         }
       }
@@ -3318,7 +3333,10 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
   func carouselScroll(_ pTask:String) {
     for (index, task) in self.tasks.enumerated() {
       if pTask == task?.taskID {
-        self.carouselView.scrollToItem(at: index, animated: true)
+        let when = DispatchTime.now() + 0.2  // change 2 to desired number of seconds
+        DispatchQueue.main.asyncAfter(deadline: when) {
+          self.carouselView.scrollToItem(at: index, animated: false)
+        }
       }
     }
   }

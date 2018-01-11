@@ -86,6 +86,7 @@ extension MainViewController: CLLocationManagerDelegate {
             checkTaskRecentActivity(currentUserTask , callBack: { (isActivity) in
                 if isActivity {
                     currentUserTask.userMovedOutside = true
+                    currentUserTask.recentActivity = isActivity
                     self.tasks[0] = currentUserTask
                     currentUserTask.updateFirebaseTask()
                 } else {

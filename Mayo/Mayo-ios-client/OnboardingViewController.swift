@@ -171,6 +171,7 @@ class OnboardingViewController: UIViewController {
       let image = FLAnimatedImage(animatedGIFData: data)
       mImageView.animatedImage = image
       
+      
     } catch {
       print("Something went Wrong")
     }
@@ -184,6 +185,7 @@ class OnboardingViewController: UIViewController {
     do {
       let data = try Data(contentsOf: URL.init(fileURLWithPath: path!))
       mImageView.animatedImage = FLAnimatedImage(animatedGIFData: data)
+      
     } catch {
       print("Something went Wrong")
     }

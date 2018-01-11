@@ -275,6 +275,7 @@
 		7B2728F81FEA30E400C3AB52 /* OnboardingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B2728F71FEA30E400C3AB52 /* OnboardingViewController.swift */; };
 		7B2728FB1FEA320400C3AB52 /* IntroCollectionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B2728FA1FEA320400C3AB52 /* IntroCollectionCell.swift */; };
 		7B2728FD1FEA34A200C3AB52 /* OnboardingViewController+iCarousel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B2728FC1FEA34A200C3AB52 /* OnboardingViewController+iCarousel.swift */; };
+		7B34427620073E33005E2CD1 /* thanks-nononono.gif in Resources */ = {isa = PBXBuildFile; fileRef = 7B34427520073E32005E2CD1 /* thanks-nononono.gif */; };
 		7B5634421FDA9162001F8A0F /* CMAlertController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B5634411FDA9162001F8A0F /* CMAlertController.swift */; };
 		7B5B045F1FDA9CF200C8E8D1 /* Utility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B5B045E1FDA9CF200C8E8D1 /* Utility.swift */; };
 		7B679D2F1FF3839000FB09C3 /* OnboardingViewController+LocationManagerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B679D2E1FF3839000FB09C3 /* OnboardingViewController+LocationManagerDelegate.swift */; };
@@ -283,13 +284,19 @@
 		7B6E3FC51FC6973400919494 /* MKCircleExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B6E3FC41FC6973400919494 /* MKCircleExtension.swift */; };
 		7B6E56D01FD66A9B009C59B6 /* SanFranciscoText-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 7B6E56CF1FD66A9B009C59B6 /* SanFranciscoText-Regular.otf */; };
 		7B7607D21F9DD47A001E2CCA /* Reachbility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B7607D11F9DD479001E2CCA /* Reachbility.swift */; };
+		7B877113200748B400ABFD90 /* thanks-final.gif in Resources */ = {isa = PBXBuildFile; fileRef = 7B877112200748B300ABFD90 /* thanks-final.gif */; };
+		7B87711520075A4600ABFD90 /* secondpin.gif in Resources */ = {isa = PBXBuildFile; fileRef = 7B87711420075A4600ABFD90 /* secondpin.gif */; };
+		7B87711920075A8800ABFD90 /* Thirdpin.gif in Resources */ = {isa = PBXBuildFile; fileRef = 7B87711820075A8700ABFD90 /* Thirdpin.gif */; };
+		7B87711B200774E600ABFD90 /* thanks-del.gif in Resources */ = {isa = PBXBuildFile; fileRef = 7B87711A200774E600ABFD90 /* thanks-del.gif */; };
+		7B87711D2007773A00ABFD90 /* thanks-del2.gif in Resources */ = {isa = PBXBuildFile; fileRef = 7B87711C2007773A00ABFD90 /* thanks-del2.gif */; };
+		7B87711F2007795500ABFD90 /* thanks.gif in Resources */ = {isa = PBXBuildFile; fileRef = 7B87711E2007795400ABFD90 /* thanks.gif */; };
 		7B8B62BE20063D9F009197D2 /* MainViewController+TaskDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B8B62BD20063D9F009197D2 /* MainViewController+TaskDelegate.swift */; };
 		7BBD997E1FFDFFD800417C9D /* thanks-no.gif in Resources */ = {isa = PBXBuildFile; fileRef = 7BBD997D1FFDFFD700417C9D /* thanks-no.gif */; };
-		7BBD99821FFE009A00417C9D /* thanks.gif in Resources */ = {isa = PBXBuildFile; fileRef = 7BBD99811FFE009A00417C9D /* thanks.gif */; };
+		7BBD99821FFE009A00417C9D /* thanks-Selected.gif in Resources */ = {isa = PBXBuildFile; fileRef = 7BBD99811FFE009A00417C9D /* thanks-Selected.gif */; };
 		7BCC4CBB1FF4BD1300222405 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BCC4CBA1FF4BD1300222405 /* StringExtension.swift */; };
 		7BE950CB1FFCBE4800819DCB /* thanks-Bac.gif in Resources */ = {isa = PBXBuildFile; fileRef = 7BE950CA1FFCBE4700819DCB /* thanks-Bac.gif */; };
-		7BE950D11FFCC11E00819DCB /* secondpin.gif in Resources */ = {isa = PBXBuildFile; fileRef = 7BE950D01FFCC11E00819DCB /* secondpin.gif */; };
-		7BE950D31FFCD47E00819DCB /* Thirdpin.gif in Resources */ = {isa = PBXBuildFile; fileRef = 7BE950D21FFCD47D00819DCB /* Thirdpin.gif */; };
+		7BE950D11FFCC11E00819DCB /* secondpin-no.gif in Resources */ = {isa = PBXBuildFile; fileRef = 7BE950D01FFCC11E00819DCB /* secondpin-no.gif */; };
+		7BE950D31FFCD47E00819DCB /* Thirdpin-no.gif in Resources */ = {isa = PBXBuildFile; fileRef = 7BE950D21FFCD47D00819DCB /* Thirdpin-no.gif */; };
 		7BF740971FDFF4EC003CB691 /* BorderedClusterAnnotationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BF740961FDFF4EC003CB691 /* BorderedClusterAnnotationView.swift */; };
 		F80C07961F55D62E00E0F8FB /* PushNotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F80C07951F55D62E00E0F8FB /* PushNotificationManager.swift */; };
 		F80C07981F55D64D00E0F8FB /* Global.swift in Sources */ = {isa = PBXBuildFile; fileRef = F80C07971F55D64D00E0F8FB /* Global.swift */; };
@@ -581,6 +588,7 @@
 		7B2728F71FEA30E400C3AB52 /* OnboardingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingViewController.swift; sourceTree = "<group>"; };
 		7B2728FA1FEA320400C3AB52 /* IntroCollectionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntroCollectionCell.swift; sourceTree = "<group>"; };
 		7B2728FC1FEA34A200C3AB52 /* OnboardingViewController+iCarousel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "OnboardingViewController+iCarousel.swift"; sourceTree = "<group>"; };
+		7B34427520073E32005E2CD1 /* thanks-nononono.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "thanks-nononono.gif"; sourceTree = "<group>"; };
 		7B5634411FDA9162001F8A0F /* CMAlertController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CMAlertController.swift; sourceTree = "<group>"; };
 		7B5B045E1FDA9CF200C8E8D1 /* Utility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utility.swift; sourceTree = "<group>"; };
 		7B5EFDF61FFBAE5F0019B5D2 /* Mayo-ios-client-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Mayo-ios-client-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -590,13 +598,19 @@
 		7B6E3FC41FC6973400919494 /* MKCircleExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MKCircleExtension.swift; sourceTree = "<group>"; };
 		7B6E56CF1FD66A9B009C59B6 /* SanFranciscoText-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SanFranciscoText-Regular.otf"; sourceTree = "<group>"; };
 		7B7607D11F9DD479001E2CCA /* Reachbility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reachbility.swift; sourceTree = "<group>"; };
+		7B877112200748B300ABFD90 /* thanks-final.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "thanks-final.gif"; sourceTree = "<group>"; };
+		7B87711420075A4600ABFD90 /* secondpin.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = secondpin.gif; sourceTree = "<group>"; };
+		7B87711820075A8700ABFD90 /* Thirdpin.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = Thirdpin.gif; sourceTree = "<group>"; };
+		7B87711A200774E600ABFD90 /* thanks-del.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "thanks-del.gif"; sourceTree = "<group>"; };
+		7B87711C2007773A00ABFD90 /* thanks-del2.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "thanks-del2.gif"; sourceTree = "<group>"; };
+		7B87711E2007795400ABFD90 /* thanks.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = thanks.gif; sourceTree = "<group>"; };
 		7B8B62BD20063D9F009197D2 /* MainViewController+TaskDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MainViewController+TaskDelegate.swift"; sourceTree = "<group>"; };
 		7BBD997D1FFDFFD700417C9D /* thanks-no.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "thanks-no.gif"; sourceTree = "<group>"; };
-		7BBD99811FFE009A00417C9D /* thanks.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = thanks.gif; sourceTree = "<group>"; };
+		7BBD99811FFE009A00417C9D /* thanks-Selected.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "thanks-Selected.gif"; sourceTree = "<group>"; };
 		7BCC4CBA1FF4BD1300222405 /* StringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
 		7BE950CA1FFCBE4700819DCB /* thanks-Bac.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "thanks-Bac.gif"; sourceTree = "<group>"; };
-		7BE950D01FFCC11E00819DCB /* secondpin.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = secondpin.gif; sourceTree = "<group>"; };
-		7BE950D21FFCD47D00819DCB /* Thirdpin.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = Thirdpin.gif; sourceTree = "<group>"; };
+		7BE950D01FFCC11E00819DCB /* secondpin-no.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "secondpin-no.gif"; sourceTree = "<group>"; };
+		7BE950D21FFCD47D00819DCB /* Thirdpin-no.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "Thirdpin-no.gif"; sourceTree = "<group>"; };
 		7BF740961FDFF4EC003CB691 /* BorderedClusterAnnotationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BorderedClusterAnnotationView.swift; sourceTree = "<group>"; };
 		7DD01FA87B2CDE0C2F4B9481 /* Pods-Mayo-ios-client.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Mayo-ios-client.release.xcconfig"; path = "Pods/Target Support Files/Pods-Mayo-ios-client/Pods-Mayo-ios-client.release.xcconfig"; sourceTree = "<group>"; };
 		F80C07951F55D62E00E0F8FB /* PushNotificationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PushNotificationManager.swift; sourceTree = "<group>"; };
@@ -880,12 +894,19 @@
 		35F81D8E1EA3EDF10066439F /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				7B87711A200774E600ABFD90 /* thanks-del.gif */,
+				7B87711C2007773A00ABFD90 /* thanks-del2.gif */,
+				7B87711E2007795400ABFD90 /* thanks.gif */,
+				7B34427520073E32005E2CD1 /* thanks-nononono.gif */,
 				7B26027A2005EE2800EBB480 /* thanks-no-no.gif */,
 				7BBD997D1FFDFFD700417C9D /* thanks-no.gif */,
-				7BBD99811FFE009A00417C9D /* thanks.gif */,
+				7B877112200748B300ABFD90 /* thanks-final.gif */,
+				7BBD99811FFE009A00417C9D /* thanks-Selected.gif */,
 				7BE950CA1FFCBE4700819DCB /* thanks-Bac.gif */,
-				7BE950D01FFCC11E00819DCB /* secondpin.gif */,
-				7BE950D21FFCD47D00819DCB /* Thirdpin.gif */,
+				7B87711420075A4600ABFD90 /* secondpin.gif */,
+				7B87711820075A8700ABFD90 /* Thirdpin.gif */,
+				7BE950D01FFCC11E00819DCB /* secondpin-no.gif */,
+				7BE950D21FFCD47D00819DCB /* Thirdpin-no.gif */,
 				7B2119A21FF644B70012D0F1 /* fatpin seq02 (2.7sec) */,
 				7B2119131FF644650012D0F1 /* fatpin seq01 (2.4sec) */,
 				7B6E56D11FD66AC1009C59B6 /* Font */,
@@ -1278,6 +1299,7 @@
 				355780F91EE5FBA0006EE70F /* AppIcon72x72@2x.png in Resources */,
 				7B211A2D1FF644B80012D0F1 /* fatpin2.0059.png in Resources */,
 				7B2119681FF644660012D0F1 /* fatpin1.0014.png in Resources */,
+				7B34427620073E33005E2CD1 /* thanks-nononono.gif in Resources */,
 				7B2119921FF644660012D0F1 /* fatpin1.0056.png in Resources */,
 				7B211A2B1FF644B80012D0F1 /* fatpin2.0057.png in Resources */,
 				7B2119851FF644660012D0F1 /* fatpin1.0043.png in Resources */,
@@ -1311,6 +1333,7 @@
 				7B211A401FF644B80012D0F1 /* fatpin2.0078.png in Resources */,
 				350CFFD41EE601B400E49713 /* fux0048.png in Resources */,
 				350CFFAB1EE601B400E49713 /* fux007.png in Resources */,
+				7B877113200748B400ABFD90 /* thanks-final.gif in Resources */,
 				7B211A0F1FF644B80012D0F1 /* fatpin2.0029.png in Resources */,
 				7B211A331FF644B80012D0F1 /* fatpin2.0065.png in Resources */,
 				350CFFD31EE601B400E49713 /* fux0047.png in Resources */,
@@ -1345,6 +1368,7 @@
 				7B2119791FF644660012D0F1 /* fatpin1.0031.png in Resources */,
 				7B211A291FF644B80012D0F1 /* fatpin2.0055.png in Resources */,
 				355780ED1EE5FBA0006EE70F /* AppIcon29x29@2x.png in Resources */,
+				7B87711920075A8800ABFD90 /* Thirdpin.gif in Resources */,
 				7B2119931FF644660012D0F1 /* fatpin1.0057.png in Resources */,
 				3516501D1F1B171200FC027E /* GoogleService-Info.plist in Resources */,
 				7B21197F1FF644660012D0F1 /* fatpin1.0037.png in Resources */,
@@ -1376,6 +1400,7 @@
 				350CFFCB1EE601B400E49713 /* fux0039.png in Resources */,
 				7B21196D1FF644660012D0F1 /* fatpin1.0019.png in Resources */,
 				355780FB1EE5FBA0006EE70F /* AppIcon76x76@2x.png in Resources */,
+				7B87711B200774E600ABFD90 /* thanks-del.gif in Resources */,
 				355780FD1EE5FBA0006EE70F /* AppIcon84x84 @2x.png in Resources */,
 				7B2119A11FF644660012D0F1 /* fatpin1.0071.png in Resources */,
 				7B2119881FF644660012D0F1 /* fatpin1.0046.png in Resources */,
@@ -1388,7 +1413,7 @@
 				7B211A381FF644B80012D0F1 /* fatpin2.0070.png in Resources */,
 				350CFFCF1EE601B400E49713 /* fux0043.png in Resources */,
 				7B2119FA1FF644B80012D0F1 /* fatpin2.008.png in Resources */,
-				7BBD99821FFE009A00417C9D /* thanks.gif in Resources */,
+				7BBD99821FFE009A00417C9D /* thanks-Selected.gif in Resources */,
 				350CFFA81EE601B400E49713 /* fux004.png in Resources */,
 				355780F81EE5FBA0006EE70F /* AppIcon72x72.png in Resources */,
 				7B211A3C1FF644B80012D0F1 /* fatpin2.0074.png in Resources */,
@@ -1396,12 +1421,12 @@
 				7B2119F41FF644B80012D0F1 /* fatpin2.002.png in Resources */,
 				7B2119611FF644660012D0F1 /* fatpin1.007.png in Resources */,
 				7B2119651FF644660012D0F1 /* fatpin1.0011.png in Resources */,
-				7BE950D11FFCC11E00819DCB /* secondpin.gif in Resources */,
+				7BE950D11FFCC11E00819DCB /* secondpin-no.gif in Resources */,
 				7B2119F71FF644B80012D0F1 /* fatpin2.005.png in Resources */,
 				7B2119621FF644660012D0F1 /* fatpin1.008.png in Resources */,
 				350CFFB01EE601B400E49713 /* fux0012.png in Resources */,
 				7B211A131FF644B80012D0F1 /* fatpin2.0033.png in Resources */,
-				7BE950D31FFCD47E00819DCB /* Thirdpin.gif in Resources */,
+				7BE950D31FFCD47E00819DCB /* Thirdpin-no.gif in Resources */,
 				7B21197E1FF644660012D0F1 /* fatpin1.0036.png in Resources */,
 				7B211A021FF644B80012D0F1 /* fatpin2.0016.png in Resources */,
 				350CFFD21EE601B400E49713 /* fux0046.png in Resources */,
@@ -1410,6 +1435,7 @@
 				7B2119811FF644660012D0F1 /* fatpin1.0039.png in Resources */,
 				350CFFA41EE601B400E49713 /* _fux-example.mov in Resources */,
 				350CFFA61EE601B400E49713 /* fux002.png in Resources */,
+				7B87711520075A4600ABFD90 /* secondpin.gif in Resources */,
 				350CFFB11EE601B400E49713 /* fux0013.png in Resources */,
 				7B2119661FF644660012D0F1 /* fatpin1.0012.png in Resources */,
 				7B2119F51FF644B80012D0F1 /* fatpin2.003.png in Resources */,
@@ -1420,6 +1446,7 @@
 				7B21196F1FF644660012D0F1 /* fatpin1.0021.png in Resources */,
 				7B211A141FF644B80012D0F1 /* fatpin2.0034.png in Resources */,
 				7B21195B1FF644660012D0F1 /* fatpin1.001.png in Resources */,
+				7B87711F2007795500ABFD90 /* thanks.gif in Resources */,
 				355780F01EE5FBA0006EE70F /* AppIcon40x40@3x.png in Resources */,
 				7B21196C1FF644660012D0F1 /* fatpin1.0018.png in Resources */,
 				350CFFB41EE601B400E49713 /* fux0016.png in Resources */,
@@ -1440,6 +1467,7 @@
 				350CFFD71EE601B400E49713 /* fux0051.png in Resources */,
 				7B26027B2005EE2900EBB480 /* thanks-no-no.gif in Resources */,
 				7B2119961FF644660012D0F1 /* fatpin1.0060.png in Resources */,
+				7B87711D2007773A00ABFD90 /* thanks-del2.gif in Resources */,
 				7B211A0D1FF644B80012D0F1 /* fatpin2.0027.png in Resources */,
 				350CFFC41EE601B400E49713 /* fux0032.png in Resources */,
 				7B2119691FF644660012D0F1 /* fatpin1.0015.png in Resources */,
