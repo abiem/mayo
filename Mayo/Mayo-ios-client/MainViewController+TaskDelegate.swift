@@ -13,7 +13,7 @@ extension MainViewController : taskDelegate {
   
   func taskUpdateFailed(_ error : Error?) {
     if error != nil {
-    CMAlertController.sharedInstance.showAlert(nil, "Check your internet connect", ["Ok"], { (sender) in
+    CMAlertController.sharedInstance.showAlert(nil, "Something went wrong! While saving task", ["Ok"], { (sender) in
       UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
       self.currentUserTaskSaved = false
       self.carouselView.reloadData()

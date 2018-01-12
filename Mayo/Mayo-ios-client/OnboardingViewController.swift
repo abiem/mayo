@@ -24,6 +24,7 @@ class OnboardingViewController: UIViewController {
   let mThanksImageListArray: NSMutableArray = []
   let mSecondPinImageListArray: NSMutableArray = []
   let mThirdPinImageListArray: NSMutableArray = []
+  var thanksData : Data?
   //rotation key animation
   let kRotationAnimationKey = "com.mayo.rotationanimationkey"
   
@@ -32,7 +33,7 @@ class OnboardingViewController: UIViewController {
   
     override func viewDidLoad() {
         super.viewDidLoad()
-
+      loadGifImages()
 
       if FIRAuth.auth()?.currentUser?.uid == nil {
         FIRAuth.auth()?.signInAnonymously() { (user, error) in
@@ -60,15 +61,25 @@ class OnboardingViewController: UIViewController {
       
     }
   
+  func loadGifImages() {
+    let path = Bundle.main.path(forResource: "thanks", ofType: "gif")
+    do {
+      let data = try Data(contentsOf: URL.init(fileURLWithPath: path!))
+      thanksData = data
+    } catch {
+      print("Something went Wrong")
+    }
+  }
+  
   
   func checkFakeTaskStatus() {
     FIRDatabase.database().reference().child("users").child((FIRAuth.auth()?.currentUser?.uid)!).child("isDemoTaskShown").observeSingleEvent(of: .value, with: { (snapshot) in
       if let isIntroTasksDone = snapshot.value as? Bool {
         if isIntroTasksDone == true {
           let defaults = UserDefaults.standard
-          defaults.set(true, forKey: Constants.ONBOARDING_TASK1_VIEWED_KEY)
-          defaults.set(true, forKey: Constants.ONBOARDING_TASK2_VIEWED_KEY)
-          defaults.set(true, forKey: Constants.ONBOARDING_TASK3_VIEWED_KEY)
+          defaults.set(false, forKey: Constants.ONBOARDING_TASK1_VIEWED_KEY)
+          defaults.set(false, forKey: Constants.ONBOARDING_TASK2_VIEWED_KEY)
+          defaults.set(false, forKey: Constants.ONBOARDING_TASK3_VIEWED_KEY)
         }
       }
     })
@@ -161,15 +172,23 @@ class OnboardingViewController: UIViewController {
   //Mark :- Thanks Image
   func showUserThankedAnimation() {
     if playingThanksAnim { return }
-    
+    playingThanksAnim = true
      self.mImageView.contentMode = .scaleAspectFit
     flareAnimation(view: self.mBackgroundAnimation, duration: Constants.THANKS_ANIMATION_DURATION)
     
     let path = Bundle.main.path(forResource: "thanks", ofType: "gif")
     do {
       let data = try Data(contentsOf: URL.init(fileURLWithPath: path!))
-      let image = FLAnimatedImage(animatedGIFData: data)
-      mImageView.animatedImage = image
+      if let data = thanksData {
+        let image = FLAnimatedImage(animatedGIFData: data)
+        mImageView.animatedImage = image
+        DispatchQueue.main.asyncAfter(deadline: .now() + 7) {
+          if self.playingThanksAnim {
+            self.mImageView.image = UIImage(named: "fux0051.png")
+          }
+        }
+      }
+      
       
       
     } catch {
@@ -210,14 +229,18 @@ class OnboardingViewController: UIViewController {
   
   //Start Flare Animation for thanks
   func flareAnimation(view: UIView, duration: Double = 1) {
-    mBackgroundAnimation.image = #imageLiteral(resourceName: "flareImage")
-    if view.layer.animation(forKey: kRotationAnimationKey) == nil {
-      let rotationAnimation = CABasicAnimation(keyPath: "transform.rotation")
-      rotationAnimation.fromValue = 0.0
-      rotationAnimation.toValue = Float(.pi * 2.0)
-      rotationAnimation.duration = duration
-      rotationAnimation.repeatCount = Float.infinity
-      view.layer.add(rotationAnimation, forKey: kRotationAnimationKey)
+   
+    DispatchQueue.main.asyncAfter(deadline: .now() + 5.2) {
+      if !self.playingThanksAnim { return }
+      self.mBackgroundAnimation.image = #imageLiteral(resourceName: "flareImage")
+      if view.layer.animation(forKey: self.kRotationAnimationKey) == nil {
+        let rotationAnimation = CABasicAnimation(keyPath: "transform.rotation")
+        rotationAnimation.fromValue = 0.0
+        rotationAnimation.toValue = Float(.pi * 2.0)
+        rotationAnimation.duration = duration
+        rotationAnimation.repeatCount = Float.infinity
+        view.layer.add(rotationAnimation, forKey: self.kRotationAnimationKey)
+      }
     }
   }
   

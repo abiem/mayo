@@ -1443,9 +1443,10 @@ class MainViewController: UIViewController {
   }
   
   func checkTaskTimeLeft () {
-    let currentUserTask = self.tasks[0]
-    tasksExpireObserver = self.tasksRef?.child((currentUserTask?.taskID)!).child("timeUpdated").observe(.value, with: { (snapshot) in
+    let currentTask = self.tasks[0]
+    tasksExpireObserver = self.tasksRef?.child((currentTask?.taskID)!).child("timeUpdated").observe(.value, with: { (snapshot) in
       UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["taskExpirationNotification"])
+      let currentUserTask = self.tasks[0]
       // reset expiration timer
       self.expirationTimer = nil
       
@@ -1475,7 +1476,7 @@ class MainViewController: UIViewController {
           self.tasks[0] = currentUserTask
           self.checkTaskRecentActivity(currentUserTask!, callBack: { (activity) in
             if activity {
-              DispatchQueue.main.asyncAfter(deadline: .now() + 0.5 ) {
+              DispatchQueue.main.asyncAfter(deadline: .now() + 1 ) {
                 self.createMarkCompleteView()
                 self.createLocalNotification(title: "Your help quest expired", body: "Did you get help? Remember to thank them!", time: Int(0.0))
                 
@@ -1599,6 +1600,36 @@ class MainViewController: UIViewController {
     locationManager.stopUpdatingHeading()
     locationManager.stopUpdatingLocation()
     locationManager.startMonitoringSignificantLocationChanges()
+  }
+  
+  func getSavedTask() -> Task? {
+    if (UserDefaults.standard.object(forKey: Constants.PENDING_TASKS) != nil) {
+      //Decode data
+      let currentTaskData = UserDefaults.standard.object(forKey: Constants.PENDING_TASKS)
+      if let task = currentTaskData as? Data {
+        
+        if  let dicTask = NSKeyedUnarchiver.unarchiveObject(with: task as! Data) as? Dictionary<String, Any> {
+          let userID = dicTask["userId"] as! String
+          let taskDescription = dicTask["taskDescription"] as! String
+          let latitude = dicTask["latitude"] as! CLLocationDegrees
+          let longitude = dicTask["longitude"] as! CLLocationDegrees
+          let completed = dicTask["completed"] as! Bool
+          let startColor =  dicTask["startColor"] as! String
+          let endColor =  dicTask["endColor"] as! String
+          let timeCreated = dicTask["timeCreated"] as! Date
+          let timeUpdated = dicTask["timeUpdated"] as! Date
+          let taskID = dicTask["taskID"] as! String
+          let recentActivity = dicTask["recentActivity"] as! Bool
+          let userMovedOutside = dicTask["userMovedOutside"] as! Bool
+          
+          let currentTask =  Task(userId: userID , taskDescription: taskDescription , latitude: latitude , longitude: longitude, completed: completed, timeCreated: timeCreated , timeUpdated: timeUpdated, taskID: taskID, recentActivity: recentActivity, userMovedOutside: userMovedOutside)
+          currentTask.startColor = startColor
+          currentTask.endColor = endColor
+          return currentTask
+        }
+      }
+    }
+    return nil
   }
   
   func removeFirebaseLoader() {
@@ -1868,10 +1899,7 @@ class MainViewController: UIViewController {
     let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
     let currentUserKey = FIRAuth.auth()?.currentUser?.uid
     
-    if self.tasks.count > 0 && self.tasks[0]?.taskDescription != "" {
-      self.newItemSwiped = true
-      self.tasks.insert(Task(userId: currentUserKey!, taskDescription: "", latitude: (self.locationManager.location?.coordinate.latitude) ?? self.userLatitude! , longitude: (self.locationManager.location?.coordinate.longitude) ?? self.userLongitude! , completed: false, taskID: "\(timeStamp)", recentActivity: false, userMovedOutside: false), at: 0)
-    }
+    
     currentUserTaskSaved = false
     //      self.carouselView.insertItem(at: 0, animated: true)
     self.carouselView.reloadData()
@@ -1899,6 +1927,14 @@ class MainViewController: UIViewController {
       ] as [String : Any];
     
     self.tasksRef?.child(currentUserTask.taskID!).setValue(taskUpdate)
+    
+    if self.tasks.count > 0 && self.tasks[0]?.taskDescription != "" {
+      self.newItemSwiped = true
+      self.tasks.insert(Task(userId: currentUserKey!, taskDescription: "", latitude: (self.locationManager.location?.coordinate.latitude) ?? self.userLatitude! , longitude: (self.locationManager.location?.coordinate.longitude) ?? self.userLongitude! , completed: false, taskID: "\(timeStamp)", recentActivity: false, userMovedOutside: false), at: 0)
+    } else {
+      self.newItemSwiped = true
+      self.tasks.append(Task(userId: currentUserKey!, taskDescription: "", latitude: (self.locationManager.location?.coordinate.latitude) ?? self.userLatitude! , longitude: (self.locationManager.location?.coordinate.longitude) ?? self.userLongitude! , completed: false, taskID: "\(timeStamp)", recentActivity: false, userMovedOutside: false))
+    }
     
     UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
     
@@ -2682,9 +2718,13 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
       }
       
       let usersToThankCopy = self.usersToThank
-      
-      //update Complete task Status
       var currentUserTask = self.tasks[0] as! Task
+      //update Complete task Status
+      if let currentTask = self.getSavedTask() {
+        currentTask.recentActivity = currentUserTask.recentActivity
+        currentUserTask = currentTask
+      }
+      
       currentUserTask.completed = true;
       currentUserTask.completeType = Constants.STATUS_FOR_THANKED;
       currentUserTask.helpedBy = Array(usersToThankCopy.keys)
@@ -2766,6 +2806,10 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
       }
     }
     var currentUserTask = self.tasks[0] as! Task
+    if var currentTask = self.getSavedTask() {
+      currentTask.recentActivity = currentUserTask.recentActivity
+      currentUserTask = currentTask
+    }
     currentUserTask.completed = true;
     currentUserTask.completeType = Constants.STATUS_FOR_NOT_HELPED
     self.carouselView.removeItem(at: 0, animated: true)
@@ -3231,6 +3275,19 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
       
       // loop through the annotations currently on the map
       let annotations = self.mapView.annotations
+      let currentIndex = self.carouselView.currentItemIndex
+      if currentIndex >= 0 && currentIndex < self.tasks.count {
+        let currentTask = self.tasks[currentIndex]
+        if let task = self.tasks[currentIndex] {
+          if task.taskDescription != "" {
+            self.updateViewsCount(task.taskID!)
+          }
+          let taskLat = task.latitude
+          let taskLong = task.longitude
+          let taskCoordinate = CLLocationCoordinate2D(latitude: taskLat, longitude: taskLong)
+          self.mapView.setCenter(taskCoordinate, animated: true)
+          print("map center changed to lat:\(task.latitude) long:\(task.longitude)")
+        }
       for annotation in annotations {
         
         // check if the annotation is a custom current user task annotation
@@ -3246,7 +3303,26 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
           }
           
         }
-        let currentTask = self.tasks[self.carouselView.currentItemIndex]
+        
+        if annotation is CustomFocusTaskMapAnnotation {
+          let customFocusTaskAnnotation = annotation as! CustomFocusTaskMapAnnotation
+          // get the current index
+          let index = self.carouselView.currentItemIndex
+          
+          // get the user id from the annotation
+          let taskUserId = (customFocusTaskAnnotation.taskUserId != nil) ? customFocusTaskAnnotation.taskUserId! : ""
+          
+          // add regular task icon
+          let taskAnnoation = CustomTaskMapAnnotation(currentCarouselIndex: index, taskUserId: taskUserId)
+          taskAnnoation.coordinate = customFocusTaskAnnotation.coordinate
+          //
+          //                    // remove focus task icon
+          taskAnnoation.style = .color(#colorLiteral(red: 0, green: 0.5901804566, blue: 0.758269012, alpha: 1), radius: 30)
+          self.mapView.removeAnnotation(customFocusTaskAnnotation)
+//          self.clusterManager.remove(customFocusTaskAnnotation)
+          self.clusterManager.add(taskAnnoation)
+        }
+        
         // check for the annotation for current card
         if annotation is CustomTaskMapAnnotation  {
           let mapTaskAnnotation = annotation as! CustomTaskMapAnnotation
@@ -3272,43 +3348,8 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
             self.mapView.selectAnnotation(focusAnnotation, animated: false)
           }
         }
-        
-        if annotation is CustomFocusTaskMapAnnotation {
-          let customFocusTaskAnnotation = annotation as! CustomFocusTaskMapAnnotation
-          // get the current index
-          let index = self.carouselView.currentItemIndex
-          
-          // get the user id from the annotation
-          let taskUserId = (customFocusTaskAnnotation.taskUserId != nil) ? customFocusTaskAnnotation.taskUserId! : ""
-          
-          // add regular task icon
-          let taskAnnoation = CustomTaskMapAnnotation(currentCarouselIndex: index, taskUserId: taskUserId)
-          taskAnnoation.coordinate = customFocusTaskAnnotation.coordinate
-          //
-          //                    // remove focus task icon
-          taskAnnoation.style = .color(#colorLiteral(red: 0, green: 0.5901804566, blue: 0.758269012, alpha: 1), radius: 30)
-          self.clusterManager.add(taskAnnoation)
-          self.mapView.removeAnnotation(customFocusTaskAnnotation)
-          
-//          self.clusterManager.remove(customFocusTaskAnnotation)
-         self.clusterManager.reload(self.mapView, visibleMapRect: self.mapView.visibleMapRect)
-        }
       }
-    
-      let taskIndex = self.carouselView.currentItemIndex
-      
-      if taskIndex >= 0 && taskIndex < self.tasks.count {
-        
-        if let task = self.tasks[taskIndex] {
-          if task.taskDescription != "" {
-            self.updateViewsCount(task.taskID!)
-          }
-          let taskLat = task.latitude
-          let taskLong = task.longitude
-          let taskCoordinate = CLLocationCoordinate2D(latitude: taskLat, longitude: taskLong)
-          self.mapView.setCenter(taskCoordinate, animated: true)
-          print("map center changed to lat:\(task.latitude) long:\(task.longitude)")
-        }
+        self.clusterManager.reload(self.mapView, visibleMapRect: self.mapView.visibleMapRect)
       }
       
       // update the last carousel card index
