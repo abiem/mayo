@@ -14,5 +14,9 @@ extension Date {
     func seconds(from date: Date) -> Int {
         return Calendar.current.dateComponents([.second], from: date, to: self).second ?? 0
     }
+  
+  func toMillis() -> Int64! {
+    return Int64(self.timeIntervalSince1970 * 1000)
+  }
     
 }

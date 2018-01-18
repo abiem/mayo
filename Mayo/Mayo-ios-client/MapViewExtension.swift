@@ -159,6 +159,7 @@ extension MainViewController: MKMapViewDelegate {
             print("custom annotation block hit")
             if let annotation = view.annotation {
                 self.mapView.setCenter( annotation.coordinate, animated: true)
+              reloadClusterView(annotation)
                 // exit delegate method
                 return
             }
@@ -171,6 +172,7 @@ extension MainViewController: MKMapViewDelegate {
                 
                 if let index = annotation.currentCarouselIndex {
                     self.carouselView.scrollToItem(at: index, animated: false)
+                  reloadClusterView(annotation)
                 }
                 // exit delegate method
                 return
@@ -184,6 +186,7 @@ extension MainViewController: MKMapViewDelegate {
                 self.mapView.setCenter( annotation.coordinate, animated: true)
                 if let taskID = annotation.taskUserId {
                   carouselScroll(taskID)
+                  reloadClusterView(annotation)
                 }
                 
                 // exit delegate method
@@ -204,11 +207,21 @@ extension MainViewController: MKMapViewDelegate {
             }
             mapView.setVisibleMapRect(zoomRect, animated: true)
         }
-        
-      
     }
     
-   
+  func reloadClusterView(_ annotation: MKAnnotation) {
+//    var zoomRect = MKMapRectNull
+//    let annotationPoint = MKMapPointForCoordinate(annotation.coordinate)
+//    let pointRect = MKMapRectMake(annotationPoint.x, annotationPoint.y, 0.1, 0.1)
+//    if MKMapRectIsNull(zoomRect) {
+//      zoomRect = pointRect
+//    } else {
+//      zoomRect = MKMapRectUnion(zoomRect, pointRect)
+//    }
+    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+      self.clusterManager.reload(self.mapView, visibleMapRect: self.mapView.visibleMapRect)
+    }
+  }
     
     func getUserLocationImage(_ time:Int) -> UIImage? {
         if time <= locationIconTime.first.rawValue {

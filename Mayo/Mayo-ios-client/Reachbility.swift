@@ -29,7 +29,7 @@ class Reachbility: NSObject {
         
         if !(reachabilityManager?.isReachable)! {
             print("The network is not reachable")
-            self.alertView?.showWarning("No Internet Connection", subTitle: "", duration: 0)
+          CMAlertController.sharedInstance.showAlert(nil, "Oops can't connect to the Internet.", ["OK"], nil)
         }
         reachabilityManager?.listener = { status in
             
@@ -38,18 +38,19 @@ class Reachbility: NSObject {
             case .notReachable:
                 print("The network is not reachable")
                 UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                self.alertView?.showWarning("No Internet Connection", subTitle: "", duration: 0)
-                
+              CMAlertController.sharedInstance.showAlert(nil, "Oops can't connect to the Internet.", ["OK"], nil)
+              
             case .unknown :
                 self.alertView?.hideView()
+                //CMAlertController.sharedInstance.dismissController()
                 print("It is unknown whether the network is reachable")
                 
             case .reachable(.ethernetOrWiFi):
-                self.alertView?.hideView()
+                //CMAlertController.sharedInstance.dismissController()
                 print("The network is reachable over the WiFi connection")
                 
             case .reachable(.wwan):
-                self.alertView?.hideView()
+                //CMAlertController.sharedInstance.dismissController()
                 print("The network is reachable over the WWAN connection")
                 
             }

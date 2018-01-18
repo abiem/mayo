@@ -176,26 +176,16 @@ class OnboardingViewController: UIViewController {
      self.mImageView.contentMode = .scaleAspectFit
     flareAnimation(view: self.mBackgroundAnimation, duration: Constants.THANKS_ANIMATION_DURATION)
     
-    let path = Bundle.main.path(forResource: "thanks", ofType: "gif")
-    do {
-      let data = try Data(contentsOf: URL.init(fileURLWithPath: path!))
+
       if let data = thanksData {
         let image = FLAnimatedImage(animatedGIFData: data)
         mImageView.animatedImage = image
         DispatchQueue.main.asyncAfter(deadline: .now() + 7) {
           if self.playingThanksAnim {
-            self.mImageView.image = UIImage(named: "fux0051.png")
+            self.mImageView.animatedImage = nil
           }
         }
       }
-      
-      
-      
-    } catch {
-      print("Something went Wrong")
-    }
-
-    
     }
   
   func showSecondPinAnimation() {
