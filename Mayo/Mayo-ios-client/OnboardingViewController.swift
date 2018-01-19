@@ -31,35 +31,34 @@ class OnboardingViewController: UIViewController {
   //CAlayerAnimation
   let animation = CAKeyframeAnimation()
   
-    override func viewDidLoad() {
-        super.viewDidLoad()
-      loadGifImages()
-
-      if FIRAuth.auth()?.currentUser?.uid == nil {
-        FIRAuth.auth()?.signInAnonymously() { (user, error) in
-          if error != nil {
-            print("an error occured during auth")
-            return
-          }
-          self.checkFakeTaskStatus()
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    loadGifImages()
+    
+    if FIRAuth.auth()?.currentUser?.uid == nil {
+      FIRAuth.auth()?.signInAnonymously() { (user, error) in
+        if error != nil {
+          print("an error occured during auth")
+          return
         }
-      } else {
-       checkFakeTaskStatus()
+        self.checkFakeTaskStatus()
       }
-      
-      mCarousel.type = iCarouselType.linear
-      mCarousel.isPagingEnabled = true
-      mCarousel.isScrollEnabled = false
-      mCarousel.bounces = true
-      mCarousel.bounceDistance = 0.2
-      mCarousel.scrollSpeed = 1.0
-      
+    } else {
+      checkFakeTaskStatus()
     }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-      
-    }
+    mCarousel.type = iCarouselType.linear
+    mCarousel.isPagingEnabled = true
+    mCarousel.isScrollEnabled = false
+    mCarousel.bounces = true
+    mCarousel.bounceDistance = 0.2
+    mCarousel.scrollSpeed = 1.0
+    
+  }
+  
+  override func didReceiveMemoryWarning() {
+    super.didReceiveMemoryWarning()
+    
+  }
   
   func loadGifImages() {
     let path = Bundle.main.path(forResource: "thanks", ofType: "gif")
@@ -84,6 +83,7 @@ class OnboardingViewController: UIViewController {
       }
     })
   }
+  
   //Mark :- location Permission
   func askForLocationAuth() {
     if CLLocationManager.locationServicesEnabled() {
@@ -117,7 +117,6 @@ class OnboardingViewController: UIViewController {
     // inside user defaults
     let userDefaults = UserDefaults.standard
     userDefaults.set(true, forKey: "onboardingHasBeenShown")
-    
   }
   
   func sequenceOfThanks() {
@@ -165,7 +164,7 @@ class OnboardingViewController: UIViewController {
       self.mBackgroundAnimation.transform = CGAffineTransform(scaleX: 5, y: 5)
     }, completion: { (completed) in
       self.mBackgroundAnimation.transform = CGAffineTransform(scaleX: 1.5, y: 1.5)
-
+      
     })
   }
   
@@ -173,23 +172,22 @@ class OnboardingViewController: UIViewController {
   func showUserThankedAnimation() {
     if playingThanksAnim { return }
     playingThanksAnim = true
-     self.mImageView.contentMode = .scaleAspectFit
+    self.mImageView.contentMode = .scaleAspectFit
     flareAnimation(view: self.mBackgroundAnimation, duration: Constants.THANKS_ANIMATION_DURATION)
     
-
-      if let data = thanksData {
-        let image = FLAnimatedImage(animatedGIFData: data)
-        mImageView.animatedImage = image
-        DispatchQueue.main.asyncAfter(deadline: .now() + 7) {
-          if self.playingThanksAnim {
-            self.mImageView.animatedImage = nil
-          }
+    
+    if let data = thanksData {
+      let image = FLAnimatedImage(animatedGIFData: data)
+      mImageView.animatedImage = image
+      DispatchQueue.main.asyncAfter(deadline: .now() + 7.1) {
+        if self.playingThanksAnim {
+          self.mImageView.animatedImage = nil
         }
       }
     }
+  }
   
   func showSecondPinAnimation() {
-    
     let path = Bundle.main.path(forResource: "secondpin", ofType: "gif")
     do {
       let data = try Data(contentsOf: URL.init(fileURLWithPath: path!))
@@ -198,8 +196,6 @@ class OnboardingViewController: UIViewController {
     } catch {
       print("Something went Wrong")
     }
-
-    
   }
   
   func showThirdPinAnimation() {
@@ -211,16 +207,11 @@ class OnboardingViewController: UIViewController {
     } catch {
       print("Something went Wrong")
     }
-
-    
   }
-  
-    
   
   //Start Flare Animation for thanks
   func flareAnimation(view: UIView, duration: Double = 1) {
-   
-    DispatchQueue.main.asyncAfter(deadline: .now() + 5.2) {
+    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
       if !self.playingThanksAnim { return }
       self.mBackgroundAnimation.image = #imageLiteral(resourceName: "flareImage")
       if view.layer.animation(forKey: self.kRotationAnimationKey) == nil {

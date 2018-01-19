@@ -68,6 +68,9 @@ class MainViewController: UIViewController {
   let SECONDS_IN_HOUR = 3600
   
   // constants for time
+  let SECONDS_IN_FIFTEEN = 900
+  
+  // constants for time
   let SECONDS_IN_DAY = 86400
   
   //Contant Time for location update
@@ -1492,7 +1495,13 @@ class MainViewController: UIViewController {
         else {
           timeDifference = self.SECONDS_IN_HOUR - timeDifference
           self.startTimer(timeDifference)
-          self.createLocalNotification(title: "Hey! No activity is there from long time", body: "Click to chat with nearby people", time: timeDifference)
+          var notificationTime = timeDifference
+          if notificationTime >= self.SECONDS_IN_FIFTEEN {
+            notificationTime = notificationTime - self.SECONDS_IN_FIFTEEN
+          } else {
+             notificationTime = timeDifference
+          }
+          self.createLocalNotification(title: "Your help quest expiring soon", body: "👋🏻 Quests inactive for 1hr automatically expires. Hope you get helped soon!", time: notificationTime)
           
         }
       }
@@ -3002,9 +3011,8 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
       content.body = contentBody
     }
     var Interval = 0.5
-    if title == "Hey! No activity is there from long time" {
-      return
-//      Interval = Double(time)
+    if title == "Your help quest expiring soon" {
+      Interval = Double(time)
     }
     else {
       removeCurrentUserTaskAnnotation()
