@@ -12,19 +12,21 @@ import QuartzCore
 import iCarousel
 import Firebase
 import FLAnimatedImage
+import APNGKit
 
 class OnboardingViewController: UIViewController {
   //Outlets
   @IBOutlet weak var mBackgroundAnimation: UIImageView!
   @IBOutlet weak var mCarousel: iCarousel!
-  @IBOutlet weak var mImageView: FLAnimatedImageView!
+//  @IBOutlet weak var mImageView: FLAnimatedImageView!
+  @IBOutlet weak var mImageView: APNGImageView!
   // Instance
   var playingThanksAnim = false
   var locationManager: CLLocationManager!
   let mThanksImageListArray: NSMutableArray = []
   let mSecondPinImageListArray: NSMutableArray = []
   let mThirdPinImageListArray: NSMutableArray = []
-  var thanksData : Data?
+  var thanksImage : APNGImage?
   //rotation key animation
   let kRotationAnimationKey = "com.mayo.rotationanimationkey"
   
@@ -34,7 +36,7 @@ class OnboardingViewController: UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     loadGifImages()
-    
+
     if FIRAuth.auth()?.currentUser?.uid == nil {
       FIRAuth.auth()?.signInAnonymously() { (user, error) in
         if error != nil {
@@ -61,10 +63,11 @@ class OnboardingViewController: UIViewController {
   }
   
   func loadGifImages() {
-    let path = Bundle.main.path(forResource: "thanks", ofType: "gif")
+    let path = Bundle.main.path(forResource: "bump", ofType: "png")
     do {
       let data = try Data(contentsOf: URL.init(fileURLWithPath: path!))
-      thanksData = data
+      thanksImage = APNGImage(data: data, progressive: false)
+
     } catch {
       print("Something went Wrong")
     }
@@ -155,7 +158,6 @@ class OnboardingViewController: UIViewController {
   //Mark :- Ripple Animation
   func showRippleAnimation(_ pCenterImage:UIImage?,_ pBackgroundImage: UIImage) {
     self.mImageView.contentMode = .center
-    self.mImageView.image = pCenterImage
     self.mBackgroundAnimation.image = pBackgroundImage
     self.mBackgroundAnimation.transform = CGAffineTransform.identity
     self.mBackgroundAnimation.transform = CGAffineTransform(scaleX: 1.5, y: 1.5)
@@ -174,36 +176,50 @@ class OnboardingViewController: UIViewController {
     playingThanksAnim = true
     self.mImageView.contentMode = .scaleAspectFit
     flareAnimation(view: self.mBackgroundAnimation, duration: Constants.THANKS_ANIMATION_DURATION)
-    
-    
-    if let data = thanksData {
-      let image = FLAnimatedImage(animatedGIFData: data)
-      mImageView.animatedImage = image
-      DispatchQueue.main.asyncAfter(deadline: .now() + 7.1) {
-        if self.playingThanksAnim {
-          self.mImageView.animatedImage = nil
-        }
-      }
+    if let image = thanksImage {
+      mImageView.image = image
+      mImageView.startAnimating()
     }
+
+    
+
   }
   
   func showSecondPinAnimation() {
-    let path = Bundle.main.path(forResource: "secondpin", ofType: "gif")
+    let path = Bundle.main.path(forResource: "ripple", ofType: "png")
     do {
       let data = try Data(contentsOf: URL.init(fileURLWithPath: path!))
-      mImageView.animatedImage = FLAnimatedImage(animatedGIFData: data)
-      
+      mImageView.image = APNGImage(data: data, progressive: true)
+      mImageView.startAnimating()
+
     } catch {
       print("Something went Wrong")
     }
   }
   
   func showThirdPinAnimation() {
-    let path = Bundle.main.path(forResource: "Thirdpin", ofType: "gif")
+    let path = Bundle.main.path(forResource: "pin1", ofType: "png")
     do {
       let data = try Data(contentsOf: URL.init(fileURLWithPath: path!))
-      mImageView.animatedImage = FLAnimatedImage(animatedGIFData: data)
-      
+      let image = APNGImage(data: data, progressive: true)
+      mImageView.image = image
+      mImageView.startAnimating()
+      DispatchQueue.main.asyncAfter(deadline: .now() + 2.84) {
+        self.showFourthPin()
+      }
+    } catch {
+      print("Something went Wrong")
+    }
+  }
+
+  func showFourthPin() {
+    let path = Bundle.main.path(forResource: "pin2", ofType: "png")
+    do {
+      let data = try Data(contentsOf: URL.init(fileURLWithPath: path!))
+      let image = APNGImage(data: data, progressive: true)
+      mImageView.image = image
+      mImageView.startAnimating()
+
     } catch {
       print("Something went Wrong")
     }
@@ -211,9 +227,8 @@ class OnboardingViewController: UIViewController {
   
   //Start Flare Animation for thanks
   func flareAnimation(view: UIView, duration: Double = 1) {
-    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-      if !self.playingThanksAnim { return }
-      self.mBackgroundAnimation.image = #imageLiteral(resourceName: "flareImage")
+    self.mBackgroundAnimation.isHidden = true
+    self.mBackgroundAnimation.image = #imageLiteral(resourceName: "flareImage")
       if view.layer.animation(forKey: self.kRotationAnimationKey) == nil {
         let rotationAnimation = CABasicAnimation(keyPath: "transform.rotation")
         rotationAnimation.fromValue = 0.0
@@ -222,14 +237,17 @@ class OnboardingViewController: UIViewController {
         rotationAnimation.repeatCount = Float.infinity
         view.layer.add(rotationAnimation, forKey: self.kRotationAnimationKey)
       }
+    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+      if !self.playingThanksAnim { return }
+      self.mBackgroundAnimation.isHidden = false
     }
   }
   
   func stopAnimationAnimation() {
-    mImageView.animatedImage = nil
+    mImageView.image = nil
+    mImageView.stopAnimating()
     mBackgroundAnimation.layer.removeAnimation(forKey: kRotationAnimationKey)
     mBackgroundAnimation.image = nil
-    self.mImageView.animationImages = nil
     playingThanksAnim = false
   }
   

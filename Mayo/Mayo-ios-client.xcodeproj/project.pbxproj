@@ -288,6 +288,10 @@
 		7B8B62BE20063D9F009197D2 /* MainViewController+TaskDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B8B62BD20063D9F009197D2 /* MainViewController+TaskDelegate.swift */; };
 		7BCC4CBB1FF4BD1300222405 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BCC4CBA1FF4BD1300222405 /* StringExtension.swift */; };
 		7BEF725520087E1000D63036 /* secondpin.gif in Resources */ = {isa = PBXBuildFile; fileRef = 7BEF725420087E0E00D63036 /* secondpin.gif */; };
+		7BF20187202425C9003DD837 /* pin1.png in Resources */ = {isa = PBXBuildFile; fileRef = 7BF20183202425C7003DD837 /* pin1.png */; };
+		7BF20188202425C9003DD837 /* bump.png in Resources */ = {isa = PBXBuildFile; fileRef = 7BF20184202425C7003DD837 /* bump.png */; };
+		7BF20189202425C9003DD837 /* pin2.png in Resources */ = {isa = PBXBuildFile; fileRef = 7BF20185202425C8003DD837 /* pin2.png */; };
+		7BF2018A202425C9003DD837 /* ripple.png in Resources */ = {isa = PBXBuildFile; fileRef = 7BF20186202425C8003DD837 /* ripple.png */; };
 		7BF740971FDFF4EC003CB691 /* BorderedClusterAnnotationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BF740961FDFF4EC003CB691 /* BorderedClusterAnnotationView.swift */; };
 		F80C07961F55D62E00E0F8FB /* PushNotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F80C07951F55D62E00E0F8FB /* PushNotificationManager.swift */; };
 		F80C07981F55D64D00E0F8FB /* Global.swift in Sources */ = {isa = PBXBuildFile; fileRef = F80C07971F55D64D00E0F8FB /* Global.swift */; };
@@ -593,6 +597,10 @@
 		7B8B62BD20063D9F009197D2 /* MainViewController+TaskDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MainViewController+TaskDelegate.swift"; sourceTree = "<group>"; };
 		7BCC4CBA1FF4BD1300222405 /* StringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
 		7BEF725420087E0E00D63036 /* secondpin.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = secondpin.gif; sourceTree = "<group>"; };
+		7BF20183202425C7003DD837 /* pin1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = pin1.png; sourceTree = "<group>"; };
+		7BF20184202425C7003DD837 /* bump.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bump.png; sourceTree = "<group>"; };
+		7BF20185202425C8003DD837 /* pin2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = pin2.png; sourceTree = "<group>"; };
+		7BF20186202425C8003DD837 /* ripple.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ripple.png; sourceTree = "<group>"; };
 		7BF740961FDFF4EC003CB691 /* BorderedClusterAnnotationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BorderedClusterAnnotationView.swift; sourceTree = "<group>"; };
 		7DD01FA87B2CDE0C2F4B9481 /* Pods-Mayo-ios-client.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Mayo-ios-client.release.xcconfig"; path = "Pods/Target Support Files/Pods-Mayo-ios-client/Pods-Mayo-ios-client.release.xcconfig"; sourceTree = "<group>"; };
 		F80C07951F55D62E00E0F8FB /* PushNotificationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PushNotificationManager.swift; sourceTree = "<group>"; };
@@ -876,6 +884,7 @@
 		35F81D8E1EA3EDF10066439F /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				7BF201822024259B003DD837 /* APNGImages */,
 				7B87711E2007795400ABFD90 /* thanks.gif */,
 				7B877112200748B300ABFD90 /* thanks-final.gif */,
 				7BEF725420087E0E00D63036 /* secondpin.gif */,
@@ -1106,6 +1115,17 @@
 				7B6E56CF1FD66A9B009C59B6 /* SanFranciscoText-Regular.otf */,
 			);
 			path = Font;
+			sourceTree = "<group>";
+		};
+		7BF201822024259B003DD837 /* APNGImages */ = {
+			isa = PBXGroup;
+			children = (
+				7BF20184202425C7003DD837 /* bump.png */,
+				7BF20183202425C7003DD837 /* pin1.png */,
+				7BF20185202425C8003DD837 /* pin2.png */,
+				7BF20186202425C8003DD837 /* ripple.png */,
+			);
+			path = APNGImages;
 			sourceTree = "<group>";
 		};
 		AA7D504636831F50698EFC2A /* Frameworks */ = {
@@ -1359,6 +1379,7 @@
 				350CFFCD1EE601B400E49713 /* fux0041.png in Resources */,
 				7B211A311FF644B80012D0F1 /* fatpin2.0063.png in Resources */,
 				7B211A1E1FF644B80012D0F1 /* fatpin2.0044.png in Resources */,
+				7BF20187202425C9003DD837 /* pin1.png in Resources */,
 				350CFFBA1EE601B400E49713 /* fux0022.png in Resources */,
 				7B2119671FF644660012D0F1 /* fatpin1.0013.png in Resources */,
 				350CFFBF1EE601B400E49713 /* fux0027.png in Resources */,
@@ -1379,6 +1400,7 @@
 				35F81D9E1EA6E2520066439F /* fux.mov in Resources */,
 				7B211A421FF644B80012D0F1 /* fatpin2.0080.png in Resources */,
 				7B211A101FF644B80012D0F1 /* fatpin2.0030.png in Resources */,
+				7BF20188202425C9003DD837 /* bump.png in Resources */,
 				350CFFBC1EE601B400E49713 /* fux0024.png in Resources */,
 				7B2119631FF644660012D0F1 /* fatpin1.009.png in Resources */,
 				7B211A381FF644B80012D0F1 /* fatpin2.0070.png in Resources */,
@@ -1446,9 +1468,11 @@
 				7B21199E1FF644660012D0F1 /* fatpin1.0068.png in Resources */,
 				7B2119821FF644660012D0F1 /* fatpin1.0040.png in Resources */,
 				7B2119701FF644660012D0F1 /* fatpin1.0022.png in Resources */,
+				7BF20189202425C9003DD837 /* pin2.png in Resources */,
 				7B211A3D1FF644B80012D0F1 /* fatpin2.0075.png in Resources */,
 				7B211A111FF644B80012D0F1 /* fatpin2.0031.png in Resources */,
 				7B211A241FF644B80012D0F1 /* fatpin2.0050.png in Resources */,
+				7BF2018A202425C9003DD837 /* ripple.png in Resources */,
 				7B211A351FF644B80012D0F1 /* fatpin2.0067.png in Resources */,
 				350CFFAD1EE601B400E49713 /* fux009.png in Resources */,
 				7B21195C1FF644660012D0F1 /* fatpin1.002.png in Resources */,
@@ -1533,6 +1557,7 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-Mayo-ios-client/Pods-Mayo-ios-client-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/APNGKit/APNGKit.framework",
 				"${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework",
 				"${BUILT_PRODUCTS_DIR}/Cluster/Cluster.framework",
 				"${BUILT_PRODUCTS_DIR}/FLAnimatedImage/FLAnimatedImage.framework",
@@ -1550,6 +1575,7 @@
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/APNGKit.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Alamofire.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Cluster.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FLAnimatedImage.framework",

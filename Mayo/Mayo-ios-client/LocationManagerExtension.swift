@@ -69,6 +69,13 @@ extension MainViewController: CLLocationManagerDelegate {
         }
         
     }
+
+  func removeAllObservingRegions() {
+    for region in self.locationManager.monitoredRegions {
+      self.locationManager.stopMonitoring(for: region)
+    }
+  }
+
     // user move away task area
     func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
         userMovedAway()

@@ -448,7 +448,9 @@ class MainViewController: UIViewController {
     
     playingThanksAnim = true
     thanksAnimImageView.startAnimating()
-    self.perform(#selector(MainViewController.afterThanksAnimation), with: nil, afterDelay: thanksAnimImageView.animationDuration-0.5)
+    DispatchQueue.main.asyncAfter(deadline: .now() + Constants.THANKS_ANIMATION_DURATION-0.1) {
+      self.afterThanksAnimation()
+    }
   }
   
   //Start Flare Animation for thanks
@@ -472,6 +474,7 @@ class MainViewController: UIViewController {
   
   func afterThanksAnimation() {
     stopFlareAnimation(view: flareAnimImageView)
+    thanksAnimImageView.image = nil
     flareAnimImageView.removeFromSuperview()
     thanksAnimImageView.stopAnimating()
     thanksAnimImageView.removeFromSuperview()
@@ -1865,7 +1868,17 @@ class MainViewController: UIViewController {
   
   // Remove task and Update completeion details at Firebase
   func removeTaskAfterComplete(_ currentUserTask: Task)  {
-    
+
+    //Remove Notification
+    UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+    UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: ["taskExpirationNotification"])
+    UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["taskExpirationNotification"])
+    // reset expiration timer
+    self.expirationTimer = nil
+    // invalidate the current timer
+    self.expirationTimer?.invalidate()
+    removeAllObservingRegions()
+
     let taskMessage = currentUserTask.taskDescription
     print("taskMessage \(currentUserTask.taskDescription) \(taskMessage)")
     
@@ -2438,8 +2451,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
   }
   
   func createMarkCompleteView() {
-    //Remove Notification
-    UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["taskExpirationNotification"])
+
     // let users know it was completed
     let currentUserTask = self.tasks[0] as! Task
     let currentUserKey = FIRAuth.auth()?.currentUser?.uid

@@ -139,7 +139,7 @@
                             <imageView hidden="YES" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="pyQ-fx-pNS">
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="413"/>
                             </imageView>
-                            <imageView hidden="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="CLj-aH-hOx" customClass="FLAnimatedImageView">
+                            <imageView hidden="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="CLj-aH-hOx" customClass="APNGImageView" customModule="APNGKit">
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="413"/>
                             </imageView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="5oo-i9-vOB" customClass="iCarousel">
@@ -177,7 +177,7 @@
                     <connections>
                         <outlet property="mBackgroundAnimation" destination="pyQ-fx-pNS" id="GAO-MF-eAi"/>
                         <outlet property="mCarousel" destination="5oo-i9-vOB" id="FkI-57-KnL"/>
-                        <outlet property="mImageView" destination="CLj-aH-hOx" id="zd5-aH-7cc"/>
+                        <outlet property="mImageView" destination="CLj-aH-hOx" id="el2-qW-6mq"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="lo5-0x-tDm" userLabel="First Responder" sceneMemberID="firstResponder"/>

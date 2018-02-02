@@ -10,11 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Mayo-ios-client/MainViewController.swift"
-            timestampString = "538035271.387406"
+            timestampString = "539246386.232385"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1338"
-            endingLineNumber = "1338"
+            startingLineNumber = "1341"
+            endingLineNumber = "1341"
             landmarkName = "appendNewTask(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -26,11 +26,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Mayo-ios-client/MainViewController.swift"
-            timestampString = "538035271.387997"
+            timestampString = "539246386.233318"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1731"
-            endingLineNumber = "1731"
+            startingLineNumber = "1734"
+            endingLineNumber = "1734"
             landmarkName = "getPreviousTask()"
             landmarkType = "7">
          </BreakpointContent>
@@ -42,11 +42,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Mayo-ios-client/MainViewController.swift"
-            timestampString = "538035271.388401"
+            timestampString = "539246386.233991"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "656"
-            endingLineNumber = "656"
+            startingLineNumber = "659"
+            endingLineNumber = "659"
             landmarkName = "createFakeTasks()"
             landmarkType = "7">
          </BreakpointContent>
@@ -58,11 +58,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Mayo-ios-client/MainViewController.swift"
-            timestampString = "538035271.38876"
+            timestampString = "539246386.234621"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "671"
-            endingLineNumber = "671"
+            startingLineNumber = "674"
+            endingLineNumber = "674"
             landmarkName = "createFakeTasks()"
             landmarkType = "7">
          </BreakpointContent>
@@ -74,11 +74,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Mayo-ios-client/MainViewController.swift"
-            timestampString = "538035271.3891"
+            timestampString = "539246386.23524"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1063"
-            endingLineNumber = "1063"
+            startingLineNumber = "1066"
+            endingLineNumber = "1066"
             landmarkName = "queryTasksAroundCurrentLocation(latitude:longitude:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -90,11 +90,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Mayo-ios-client/MainViewController.swift"
-            timestampString = "538035271.389501"
+            timestampString = "539246386.2358691"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1153"
-            endingLineNumber = "1153"
+            startingLineNumber = "1156"
+            endingLineNumber = "1156"
             landmarkName = "queryTasksAroundCurrentLocation(latitude:longitude:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -102,11 +102,11 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Mayo-ios-client/MapViewExtension.swift"
-            timestampString = "538035271.389845"
+            timestampString = "539246386.236491"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "155"
@@ -118,15 +118,15 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Mayo-ios-client/MainViewController.swift"
-            timestampString = "538035271.390143"
+            timestampString = "539246386.236809"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "3364"
-            endingLineNumber = "3364"
+            startingLineNumber = "3376"
+            endingLineNumber = "3376"
             landmarkName = "carouselCurrentItemIndexDidChange(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -180,11 +180,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Mayo-ios-client/MainViewController.swift"
-            timestampString = "538035271.3904999"
+            timestampString = "539246386.237493"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1869"
-            endingLineNumber = "1869"
+            startingLineNumber = "1950"
+            endingLineNumber = "1950"
             landmarkName = "removeTaskAfterComplete(_:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -196,27 +196,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Mayo-ios-client/MainViewController.swift"
-            timestampString = "538035271.390835"
+            timestampString = "539246386.238149"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1937"
-            endingLineNumber = "1937"
-            landmarkName = "removeTaskAfterComplete(_:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Mayo-ios-client/MainViewController.swift"
-            timestampString = "538035271.391163"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "2924"
-            endingLineNumber = "2924"
+            startingLineNumber = "2936"
+            endingLineNumber = "2936"
             landmarkName = "createTaskForCurrentUser(sender:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -228,11 +212,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Mayo-ios-client/MainViewController.swift"
-            timestampString = "538035271.391456"
+            timestampString = "539246386.238711"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "2444"
-            endingLineNumber = "2444"
+            startingLineNumber = "2456"
+            endingLineNumber = "2456"
             landmarkName = "createMarkCompleteView()"
             landmarkType = "7">
          </BreakpointContent>
@@ -244,11 +228,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Mayo-ios-client/MainViewController.swift"
-            timestampString = "538035271.391764"
+            timestampString = "539246386.239265"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "2843"
-            endingLineNumber = "2843"
+            startingLineNumber = "2855"
+            endingLineNumber = "2855"
             landmarkName = "handleNoOneHelpedButtonPressed(sender:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -260,11 +244,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Mayo-ios-client/MainViewController.swift"
-            timestampString = "538035271.392107"
+            timestampString = "539246386.239825"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1482"
-            endingLineNumber = "1482"
+            startingLineNumber = "1485"
+            endingLineNumber = "1485"
             landmarkName = "checkTaskTimeLeft()"
             landmarkType = "7">
          </BreakpointContent>
@@ -276,11 +260,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Mayo-ios-client/MainViewController.swift"
-            timestampString = "538035271.392437"
+            timestampString = "539246386.240455"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "2009"
-            endingLineNumber = "2009"
+            startingLineNumber = "2022"
+            endingLineNumber = "2022"
             landmarkName = "sortTaskAccordingToTime()"
             landmarkType = "7">
          </BreakpointContent>
@@ -292,11 +276,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Mayo-ios-client/MainViewController.swift"
-            timestampString = "538035271.3928241"
+            timestampString = "539246386.241092"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "2001"
-            endingLineNumber = "2001"
+            startingLineNumber = "2014"
+            endingLineNumber = "2014"
             landmarkName = "sortTaskAccordingToTime()"
             landmarkType = "7">
             <Locations>
@@ -308,12 +292,12 @@
                   moduleName = "Mayo-ios-client"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Volumes/B/Mayo/Mayo/Mayo-ios-client/MainViewController.swift"
-                  timestampString = "537947130.825718"
+                  timestampString = "539246231.3724689"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "1993"
-                  endingLineNumber = "1993"
-                  offsetFromSymbolStart = "574">
+                  startingLineNumber = "2015"
+                  endingLineNumber = "2015"
+                  offsetFromSymbolStart = "676">
                </Location>
                <Location
                   shouldBeEnabled = "Yes"
@@ -323,14 +307,78 @@
                   moduleName = "Mayo-ios-client"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Volumes/B/Mayo/Mayo/Mayo-ios-client/MainViewController.swift"
-                  timestampString = "537947130.827529"
+                  timestampString = "539246231.374262"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "1993"
-                  endingLineNumber = "1993"
-                  offsetFromSymbolStart = "27">
+                  startingLineNumber = "2015"
+                  endingLineNumber = "2015"
+                  offsetFromSymbolStart = "32">
                </Location>
             </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Mayo-ios-client/MainViewController.swift"
+            timestampString = "539246386.2417279"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1936"
+            endingLineNumber = "1936"
+            landmarkName = "removeTaskAfterComplete(_:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Mayo-ios-client/MainViewController.swift"
+            timestampString = "539246386.2423609"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "475"
+            endingLineNumber = "475"
+            landmarkName = "afterThanksAnimation()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Mayo-ios-client/MainViewController.swift"
+            timestampString = "539246386.242988"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "476"
+            endingLineNumber = "476"
+            landmarkName = "afterThanksAnimation()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Mayo-ios-client/MainViewController.swift"
+            timestampString = "539246386.243564"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "452"
+            endingLineNumber = "452"
+            landmarkName = "showUserThankedAnimation()"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

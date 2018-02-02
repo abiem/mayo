@@ -54,7 +54,7 @@ extension OnboardingViewController: iCarouselDelegate, iCarouselDataSource  {
     view.layer.shadowColor = UIColor.black.cgColor
     view.layer.shadowOffset = CGSize(width: 0, height: 10)
     view.layer.shadowOpacity = 0.3
-    view.layer.shadowRadius = 15.0
+    view.layer.shadowRadius = 40.0
     
     return view
   }
