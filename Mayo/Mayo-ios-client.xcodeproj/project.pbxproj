@@ -1197,7 +1197,7 @@
 			attributes = {
 				LastSwiftUpdateCheck = 0830;
 				LastUpgradeCheck = 0830;
-				ORGANIZATIONNAME = Weijie;
+				ORGANIZATIONNAME = "abiem design";
 				TargetAttributes = {
 					3529A9CA1E998377003C815A = {
 						CreatedOnToolsVersion = 8.3;
