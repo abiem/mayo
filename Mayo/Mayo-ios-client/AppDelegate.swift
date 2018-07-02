@@ -30,7 +30,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
             locationManager.delegate = self
             locationManager.allowsBackgroundLocationUpdates = true
             locationManager.pausesLocationUpdatesAutomatically = false
-            locationManager.startMonitoringSignificantLocationChanges()
+            locationManager.startUpdatingLocation()
         }
     
         IQKeyboardManager.sharedManager().enable = true

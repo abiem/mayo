@@ -1610,7 +1610,7 @@ class MainViewController: UIViewController {
     locationManager.delegate = self
     locationManager.stopUpdatingHeading()
     locationManager.stopUpdatingLocation()
-    locationManager.startMonitoringSignificantLocationChanges()
+    locationManager.startUpdatingLocation()
   }
   
   func getSavedTask() -> Task? {
@@ -2776,8 +2776,9 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
       currentUserTask.completeType = Constants.STATUS_FOR_THANKED;
       currentUserTask.helpedBy = Array(usersToThankCopy.keys)
       
+        self.carouselView.removeItem(at: 0, animated: true)
       self.removeTaskAfterComplete(currentUserTask)
-      self.carouselView.removeItem(at: 0, animated: true)
+      
       // thank the users that are in the thank users dictionary
       for userId in usersToThankCopy.keys {
         
