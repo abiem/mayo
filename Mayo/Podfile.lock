@@ -61,7 +61,7 @@ PODS:
   - GoogleToolboxForMac/NSString+URLArguments (2.1.1)
   - GTMSessionFetcher/Core (1.1.9)
   - iCarousel (1.8.3)
-  - IQKeyboardManagerSwift (5.0.6)
+  - IQKeyboardManagerSwift (6.0.4)
   - JSQMessagesViewController (7.3.5):
     - JSQSystemSoundPlayer (~> 2.0.1)
   - JSQSystemSoundPlayer (2.0.1)
@@ -119,7 +119,7 @@ SPEC CHECKSUMS:
   GoogleToolboxForMac: 8e329f1b599f2512c6b10676d45736bcc2cbbeb0
   GTMSessionFetcher: 5c046c76a1f859bc9c187e918f18e4fc7bb57b5e
   iCarousel: d782f635afac190c49bb8ee455882284cff8b85f
-  IQKeyboardManagerSwift: 02bfbb0dff71c66d0ab77d80d25dfce0c3717735
+  IQKeyboardManagerSwift: 36dbe324b4f9793f5f41ba5227f3e7c76dfefd50
   JSQMessagesViewController: 6587f56aedbcb150a8ba1d968e1ef58b1bc758b7
   JSQSystemSoundPlayer: c5850e77a4363ffd374cd851154b9af93264ed8d
   Protobuf: d582fecf68201eac3d79ed61369ef45734394b9c
@@ -129,4 +129,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 3e4d696908ea236512cc4d5cff23d6a454e5e15f
 
-COCOAPODS: 1.3.1
+COCOAPODS: 1.4.0

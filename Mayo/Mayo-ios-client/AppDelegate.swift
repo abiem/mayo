@@ -33,10 +33,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
             locationManager.startUpdatingLocation()
         }
     
-        IQKeyboardManager.sharedManager().enable = true
-        IQKeyboardManager.sharedManager().enableAutoToolbar = false
-        IQKeyboardManager.sharedManager().shouldResignOnTouchOutside = true
-        IQKeyboardManager.sharedManager().keyboardDistanceFromTextField = 75
+        IQKeyboardManager.shared.enable = true
+        IQKeyboardManager.shared.enableAutoToolbar = false
+        IQKeyboardManager.shared.shouldResignOnTouchOutside = true
+        IQKeyboardManager.shared.keyboardDistanceFromTextField = 75
         
         
         //Set Up Fabric Crashlystics

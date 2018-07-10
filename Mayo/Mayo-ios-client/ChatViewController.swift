@@ -71,7 +71,7 @@ class ChatViewController: JSQMessagesViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         // listen for new messages
-        IQKeyboardManager.sharedManager().enable = false
+        IQKeyboardManager.shared.enable = false
         observeMessages()
         if isCompleted == false {
             checkTaskCompletion()
@@ -87,7 +87,7 @@ class ChatViewController: JSQMessagesViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         // remove observer for messages
-        IQKeyboardManager.sharedManager().enable = true
+        IQKeyboardManager.shared.enable = true
         messageRef.removeObserver(withHandle: newMessageRefHandle!)
         if isCompleted == false {
             taskRef?.child("completed").removeObserver(withHandle: taskHandler!)
