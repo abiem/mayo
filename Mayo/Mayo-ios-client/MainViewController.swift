@@ -144,7 +144,19 @@ class MainViewController: UIViewController {
   private var notification: NSObjectProtocol?
   
   // tasks array for nearby tasks
-  var tasks = [Task?]()
+    var tasks = [Task?]() {
+        willSet {
+            print("AAA")
+            
+            let ddd = newValue.compactMap({$0})
+            let cas = ddd.contains { task -> Bool in
+                return task.taskDescription == "G"
+            }
+            if cas {
+                print("bbbb")
+            }
+        }
+    }
   
   // geofire
   var tasksLocationsRef:FIRDatabaseReference?
@@ -409,9 +421,9 @@ class MainViewController: UIViewController {
     // add current user's location to firebase/geofire
     
     self.getCurrentUserLocation()
-    if self.locationManager.location != nil {
-      self.usersGeoFire?.setLocation( self.locationManager.location, forKey: "\(String(describing: FIRAuth.auth()?.currentUser?.uid))")
-      
+    if self.locationManager.location != nil,
+        let uid = FIRAuth.auth()?.currentUser?.uid {
+        self.usersGeoFire?.setLocation( self.locationManager.location, forKey: "\(String(describing: uid))")
     }
     
     //Updated Time
@@ -1065,6 +1077,8 @@ class MainViewController: UIViewController {
                     self.tasks[index]?.completed = true
                     self.tasks.append(self.tasks[index])
                     self.tasks.remove(at: index)
+                    
+                    self.carouselView.visibleItemViews
                     self.removeCarousel(index)
                     self.removeAnnotationForTask((task?.taskID)!)
                     self.sortTaskAccordingToTime()
