@@ -61,7 +61,8 @@ class PushNotificationManager {
                 "body": "Someone posted in \"\(topic)\"",
                 "title": "New Message Posted",
 //                "content_available": true,
-                "sound": "default"
+                "sound": "default",
+                "click_action": "com.mayo.fcmwithappserver_target_notification"
             ],
             "data": [
                 "sender_id": "\(currentUserId)",
@@ -104,7 +105,8 @@ class PushNotificationManager {
             "notification": [
                 "body": "🤜🏻🤛🏻 \"\(pTaskDescription)\" was completed. Thanks for helping! ",
                 "title": "You were thanked!",
-                "sound": "default"
+                "sound": "default",
+                "click_action": "com.mayo.fcmwithappserver_target_notification_mapactivity"
             ],
             "data": [
                 "notification_type": "\(Constants.NOTIFICATION_WERE_THANKS)"
@@ -140,7 +142,8 @@ class PushNotificationManager {
             "notification": [
                 "body": "Someone has a new quest nearby",
                 "title": "New quest available",
-                "sound": "default"
+                "sound": "default",
+                "click_action": "com.mayo.fcmwithappserver_target_notification_mapactivity"
             ],
             "data": [
                 "notification_type": "\(Constants.NOTIFICATION_NEARBY_TASK)",
