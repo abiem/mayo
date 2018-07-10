@@ -1414,7 +1414,10 @@ class MainViewController: UIViewController {
                         self.carouselView.itemView(at: index)?.alpha = 0;
     },
                       completion:{ (success) in
-                        self.carouselView.removeItem(at: index, animated: true)
+                        if self.carouselView.itemView(at: index) != nil {
+                            self.carouselView.removeItem(at: index, animated: true)
+                        }
+                        
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                           self.carouselView.reloadData()
                         }
