@@ -1959,7 +1959,7 @@ class MainViewController: UIViewController {
                       "timeCreated": currentUserTask.timeCreatedString ,
                       "timeUpdated": updateDate,
                       "completeType": currentUserTask.completeType ?? "",
-                      "helpedBy": currentUserTask.helpedBy ?? "",
+                      "helpedBy": currentUserTask.helpedBy ?? [],
                       "userMovedOutside" : currentUserTask.userMovedOutside  ,
                       "recentActivity" : currentUserTask.recentActivity
       ] as [String : Any];

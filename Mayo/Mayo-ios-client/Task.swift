@@ -115,7 +115,7 @@ class Task: NSObject {
             "completeType" : self.completeType ?? "" ,
             "userMovedOutside" : self.userMovedOutside  ,
             "recentActivity" : self.recentActivity,
-            "helpedBy" : "" ]
+            "helpedBy" : [] ]
         tasksRef.child(self.taskID!).setValue(taskDictionary)
       tasksRef.child(self.taskID!).setValue(taskDictionary) { (error, ref) in
           if let mTaskDelegate = self.delegate   {
