@@ -9,7 +9,7 @@
 import UIKit
 import CoreLocation
 
-
+let exitAreaRadius = 200.0
 extension MainViewController: CLLocationManagerDelegate {
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
@@ -58,12 +58,12 @@ extension MainViewController: CLLocationManagerDelegate {
         if locationManager.location?.coordinate.latitude == nil && locationManager.location?.coordinate.longitude == nil {
             return
         }
-        if calculateDistance(lat, long) > 200 {
+        if calculateDistance(lat, long) > exitAreaRadius {
             userMovedAway()
         }
         else {
             let geofenceRegionCenter = CLLocationCoordinate2DMake(lat, long);
-            let geofenceRegion = CLCircularRegion(center: geofenceRegionCenter, radius: 200, identifier: "taskDistanceExpired");
+            let geofenceRegion = CLCircularRegion(center: geofenceRegionCenter, radius: 1, identifier: "taskDistanceExpired");
             geofenceRegion.notifyOnExit = true;
             self.locationManager.startMonitoring(for: geofenceRegion)
         }

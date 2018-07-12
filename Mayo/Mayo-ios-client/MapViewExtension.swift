@@ -257,7 +257,7 @@ extension MainViewController: MKMapViewDelegate {
     
     func addRadiusCircle(location: CLLocation){
         self.mapView.delegate = self
-        let circle = MKCircle(center: location.coordinate, radius: 200 as CLLocationDistance)
+        let circle = MKCircle(center: location.coordinate, radius: exitAreaRadius as CLLocationDistance)
         self.mapView.add(circle)
     }
     

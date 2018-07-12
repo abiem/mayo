@@ -95,7 +95,7 @@ class MainViewController: UIViewController {
   var mShowNotification = true
   
   // query distance for getting nearby tasks and users in meters
-  let queryDistance = 200.0
+  let queryDistance = exitAreaRadius
   
   // current user uid
   var currentUserId: String?
