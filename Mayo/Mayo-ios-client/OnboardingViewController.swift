@@ -75,7 +75,7 @@ class OnboardingViewController: UIViewController {
   
   
   func checkFakeTaskStatus() {
-    FIRDatabase.database().reference().child("users").child((FIRAuth.auth()?.currentUser?.uid)!).child("isDemoTaskShown").observeSingleEvent(of: .value, with: { (snapshot) in
+    FIRDatabase.database().reference().child("users").child((FIRAuth.auth()?.currentUser?.uid)!).child("demoTaskShown").observeSingleEvent(of: .value, with: { (snapshot) in
       if let isIntroTasksDone = snapshot.value as? Bool {
         if isIntroTasksDone == true {
           let defaults = UserDefaults.standard

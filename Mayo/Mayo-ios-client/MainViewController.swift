@@ -429,7 +429,7 @@ class MainViewController: UIViewController {
     //Updated Time
     let dateformatter = DateStringFormatterHelper()
     let stringDate = dateformatter.convertDateToString(date: NSDate() as Date)
-    usersRef?.child((FIRAuth.auth()?.currentUser?.uid)!).child("UpdatedAt").setValue(stringDate)
+    usersRef?.child((FIRAuth.auth()?.currentUser?.uid)!).child("updatedAt").setValue(stringDate)
     
   }
   
@@ -832,7 +832,7 @@ class MainViewController: UIViewController {
       let key1 = key?.replacingOccurrences(of: "Optional(\"", with: "")
       let userId = key1?.replacingOccurrences(of: "\")", with: "")
       
-      self.usersRef?.child(userId!).child("UpdatedAt").observeSingleEvent(of: .value, with: { (snapshot) in
+      self.usersRef?.child(userId!).child("updatedAt").observeSingleEvent(of: .value, with: { (snapshot) in
         if let lastUpdateTime = snapshot.value as? String {
           let currentDate = Date()
           let dateformatter = DateStringFormatterHelper()
@@ -3159,7 +3159,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
       
       // set onboarding task 3 viewed to true
       //            if defaults.bool(forKey: Constants.ONBOARDING_TASK2_VIEWED_KEY) == true {
-      self.usersRef?.child(currentUserId!).child("isDemoTaskShown").setValue(true)
+      self.usersRef?.child(currentUserId!).child("demoTaskShown").setValue(true)
       UpdatePointsServer(1, (FIRAuth.auth()?.currentUser?.uid)!)
       mTaskScore = mTaskScore + 1
       self.usersRef?.child((FIRAuth.auth()?.currentUser?.uid)!).child("score").setValue(mTaskScore)

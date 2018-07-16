@@ -64,7 +64,7 @@ extension MainViewController: MKMapViewDelegate {
                 return annotationView
             }
            
-        self.usersRef?.child(customAnnotation.userId!).child("UpdatedAt").observeSingleEvent(of: .value, with: { (snapshot) in
+        self.usersRef?.child(customAnnotation.userId!).child("updatedAt").observeSingleEvent(of: .value, with: { (snapshot) in
                 if let updatedTimeString = snapshot.value as? String {
                     let currentTime = Date();
                     let updatedTime = DateStringFormatterHelper().convertStringToDate(datestring: updatedTimeString)
