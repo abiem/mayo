@@ -827,23 +827,22 @@ class MainViewController: UIViewController {
     usersCircleQuery = usersGeoFire?.query(at: center, withRadius: queryDistance/1000)
     
     usersEnterCircleQueryHandle = usersCircleQuery?.observe(.keyEntered, with: { (key: String?, location: CLLocation?) in
-      print("Key '\(key!)' entered the search are and is at location '\(location!)'")
+        guard let userId = key,
+            let location = location else { return }
+        print("userId '\(userId)' entered the search and is at location '\(location)'")
       
-      let key1 = key?.replacingOccurrences(of: "Optional(\"", with: "")
-      let userId = key1?.replacingOccurrences(of: "\")", with: "")
-      
-      self.usersRef?.child(userId!).child("updatedAt").observeSingleEvent(of: .value, with: { (snapshot) in
+      self.usersRef?.child(userId).child("updatedAt").observeSingleEvent(of: .value, with: { (snapshot) in
         if let lastUpdateTime = snapshot.value as? String {
           let currentDate = Date()
           let dateformatter = DateStringFormatterHelper()
           let userLastUpdate = dateformatter.convertStringToDate(datestring: lastUpdateTime)
           //check user active from 3 days
           if currentDate.seconds(from: userLastUpdate ) < self.SECONDS_IN_DAY * 3 {
-            if !self.nearbyUsers.contains(key!) && key! != FIRAuth.auth()!.currentUser!.uid {
+            if !self.nearbyUsers.contains(userId) && userId != FIRAuth.auth()!.currentUser!.uid {
               //Create marker for user
-              if self.nearbyUsers.contains(userId!) == false {
-                self.nearbyUsers.append(userId!)
-                self.addUserPin(latitude: (location?.coordinate.latitude)!, longitude: (location?.coordinate.longitude)!, userId: userId!, updatedTime:userLastUpdate )
+              if self.nearbyUsers.contains(userId) == false {
+                self.nearbyUsers.append(userId)
+                self.addUserPin(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude, userId: userId, updatedTime:userLastUpdate )
               }
             }
           }
