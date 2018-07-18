@@ -169,3 +169,43 @@ class Task: NSObject {
     }
     
 }
+
+// MARK: - Constructors
+extension Task {
+    convenience init(dict taskDict: [String: AnyObject], location: CLLocation) {
+//        let key = dict["key"] as! String
+//        let id = dict["id"] as! String
+//        let title = dict["title"] as! String
+//        let author = dict["author"] as! String
+//        let isFavorite = false
+        let dateformatter = DateStringFormatterHelper()
+        
+        let taskCompleted = taskDict["completed"] as! Bool
+        let taskTimeCreated = dateformatter.convertStringToDate(datestring: taskDict["timeCreated"] as! String)
+        let taskTimeUpdated = dateformatter.convertStringToDate(datestring: taskDict["timeUpdated"] as! String)
+        let taskDescription = taskDict["taskDescription"] as! String
+        
+        
+        let userId = taskDict["createdby"] as! String
+        let taskID = taskDict["taskID"] as! String
+        var recentActivity = false
+        if let activity = taskDict["recentActivity"] as? Bool {
+            recentActivity = activity
+        }
+        var userMovedOutside = false
+        if let movedOuside = taskDict["userMovedOutside"] as? Bool {
+            userMovedOutside = movedOuside
+        }
+        
+        self.init(userId: userId,
+                  taskDescription: taskDescription,
+                  latitude: location.coordinate.latitude,
+                  longitude: location.coordinate.longitude,
+                  completed: taskCompleted,
+                  timeCreated: taskTimeCreated,
+                  timeUpdated: taskTimeUpdated,
+                  taskID: taskID,
+                  recentActivity: recentActivity,
+                  userMovedOutside: userMovedOutside)
+    }
+}

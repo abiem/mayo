@@ -384,7 +384,19 @@ class MainViewController: UIViewController {
       if (self.userLatitude != nil && self.userLongitude != nil) {
         // TODO fix
         let timeStamp = Date().toMillis()
-        tasks.insert(Task(userId: currentUserId!, taskDescription: "loading", latitude: self.userLatitude!, longitude: self.userLongitude!, completed: false, timeCreated: Date(), timeUpdated: Date(), taskID: "\(timeStamp!)", recentActivity: false, userMovedOutside: false), at: 0)
+        
+        let task = Task(userId: currentUserId!,
+                        taskDescription: "loading",
+                        latitude: self.userLatitude!,
+                        longitude: self.userLongitude!,
+                        completed: false,
+                        timeCreated: Date(),
+                        timeUpdated: Date(),
+                        taskID: "\(timeStamp!)",
+                        recentActivity: false,
+                        userMovedOutside: false)
+        
+        tasks.insert(task, at: 0)
         carouselView.reloadData()
       }
       self.currentUserTaskSaved = false
@@ -1104,27 +1116,12 @@ class MainViewController: UIViewController {
           // adds key for task to chat channels array
           self.chatChannels.append(taskDict["taskID"] as! String)
           
-          let taskCompleted = taskDict["completed"] as! Bool
-          let taskTimeCreated = dateformatter.convertStringToDate(datestring: taskDict["timeCreated"] as! String)
-          let taskTimeUpdated = dateformatter.convertStringToDate(datestring: taskDict["timeUpdated"] as! String)
-          let taskDescription = taskDict["taskDescription"] as! String
-          
-          let timeStamp = taskDict["taskID"] as! String
-          var recentActivity = false
-          if let activity = taskDict["recentActivity"] as? Bool {
-            recentActivity = activity
-          }
-          var userMovedOutside = false
-          if let movedOuside = taskDict["userMovedOutside"] as? Bool {
-            userMovedOutside = movedOuside
-          }
-          
           var taskStartColor: String? = nil
           var taskEndColor: String? = nil
           //
-          
-          
-          let newTask = Task(userId: key, taskDescription: taskDescription, latitude: location.coordinate.latitude, longitude: location.coordinate.longitude, completed: taskCompleted, timeCreated: taskTimeCreated, timeUpdated: taskTimeUpdated, taskID: "\(timeStamp)",recentActivity: recentActivity, userMovedOutside: userMovedOutside)
+            
+            let newTask = Task.init(dict: taskDict, location: location)
+            //          let newTask = Task(userId: key, taskDescription: taskDescription, latitude: location.coordinate.latitude, longitude: location.coordinate.longitude, completed: taskCompleted, timeCreated: taskTimeCreated, timeUpdated: taskTimeUpdated, taskID: "\(timeStamp)",recentActivity: recentActivity, userMovedOutside: userMovedOutside)
           
           
           // check if the task already has start and end colors saved
