@@ -1347,6 +1347,10 @@ class MainViewController: UIViewController {
     
     if newTask.completed == true {
       self.tasks.append(newTask)
+    } else if newTask.userId == self.currentUserId && newTask.timeUpdated.addingTimeInterval(Double(SECONDS_IN_HOUR)) > Date() && newTask.taskDescription != "loading" {
+        self.tasks[0] = newTask
+        self.addMapPin(task: newTask, carouselIndex: 0)
+        currentUserTaskSaved = true
     } else {
       let carouselIndex = self.getFakeTasksCount()
       self.tasks.insert(newTask, at: carouselIndex)
