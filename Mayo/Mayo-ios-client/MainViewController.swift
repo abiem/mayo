@@ -587,15 +587,15 @@ class MainViewController: UIViewController {
     
     // create label for text
     let textLabel = UILabel(frame: CGRect(x: 0, y: 0, width: horizontalGradientView.frame.size.width-60, height: 50))
-    textLabel.text = "Your mayo points can be exchanged for  rewards in the future so hang on to it!"
+    textLabel.text = "Your mayo points can be exchanged for rewards in the future so hang on to it!"
     textLabel.textAlignment = .left
     textLabel.font = UIFont.systemFont(ofSize: 14)
-    textLabel.lineBreakMode = .byWordWrapping
     textLabel.numberOfLines = 2
     textLabel.adjustsFontSizeToFitWidth = true
     textLabel.center.x = horizontalGradientView.bounds.width/2 - 10
     textLabel.center.y = 30
     textLabel.textColor = UIColor.white
+    textLabel.minimumScaleFactor = 10/UIFont.labelFontSize
     
     // create label for 'You have'
     let youHaveLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 100, height: 40))
