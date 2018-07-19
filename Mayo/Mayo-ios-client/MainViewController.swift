@@ -2153,7 +2153,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
       textView.textColor = UIColor.white
       textView.contentInset = UIEdgeInsets(top: 15, left: 0, bottom: 0, right: 0)
       // turn off auto correction
-      textView.autocorrectionType = .no
+      textView.autocorrectionType = .yes
       textView.showsVerticalScrollIndicator = false
       textView.showsHorizontalScrollIndicator = false
       
