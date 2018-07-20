@@ -316,6 +316,7 @@ class MainViewController: UIViewController {
     swipeRightRecognizer.delegate = self
     
     // add recognizers to the carousel view
+    carouselView.isUserInteractionEnabled = true
     carouselView.addGestureRecognizer(swipeLeftRecognizer)
     carouselView.addGestureRecognizer(swipeRightRecognizer)
     
@@ -570,7 +571,7 @@ class MainViewController: UIViewController {
   func showPointsProfileView(_:UIGestureRecognizer) {
     // center the map on current user's location
     //setupLocationRegion()
-    mapView.setUserTrackingMode(.follow, animated: true)
+//    mapView.setUserTrackingMode(.follow, animated: true)
     // show points pofile view
     let pointsProfileView = UIView(frame: CGRect(x: 0, y: 0, width: mapView.frame.size.width, height: self.view.bounds.height))
     pointsProfileView.center = self.view.center
@@ -2482,6 +2483,12 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
       let users = value?["users"] as? NSDictionary ?? [:]
       let messages = value?["messages"] as? NSDictionary ?? [:]
       
+      // if nobody answered to usre's quest, we'll not show view
+      let messageCount = messages.count
+      if messageCount < 1 {
+          return
+      }
+      
       print("conversation channel value: \(value)")
       print("users \(users)")
       print("messages \(messages) keys \(messages.allKeys)")
@@ -3462,4 +3469,3 @@ extension MainViewController {
     }
   }
 }
-
