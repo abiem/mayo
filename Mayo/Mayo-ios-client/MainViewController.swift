@@ -18,6 +18,7 @@ import Alamofire
 import AVKit
 import AVFoundation
 import Cluster
+import SafariServices
 
 class MainViewController: UIViewController {
   
@@ -28,6 +29,7 @@ class MainViewController: UIViewController {
   var pointsLabel: UILabel!
   var thanksAnimImageView: UIImageView!
   var flareAnimImageView: UIImageView!
+    var safariVC: SFSafariViewController?
   var playingThanksAnim = false
   var canCreateNewtask = false
   var completedTask:Task?
@@ -579,7 +581,7 @@ class MainViewController: UIViewController {
     pointsProfileView.tag = self.POINTS_PROFILE_VIEW_TAG
     
     // create horizontal gradient card for showing points
-    let horizontalGradientView = HorizontalGradientView(frame: CGRect(x: 0, y: 0, width: pointsProfileView.frame.size.width-30, height: 170))
+    let horizontalGradientView = HorizontalGradientView(frame: CGRect(x: 0, y: 0, width: pointsProfileView.frame.size.width-30, height: 217))
     horizontalGradientView.center.y = pointsProfileView.bounds.height/4
     horizontalGradientView.center.x = pointsProfileView.center.x
     horizontalGradientView.layer.cornerRadius = 4
@@ -629,12 +631,27 @@ class MainViewController: UIViewController {
     closeButton.center.y = 25
     closeButton.addTarget(self, action: #selector(self.removePointsProfile(_:)), for: UIControlEvents.touchUpInside)
     
+    // setup clickable button for move to send feedback
+    let feedbackButton = UIButton(frame: CGRect(x: 0, y: 0, width: horizontalGradientView.frame.size.width * 0.9, height: 20))
+    feedbackButton.center.y = scoreLabel.center.y + 40
+    feedbackButton.center.x = scoreLabel.center.x
+    feedbackButton.setTitle("Send feedback about Mayo", for: .normal)
+    
+    feedbackButton.setTitleColor(UIColor.darkGray, for: .highlighted)
+    feedbackButton.titleEdgeInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 0)
+    feedbackButton.addTarget(self, action: #selector(sendFeedback), for: .touchUpInside)
+    feedbackButton.alpha = 1.0
+    feedbackButton.tintColor = UIColor.white
+    
+    
+    
     // add to superview
     horizontalGradientView.addSubview(textLabel)
     horizontalGradientView.addSubview(youHaveLabel)
     horizontalGradientView.addSubview(scoreLabel)
     horizontalGradientView.addSubview(closeButton)
     horizontalGradientView.addGestureRecognizer(closeGesture)
+    horizontalGradientView.addSubview(feedbackButton)
     pointsProfileView.addSubview(horizontalGradientView)
     
     self.view.addSubview(pointsProfileView)
@@ -645,6 +662,16 @@ class MainViewController: UIViewController {
     let pointsProfileView = self.view.viewWithTag(self.POINTS_PROFILE_VIEW_TAG)
     pointsProfileView?.removeFromSuperview()
   }
+    
+  func sendFeedback() {
+    let url = URL (string: "https://www.heymayo.com/mayo-feedback")
+    safariVC = SFSafariViewController.init(url: url!)
+    self.present(safariVC!, animated: true, completion: nil)
+    }
+    
+    func closeWebView() {
+        safariVC?.dismiss(animated: true, completion: nil)
+    }
   
   // creates 3 fake tasks to show on load
   func createFakeTasks() {
