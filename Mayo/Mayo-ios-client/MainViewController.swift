@@ -572,8 +572,16 @@ class MainViewController: UIViewController {
   
   func showPointsProfileView(_:UIGestureRecognizer) {
     // center the map on current user's location
-    //setupLocationRegion()
-//    mapView.setUserTrackingMode(.follow, animated: true)
+//    setupLocationRegion()
+//    mapView.setUserTrackingMode(.followWithHeading, animated: true)
+    
+    if userLatitude != nil && userLongitude != nil {
+        let region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: userLatitude!, longitude: userLongitude!), span: MKCoordinateSpan(latitudeDelta: mapView.region.span.latitudeDelta, longitudeDelta: mapView.region.span.longitudeDelta))
+        mapView.setRegion(region, animated: true)
+    }
+    
+    
+    
     // show points pofile view
     let pointsProfileView = UIView(frame: CGRect(x: 0, y: 0, width: mapView.frame.size.width, height: self.view.bounds.height))
     pointsProfileView.center = self.view.center
@@ -1300,6 +1308,7 @@ class MainViewController: UIViewController {
     getCurrentUserLocation()
     
     // setup zoom level for mapview
+    
     let span = MKCoordinateSpanMake(0.0015, 0.0015)
     
     if userLatitude != nil && userLongitude != nil {
