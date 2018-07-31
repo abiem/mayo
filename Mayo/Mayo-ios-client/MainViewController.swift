@@ -579,9 +579,7 @@ class MainViewController: UIViewController {
         let region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: userLatitude!, longitude: userLongitude!), span: MKCoordinateSpan(latitudeDelta: mapView.region.span.latitudeDelta, longitudeDelta: mapView.region.span.longitudeDelta))
         mapView.setRegion(region, animated: true)
     }
-    
-    
-    
+ 
     // show points pofile view
     let pointsProfileView = UIView(frame: CGRect(x: 0, y: 0, width: mapView.frame.size.width, height: self.view.bounds.height))
     pointsProfileView.center = self.view.center
