@@ -2444,7 +2444,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
       // create label to show how long ago it was created
       let bottomLabel = UILabel(frame: CGRect(x: 20, y: 0, width: shadowView.frame.size.width-40, height: 30))
       // use Moment to get the time ago for task at current index
-      let taskTimeCreated = moment((self.tasks[index]?.timeCreated)!)
+      let taskTimeUpdated = moment((self.tasks[index]?.timeUpdated)!)
       // set label with time ago "x min ago"
       bottomLabel.textAlignment = .center
       bottomLabel.center.x = tempView.center.x
@@ -2456,12 +2456,12 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
       bottomLabel.minimumScaleFactor = 0.5
       bottomLabel.textColor = UIColor.white
       bottomLabel.alpha = 1.0
-      var textTaskCreatedTime = "\(taskTimeCreated.fromNow())"
+      var textTaskUpdatedTime = "Automatically expires in 1 hr or if you leave the area"
       if task.completed == true {
-        textTaskCreatedTime = "Completed \(textTaskCreatedTime)"
+          textTaskUpdatedTime = "Completed \(taskTimeUpdated.fromNow())"
       }
       
-      bottomLabel.text = textTaskCreatedTime
+      bottomLabel.text = textTaskUpdatedTime
       
       // add bottom label to shadow view
       shadowView.addSubview(bottomLabel)
