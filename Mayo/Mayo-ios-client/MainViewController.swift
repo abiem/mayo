@@ -2520,6 +2520,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
       // if nobody answered to usre's quest, we'll not show view
       let messageCount = messages.count
       if messageCount < 1 {
+          self.handleNoOneHelpedButtonPressed()
           return
       }
       
@@ -2889,7 +2890,7 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
   
   // action for when users complete task
   // and no users helped
-  func handleNoOneHelpedButtonPressed(sender: UIButton) {
+  func handleNoOneHelpedButtonPressed() {
     let completionView = self.view.viewWithTag(COMPLETION_VIEW_TAG)
     
     
