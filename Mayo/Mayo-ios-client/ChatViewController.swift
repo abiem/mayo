@@ -61,7 +61,6 @@ class ChatViewController: JSQMessagesViewController {
             self.inputToolbar.contentView.textView.smartDashesType = .yes
             self.inputToolbar.contentView.textView.smartInsertDeleteType = .yes
         }
-
         
         // set senderid as current user id
         self.senderId = FIRAuth.auth()?.currentUser?.uid
@@ -84,6 +83,14 @@ class ChatViewController: JSQMessagesViewController {
         }
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(true)
+        if #available(iOS 11.0, *) {
+            if self.inputToolbar.window?.safeAreaLayoutGuide != nil {
+                self.inputToolbar.bottomAnchor.constraintLessThanOrEqualToSystemSpacingBelow((self.inputToolbar.window?.safeAreaLayoutGuide.bottomAnchor)!, multiplier: 1.0).isActive = true
+            }
+        }
+    }
     
     override func viewWillDisappear(_ animated: Bool) {
         // remove observer for messages
