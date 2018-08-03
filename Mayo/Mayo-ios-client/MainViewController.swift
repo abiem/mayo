@@ -2982,8 +2982,12 @@ extension MainViewController: iCarouselDelegate, iCarouselDataSource {
     
     if let currentUserTask = self.tasks[0] {
       // taskdescription to be textView
-      currentUserTask.latitude = (locationManager.location?.coordinate.latitude)!
-      currentUserTask.longitude = (locationManager.location?.coordinate.longitude)!
+        guard let latitude = locationManager.location?.coordinate.latitude, let longitude = locationManager.location?.coordinate.longitude else {
+            self.pleaseTurnOnGeodataAlert()
+            return
+        }
+      currentUserTask.latitude = latitude
+      currentUserTask.longitude = longitude
       currentUserTask.completed = false
       currentUserTask.taskDescription = currentUserTextView.text
       currentUserTask.timeCreated = Date()
@@ -3503,4 +3507,17 @@ extension MainViewController {
       UIApplication.shared.sendAction(#selector(UIApplication.resignFirstResponder), to: nil, from: nil, for: nil)
     }
   }
+}
+
+// MARK: - MainViewController (Alert)
+
+extension MainViewController {
+    func pleaseTurnOnGeodataAlert() {
+        let alert = UIAlertController(title: "Don't have your location", message: "Please, turn on location sharing", preferredStyle: .alert)
+        let cancelAction = UIAlertAction.init(title: "Ok", style: .cancel) { (action) in
+            alert.dismiss(animated: true, completion: nil)
+        }
+        alert.addAction(cancelAction)
+        self.present(alert, animated: true, completion: nil)
+    }
 }
