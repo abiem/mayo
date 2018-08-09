@@ -1504,12 +1504,13 @@ class MainViewController: UIViewController {
     tasksExpireObserver = self.tasksRef?.child((currentTask?.taskID)!).child("timeUpdated").observe(.value, with: { (snapshot) in
       UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["taskExpirationNotification"])
       let currentUserTask = self.tasks[0]
+        
       // reset expiration timer
       self.expirationTimer = nil
       
       // invalidate the current timer
       self.expirationTimer?.invalidate()
-      
+        
       if let timeUpdated = snapshot.value as? String {
         
         let dateformatter = DateStringFormatterHelper()
@@ -1549,7 +1550,7 @@ class MainViewController: UIViewController {
         }
         else {
           timeDifference = self.SECONDS_IN_HOUR - timeDifference
-          self.startTimer(timeDifference)
+          self.startTimer(self.SECONDS_IN_HOUR)
           var notificationTime = timeDifference
           if notificationTime >= self.SECONDS_IN_FIFTEEN {
             notificationTime = notificationTime - self.SECONDS_IN_FIFTEEN
@@ -1595,57 +1596,78 @@ class MainViewController: UIViewController {
     // save current user task description to check if its
     // the same when timer is done
     
+    // invalidate the current timer
+    self.expirationTimer?.invalidate()
+    
     // reset expiration timer
     self.expirationTimer = nil
     
-    // invalidate the current timer
-    self.expirationTimer?.invalidate()
     // start timer to check if it has expired
     self.expirationTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(interval), repeats: false) { (Timer) in
-      
+
       // finish deleting task
       if self.tasks.count == 0 {
         return
       }
       // get the current user's task
       let currentUserTask = self.tasks[0]
-      
-      // if the current user's task has not been completed
-      // and it is the same task (don't notify expiration if its a different task)
-      if currentUserTask?.completed != true && currentUserTask?.userId == self.currentUserId {
-        
-        // create notification that the task is out of time
-        currentUserTask?.completed = true;
-        currentUserTask?.completeType = Constants.STATUS_FOR_TIME_EXPIRED
-        self.tasks[0] = currentUserTask
-        //Check Recent Activity
-        self.checkTaskRecentActivity(currentUserTask!, callBack: { (activity) in
-          if activity {
-            self.createMarkCompleteView()
-            self.createLocalNotification(title: "Your help quest expired", body: "Did you get help? Remember to thank them!", time: Int(0.0))
-          } else {
-            UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
-            self.newItemSwiped = true
-            self.removeTaskAfterComplete(currentUserTask!)
-            self.createLocalNotification(title: "Your help quest expired", body: "🕐 Still need help?", time: Int(0.5))
-          }
+        self.needSetExpiredTask(complition: { [weak self] (bool) in
+            if bool == true {
+                // if the current user's task has not been completed
+                // and it is the same task (don't notify expiration if its a different task)
+                if currentUserTask?.completed != true && currentUserTask?.userId == self?.currentUserId {
+                    
+                    // create notification that the task is out of time
+                    currentUserTask?.completed = true;
+                    currentUserTask?.completeType = Constants.STATUS_FOR_TIME_EXPIRED
+                    self?.tasks[0] = currentUserTask
+                    //Check Recent Activity
+                    self?.checkTaskRecentActivity(currentUserTask!, callBack: { (activity) in
+                        if activity {
+                            self?.createMarkCompleteView()
+                            self?.createLocalNotification(title: "Your help quest expired", body: "Did you get help? Remember to thank them!", time: Int(0.0))
+                        } else {
+                            UserDefaults.standard.set(nil, forKey: Constants.PENDING_TASKS)
+                            self?.newItemSwiped = true
+                            self?.removeTaskAfterComplete(currentUserTask!)
+                            self?.createLocalNotification(title: "Your help quest expired", body: "🕐 Still need help?", time: Int(0.5))
+                        }
+                    })
+                    // reset the current user's task
+                    // delete the task if it has expired
+                    // self.deleteAndResetCurrentUserTask()
+                    
+                    // remove own annotation on the map
+                    //  self.removeCurrentUserTaskAnnotation()
+                    
+                }
+            }
+            // reset expiration timer
+            self?.expirationTimer = nil
+            
+            // invalidate the current timer
+            Timer.invalidate()
+            
         })
-        // reset the current user's task
-        // delete the task if it has expired
-        // self.deleteAndResetCurrentUserTask()
-        
-        // remove own annotation on the map
-        //  self.removeCurrentUserTaskAnnotation()
-        
-      }
-      
-      // reset expiration timer
-      self.expirationTimer = nil
-      
-      // invalidate the current timer
-      Timer.invalidate()
     }
   }
+    
+    func needSetExpiredTask(complition: @escaping((Bool) -> Void)) {
+        let currentTask = self.tasks[0]
+        self.tasksRef?.child((currentTask?.taskID)!).child("timeUpdated").observe(.value, with: { (snapshot) in
+            if let timeUpdated = snapshot.value as? String {
+                let currentTime = Date()
+                let dateformatter = DateStringFormatterHelper()
+                let timeUpdatedDate = dateformatter.convertStringToDate(datestring: timeUpdated)
+                let timeDifference = currentTime.seconds(from: timeUpdatedDate)
+                if timeDifference < self.SECONDS_IN_HOUR {
+                    complition(false)
+                } else {
+                    complition(true)
+                }
+            }
+        })
+    }
   
   //Start updating location at Significant Changes
   func startReceivingSignificantLocationChanges() {
